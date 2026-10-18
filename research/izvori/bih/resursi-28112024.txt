@@ -1,0 +1,31 @@
+=====PAGE 1=====
+ 
+_ 
+     28 Nov 2024Prema stanju BHMAIS   na dan u9:54:52 1/1 
+ 
+ Resursi akreditovanih organizacija    
+Rb Organizacija Broj ma{ina Broj pasa Broj detektora Akreditovana do 
+1 " Minemon " d.o.o. Pale 0 0 9 14.09.2025 
+2 " Trotil " d.o.o. Sarajevo 0 0 7 19.08.2025 
+3 "DCM MEDIA" d.o.o. 0 2 14 28.06.2025 
+4 "IN DEMINING" N.H.O. 1 2 58 26.05.2026 
+5 "POINT" d.o.o. 1 0 26 26.05.2026 
+6 Centar za humanitarno razoružanje d.o.o. 0 2 20 28.12.2024 
+7 Centar za obuku pasa za otkrivanje mina u BiH 0 2 18 12.06.2026 
+8 Civilna za{tita Br~ko distrikta BiH 0 0 7 24.06.2026 
+9 DETEKTOR 1 0 11 26.05.2026 
+10 Dru{tvo Crvenog kri`a/krsta BiH 0 0 0 02.03.2025 
+11 EKSPLORING 0 0 5 26.05.2026 
+12 Federalna uprava civilne zastite 5 4 112 26.05.2026 
+13 HEKSOGEN d.o.o. 0 0 8 30.09.2025 
+14 N&N IVSA 2 2 54 26.05.2026 
+15 NGO POSAVINA BEZ MINA Br~ko DBiH 0 0 0 29.05.2026 
+16 NGO PRO VITA 0 0 0 25.05.2026 
+17 NGO STOP MINES 1 4 104 26.05.2026 
+18 NORWEGIAN PEOPLES AID (NPA) 3 6 152 26.05.2026 
+19 Oru`ane snage Bosne i Hercegovine 4 5 295 26.05.2026 
+20 Republi~ka uprava civilne za{tite RS 4 2 46 26.05.2026 
+21 The Mines Advissory Group-MAG 0 3 77 05.09.2025 
+22 UEM d.o.o. 2 2 46 26.05.2026 
+UKUPNO: 24 36 1069  
+ 

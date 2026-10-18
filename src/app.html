@@ -1,0 +1,961 @@
+<title>Terenska knjiga</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: phone-first field app. Status header with site switcher, one scrolling view, tab bar at the bottom.
+   High contrast for sunlight, large targets for gloved hands. Red is reserved for hazard. Documents render as paper forms. */
+:root{
+  --bg:#E8EBE3; --surface:#F7F8F4; --surface-2:#FFFFFF; --ink:#1A1F19; --muted:#59625A; --line:#CBD1C4;
+  --accent:#1F3D35; --on-accent:#F3F7F2;
+  --hazard:#BF2A1C; --on-hazard:#FFFFFF; --haz-soft:#F1D5CE;
+  --cleared:#2B784A; --clr-soft:#C8E2D0;
+  --work:#A86F0B; --work-soft:#F4DFAF;
+  --paper:#FFFFFF; --paper-ink:#111511;
+  --font-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F120F; --surface:#171B16; --surface-2:#1E231D; --ink:#E5E9E0; --muted:#97A190; --line:#2C3229;
+    --accent:#A8D0C2; --on-accent:#0D1915;
+    --hazard:#EC5B45; --on-hazard:#1B0805; --haz-soft:#3A1C17;
+    --cleared:#5CBF85; --clr-soft:#1B3223;
+    --work:#E7B142; --work-soft:#3A2E12;
+    --paper:#F4F3EE; --paper-ink:#111511;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F120F; --surface:#171B16; --surface-2:#1E231D; --ink:#E5E9E0; --muted:#97A190; --line:#2C3229;
+  --accent:#A8D0C2; --on-accent:#0D1915;
+  --hazard:#EC5B45; --on-hazard:#1B0805; --haz-soft:#3A1C17;
+  --cleared:#5CBF85; --clr-soft:#1B3223;
+  --work:#E7B142; --work-soft:#3A2E12;
+  --paper:#F4F3EE; --paper-ink:#111511;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{height:100%}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:12px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.label{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sub{font-size:13px;color:var(--muted)}
+
+.app{position:relative;max-width:460px;height:100%;margin:0 auto;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.site-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;text-align:left;min-width:0}
+.site-btn:hover{background:var(--bg)}
+.site-code{font-family:var(--font-display);font-weight:700;font-size:21px;letter-spacing:.02em;line-height:1;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.site-code svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.2}
+.site-meta{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.pack{font-family:var(--font-mono);font-size:10.5px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--muted);font-weight:500;letter-spacing:0}
+.sync{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:500;white-space:nowrap;flex:none}
+.sync .dot{width:9px;height:9px;border-radius:50%;background:var(--work);flex:none}
+.sync.ok .dot{background:var(--cleared)}
+.sync.busy .dot{animation:pulse .8s infinite alternate}
+@keyframes pulse{to{opacity:.25}}
+
+main{flex:1;overflow-y:auto;padding:14px 14px 22px;display:flex;flex-direction:column}
+.view{display:flex;flex-direction:column;gap:12px}
+h2{font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1.05;margin:0;text-wrap:balance}
+h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;letter-spacing:.01em}
+.card{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+
+.big{font-family:var(--font-display);font-weight:700;font-size:50px;line-height:.95;font-variant-numeric:tabular-nums}
+.big .unit{font-size:21px;margin-left:4px;color:var(--muted);font-weight:600}
+.bar{height:10px;border-radius:5px;background:var(--haz-soft);overflow:hidden;margin:12px 0 4px}
+.bar span{display:block;height:100%;background:var(--cleared);border-radius:5px;transition:width .4s}
+.kv3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 0}
+.kv3 dt{font-size:11.5px;color:var(--muted)}
+.kv3 dd{margin:2px 0 0;font-weight:600;font-variant-numeric:tabular-nums}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 16px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-weight:600;text-align:center}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.danger{background:var(--hazard);color:var(--on-hazard);border-color:var(--hazard)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.sm{min-height:38px;padding:6px 12px;font-size:13.5px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btnrow .btn{flex:1 1 130px}
+.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:12.5px;padding:6px}
+
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.rows li:first-child{border-top:0}
+.grow{flex:1;min-width:0}
+.chip{display:inline-block;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--bg);color:var(--muted)}
+.chip.work{background:var(--work-soft);color:var(--ink)}
+.chip.ok{background:var(--clr-soft);color:var(--ink)}
+.chip.haz{background:var(--haz-soft);color:var(--ink)}
+.tri{width:16px;height:14px;flex:none}
+.tri path{fill:var(--hazard)}
+
+/* pairs */
+.pair{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.pair:first-of-type{border-top:0}
+.pair .tag{font-family:var(--font-display);font-weight:700;font-size:22px;width:34px;height:34px;border-radius:8px;background:var(--bg);display:grid;place-items:center}
+.pair .t{font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1;font-variant-numeric:tabular-nums;text-align:right}
+.pair.over .t{color:var(--hazard)}
+.pair.over .tag{background:var(--haz-soft)}
+
+/* compliance */
+.chk{list-style:none;margin:0;padding:0}
+.chk li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line)}
+.chk li:first-child{border-top:0}
+.chk .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;margin-top:1px}
+.chk .ok .ic,.chk li.ok .ic{background:var(--clr-soft);color:var(--cleared)}
+.chk li.warn .ic{background:var(--work-soft);color:var(--work)}
+.chk li.bad .ic{background:var(--haz-soft);color:var(--hazard)}
+.chk .v{font-family:var(--font-mono);font-size:12.5px;text-align:right;white-space:nowrap}
+
+/* log */
+.log{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.log li:first-child{border-top:0}
+.log .tm{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);padding-top:1px}
+.log li.find .ev{color:var(--hazard);font-weight:500}
+.quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
+.quick .btn{min-height:42px;padding:6px 8px;font-size:13px;font-weight:500}
+
+.checks{list-style:none;margin:0;padding:0}
+.checks li{border-top:1px solid var(--line)}
+.checks li:first-child{border-top:0}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:9px 0;cursor:pointer;font-size:14px}
+.checks input{width:22px;height:22px;margin:0;accent-color:var(--cleared);flex:none}
+.notice{font-size:13px;padding:9px 11px;border-radius:8px;background:var(--work-soft);margin:6px 0 10px}
+.notice.haz{background:var(--haz-soft)}
+
+/* map */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.mapwrap{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px;overflow:hidden}
+.mapwrap svg{display:block;width:100%;height:auto}
+.m-poly{fill:var(--haz-soft);stroke:var(--hazard);stroke-width:1.4;stroke-dasharray:5 3}
+.m-safe{fill:var(--clr-soft)}
+.m-zero{stroke:var(--ink);stroke-width:2}
+.m-lane{fill:var(--cleared)}
+.m-lane-p{fill:var(--work)}
+.m-hit{fill:transparent;cursor:pointer}
+.m-hit:hover{fill:rgba(0,0,0,.06)}
+.m-sel{fill:none;stroke:var(--ink);stroke-width:1.5}
+.m-mk{fill:var(--hazard);stroke:var(--surface-2);stroke-width:.8;pointer-events:none}
+.m-t{fill:var(--muted);font-family:var(--font-mono);font-size:8.5px}
+.m-t.ink{fill:var(--ink)}
+.m-t.big{font-family:var(--font-display);font-weight:700;font-size:12px;fill:var(--ink)}
+.m-gap{stroke:var(--muted);stroke-width:.8;stroke-dasharray:2 2}
+.m-tp{fill:var(--surface-2);stroke:var(--hazard);stroke-width:1.2}
+.m-n{stroke:var(--ink);stroke-width:1.2;fill:none}
+.m-nf{fill:var(--ink)}
+
+/* sheet */
+.scrim{position:absolute;inset:0;background:rgba(10,14,10,.4);display:flex;align-items:flex-end;z-index:5}
+.sheet{width:100%;background:var(--surface-2);border-top-left-radius:16px;border-top-right-radius:16px;padding:16px 16px 20px;border-top:1px solid var(--line);max-height:88%;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.sheet-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1;flex:none}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.sitecard{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px}
+.sitecard.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.packs{display:grid;gap:6px}
+.packrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;padding:8px 10px;border-radius:8px;background:var(--bg)}
+
+/* forms */
+form{display:flex;flex-direction:column;gap:14px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips label span{display:inline-flex;align-items:center;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:13.5px;cursor:pointer}
+.chips.mono label span{font-family:var(--font-mono);font-size:13px}
+.chips input:checked + span{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.chips input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;min-width:0}
+.field input,.field select,.field textarea{min-height:46px;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-weight:400;font-size:15px;width:100%}
+.field textarea{min-height:90px;resize:vertical;font-family:var(--font-mono);font-size:13px}
+.field small{font-weight:400;color:var(--muted);font-size:12px}
+.calc{padding:11px 12px;border-radius:8px;background:var(--clr-soft);font-size:13px;display:flex;flex-direction:column;gap:3px}
+.calc .mono{font-size:13.5px;font-weight:500}
+.calc.warn{background:var(--work-soft)}
+.photo{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 12px;border:1.5px dashed var(--line);border-radius:10px;cursor:pointer;background:var(--surface-2);font-size:14px;font-weight:500}
+.photo input{position:absolute;opacity:0;width:1px;height:1px}
+.photo img{width:56px;height:56px;object-fit:cover;border-radius:6px;flex:none}
+.photo .ph{width:56px;height:56px;border-radius:6px;background:var(--bg);display:grid;place-items:center;flex:none}
+.photo .ph svg{width:26px;height:26px;stroke:var(--muted);fill:none;stroke-width:1.8}
+
+/* reports list */
+.doclist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.docitem{display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:12px}
+.docitem .pn{font-family:var(--font-display);font-weight:700;font-size:15px;line-height:1.05;text-align:center;background:var(--bg);border-radius:6px;padding:7px 2px}
+.docitem b{display:block;font-size:14.5px;line-height:1.3}
+
+/* paper document */
+.doc{--ink:#111511;--muted:#4c544c;--surface-2:#fff;--hazard:#BF2A1C;--haz-soft:#F1D5CE;--cleared:#2B784A;--clr-soft:#C8E2D0;--work:#A86F0B;--work-soft:#F4DFAF;background:var(--paper);color:var(--paper-ink);border:1px solid var(--line);border-radius:4px;padding:18px 16px;font-size:12.5px;line-height:1.4;box-shadow:0 1px 0 var(--line)}
+.doc h4{font-family:var(--font-body);font-size:14px;font-weight:700;text-align:center;margin:6px 0 2px;letter-spacing:.04em}
+.doc .dsub{text-align:center;font-size:11.5px;margin-bottom:12px}
+.doc .dorg{border-bottom:1px dotted #111511;padding-bottom:2px;text-align:center;font-weight:600}
+.doc .dsmall{font-size:10.5px;text-align:center;color:#3c433c}
+.doc table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12px}
+.doc th,.doc td{border:1px solid #111511;padding:4px 5px;vertical-align:top;text-align:left;color:#111511}
+.doc th{font-weight:600;background:#eef0ea;font-size:11px}
+.doc td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.doc td.k{width:42%;font-weight:500}
+.doc .box{display:inline-block;width:11px;height:11px;border:1px solid #111511;vertical-align:-1px;margin:0 3px 0 8px;text-align:center;line-height:9px;font-size:10px;font-weight:700}
+.doc .sec{font-weight:700;margin:12px 0 4px;font-size:12.5px}
+.doc .sig{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px;font-size:11px}
+.doc .sig div{border-top:1px solid #111511;padding-top:3px}
+.doc .miss{background:#f6dcc8;padding:0 3px}
+.doc .note{font-size:10.5px;color:#3c433c;margin-top:8px}
+.doc svg{display:block;width:100%;height:auto;border:1px solid #111511;margin:6px 0;background:#fff}
+.tbl{overflow-x:auto}
+.doc.wide{min-width:640px}
+.missing{font-size:13px}
+.missing li{margin:3px 0}
+.out{white-space:pre-wrap;font-family:var(--font-mono);font-size:11.5px;background:var(--bg);padding:10px;border-radius:8px;max-height:220px;overflow:auto;margin:0;user-select:all}
+
+/* emergency */
+.sos{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;padding:22px 16px;border-radius:12px;border:0;background:var(--hazard);color:var(--on-hazard)}
+.sos b{font-family:var(--font-display);font-size:30px;letter-spacing:.04em;line-height:1}
+.sos span{font-size:13.5px;opacity:.92}
+.inc{background:var(--hazard);color:var(--on-hazard);border-radius:12px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inc .label{color:inherit;opacity:.85}
+.inc .tv{font-family:var(--font-display);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.steps{list-style:none;margin:0;padding:0}
+.steps li{border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0}
+.steps label{display:flex;gap:12px;align-items:flex-start;padding:10px 0;cursor:pointer}
+.steps input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--hazard);flex:none}
+.steps .t{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.contact{display:flex;align-items:center;gap:10px}
+.contact .num{font-family:var(--font-display);font-weight:700;font-size:23px;line-height:1}
+.dtab{width:100%;border-collapse:collapse;font-size:13.5px}
+.dtab td{padding:7px 0;border-top:1px solid var(--line)}
+.dtab tr:first-child td{border-top:0}
+.dtab td.n{text-align:right;font-family:var(--font-display);font-weight:700;font-size:20px;white-space:nowrap}
+.fine{font-size:12px;color:var(--muted);margin:10px 0 0}
+
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line);background:var(--surface-2);padding:4px 4px 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;padding:6px 2px;font-size:11.5px;font-weight:500;color:var(--muted);border-radius:8px;min-height:54px;justify-content:center}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.tab[aria-current="page"]{color:var(--ink);background:var(--bg)}
+.tab.add svg{stroke:var(--hazard)}
+.tab.sos-t{color:var(--hazard)}
+.toast{position:absolute;left:14px;right:14px;bottom:76px;z-index:9;background:var(--ink);color:var(--surface-2);padding:12px 14px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+
+@media (max-width:480px){
+  body{padding-block:0;padding-left:max(0px, env(safe-area-inset-left, 0px));padding-right:max(0px, env(safe-area-inset-right, 0px))}
+  .app{border-radius:0;border-left:0;border-right:0;max-width:none}
+  main{padding-left:max(14px, env(safe-area-inset-left, 0px));padding-right:max(14px, env(safe-area-inset-right, 0px))}
+  .top{padding-left:max(14px, env(safe-area-inset-left, 0px));padding-right:max(14px, env(safe-area-inset-right, 0px))}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff;padding:0;height:auto}
+  .app{display:block;border:0;height:auto;max-width:none;overflow:visible;background:#fff}
+  .top,.tabs,.toast,.scrim,.noprint{display:none!important}
+  main{overflow:visible;padding:0;display:block}
+  .view{display:block}
+  .doc{border:0;box-shadow:none;padding:0;font-size:11pt}
+  .doc.wide{min-width:0}
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <button class="site-btn" type="button" data-act="sites" aria-label="Promijeni radilište i paket zemlje">
+      <span class="site-code"><span id="hdrSite">MSP</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+      <span class="site-meta" id="hdrMeta">…</span>
+    </button>
+    <button class="sync" id="syncBtn" data-act="sync" type="button"><span class="dot"></span><span id="syncLabel">…</span></button>
+  </header>
+
+  <main id="main">
+    <section class="view" id="v-danas"></section>
+    <section class="view" id="v-mapa" hidden></section>
+    <section class="view" id="v-nalaz" hidden></section>
+    <section class="view" id="v-izvjestaji" hidden></section>
+    <section class="view" id="v-hitno" hidden></section>
+  </main>
+
+  <nav class="tabs" aria-label="Glavni meni">
+    <button class="tab" type="button" data-act="tab" data-tab="danas"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="1.5"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h5"/></svg>Danas</button>
+    <button class="tab" type="button" data-act="tab" data-tab="mapa"><svg viewBox="0 0 24 24"><path d="M4 20V8M8 20V5M12 20V9M16 20V4M20 20V11"/><path d="M2.5 20.5h19"/></svg>Staze</button>
+    <button class="tab add" type="button" data-act="tab" data-tab="nalaz"><svg viewBox="0 0 24 24"><path d="M12 3.5 21.5 20h-19z"/><path d="M12 10v5.5M9.2 12.8h5.6"/></svg>Nalaz</button>
+    <button class="tab" type="button" data-act="tab" data-tab="izvjestaji"><svg viewBox="0 0 24 24"><path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M14 3.5V8h5M9 12.5h7M9 16h7"/></svg>Izvještaji</button>
+    <button class="tab sos-t" type="button" data-act="tab" data-tab="hitno"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M7.5 12h9"/></svg>Hitno</button>
+  </nav>
+
+  <div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+(function(){
+/* ================= geodesy: GK zone 6 (MGI 1901 / Bessel) and UTM 34N (WGS84) ================= */
+const D2R=Math.PI/180;
+const ELL={bessel:{a:6377397.155,f:1/299.1528128},wgs84:{a:6378137,f:1/298.257223563}};
+const MGI_SHIFT=[682,-203,480]; // demo 3-parameter shift; confirm with BHMAC
+function tmInv(E,N,el,lon0,k0,FE){const a=el.a,f=el.f,e2=2*f-f*f,ep2=e2/(1-e2);const x=E-FE,M=N/k0;
+  const mu=M/(a*(1-e2/4-3*e2*e2/64-5*e2*e2*e2/256));const e1=(1-Math.sqrt(1-e2))/(1+Math.sqrt(1-e2));
+  const p1=mu+(3*e1/2-27*e1**3/32)*Math.sin(2*mu)+(21*e1*e1/16-55*e1**4/32)*Math.sin(4*mu)+(151*e1**3/96)*Math.sin(6*mu)+(1097*e1**4/512)*Math.sin(8*mu);
+  const s=Math.sin(p1),c=Math.cos(p1),t=Math.tan(p1);const C1=ep2*c*c,T1=t*t,N1=a/Math.sqrt(1-e2*s*s),R1=a*(1-e2)/Math.pow(1-e2*s*s,1.5),D=x/(N1*k0);
+  const lat=p1-(N1*t/R1)*(D*D/2-(5+3*T1+10*C1-4*C1*C1-9*ep2)*D**4/24+(61+90*T1+298*C1+45*T1*T1-252*ep2-3*C1*C1)*D**6/720);
+  const lon=lon0*D2R+(D-(1+2*T1+C1)*D**3/6+(5-2*C1+28*T1-3*C1*C1+8*ep2+24*T1*T1)*D**5/120)/c;return {lat:lat/D2R,lon:lon/D2R};}
+function tmFwd(lat,lon,el,lon0,k0,FE){const a=el.a,f=el.f,e2=2*f-f*f,ep2=e2/(1-e2);const p=lat*D2R,s=Math.sin(p),c=Math.cos(p),t=Math.tan(p);
+  const N=a/Math.sqrt(1-e2*s*s),T=t*t,C=ep2*c*c,A=c*(lon-lon0)*D2R;
+  const M=a*((1-e2/4-3*e2*e2/64-5*e2**3/256)*p-(3*e2/8+3*e2*e2/32+45*e2**3/1024)*Math.sin(2*p)+(15*e2*e2/256+45*e2**3/1024)*Math.sin(4*p)-(35*e2**3/3072)*Math.sin(6*p));
+  const x=k0*N*(A+(1-T+C)*A**3/6+(5-18*T+T*T+72*C-58*ep2)*A**5/120);
+  const y=k0*(M+N*t*(A*A/2+(5-T+9*C+4*C*C)*A**4/24+(61-58*T+T*T+600*C-330*ep2)*A**6/720));return {E:x+FE,N:y};}
+function toEcef(lat,lon,el){const f=el.f,e2=2*f-f*f,p=lat*D2R,l=lon*D2R,s=Math.sin(p),N=el.a/Math.sqrt(1-e2*s*s);return [N*Math.cos(p)*Math.cos(l),N*Math.cos(p)*Math.sin(l),N*(1-e2)*s];}
+function fromEcef(X,Y,Z,el){const a=el.a,f=el.f,e2=2*f-f*f,b=a*(1-f),ep2=(a*a-b*b)/(b*b),p=Math.hypot(X,Y),th=Math.atan2(Z*a,p*b);
+  const lat=Math.atan2(Z+ep2*b*Math.sin(th)**3,p-e2*a*Math.cos(th)**3);return {lat:lat/D2R,lon:Math.atan2(Y,X)/D2R};}
+function gk6ToWgs(Y,X){const g=tmInv(Y,X,ELL.bessel,18,0.9999,6500000);const e=toEcef(g.lat,g.lon,ELL.bessel);return fromEcef(e[0]+MGI_SHIFT[0],e[1]+MGI_SHIFT[1],e[2]+MGI_SHIFT[2],ELL.wgs84);}
+function wgsToGk6(lat,lon){const e=toEcef(lat,lon,ELL.wgs84);const g=fromEcef(e[0]-MGI_SHIFT[0],e[1]-MGI_SHIFT[1],e[2]-MGI_SHIFT[2],ELL.bessel);const r=tmFwd(g.lat,g.lon,ELL.bessel,18,0.9999,6500000);return {Y:r.E,X:r.N};}
+function wgsToUtm34(lat,lon){const r=tmFwd(lat,lon,ELL.wgs84,21,0.9996,500000);return {E:r.E,N:r.N};}
+function utm34ToWgs(E,N){return tmInv(E,N,ELL.wgs84,21,0.9996,500000);}
+
+/* ================= country packs ================= */
+const PACKS={
+  BA:{id:'BA-BHMAC-2024',drzava:'Bosna i Hercegovina',kratko:'BiH · BHMAC',standard:'Standard za PMA u BiH, izdanje april 2024',centar:'BHMAC',
+    rules:{lane:1,minDepth:10,shiftMax:30,pairGap:25,rest:100,qcMin:3,monitorDays:5,accidentH:6,planDays:7},
+    items:{
+      PP:['PMA-1','PMA-2','PMA-3','PMR-2A','PMR-2AS','PMR-3','PMR-4','PROM-1','PMR-čp','Goraždanka'],
+      PT:['TMM-1','TMA-1A','TMA-2A','TMA-3','TMA-4','TMA-5','TMRP-6'],
+      NUS:['Ručna bomba M75','Mina MB 60 mm','Mina MB 82 mm','Mina MB 120 mm','Projektil','Nepoznato'],
+      MI:['Mina iznenađenja']},
+    cats:{PP:'PP mina',PT:'PT mina',NUS:'NUS',MI:'Mina iznenađenja'},
+    demolition:[['PP mina, fugasna','100 m'],['PP mina, rasprskavajuća ili odskočna','300 m'],['PT mina','400–1000 m'],['Projektili','do 2250 m'],['Zakopano punjenje do 10 kg','500 m']],
+    distances:[['Između radnih staza (dvojaca)','25 m'],['Skladište eksploziva','50 m'],['Parking, medicinar, kontrolna tačka','100 m']],
+    contacts:[['124','Hitna pomoć'],['122','Policija'],['+387 33 253 800','BHMAC, Sarajevo']]
+  }
+};
+const P=PACKS.BA, R=P.rules;
+const ACTIONS=['Označeno, čeka uništavanje','Uništeno na licu mjesta','Predato UES timu'];
+const CONDS=['Neoštećeno','Korodirano','Oštećeno'];
+const TEAM=[
+  {id:'D-01',n:'M. Hodžić',bg:'A+'},{id:'D-02',n:'S. Petrović',bg:'0+'},{id:'D-03',n:'N. Begić',bg:'B+'},
+  {id:'D-04',n:'J. Kovač',bg:'A−'},{id:'D-05',n:'E. Mehić',bg:'0+'},{id:'D-06',n:'V. Simić',bg:'AB+'}
+];
+const LEADER='A. Delić', MEDIC='L. Omerović', ORG='Demo d.o.o. (primjer)';
+const BRIEF=['Medicinar i sanitetsko vozilo na mjestu, vozilo okrenuto ka izlazu','Radio veza provjerena s bazom','Detektori testirani na UPMAH-3 (10 cm)','Sigurna staza i nulta linija obilježene','Plan CASEVAC pročitan timu','Zaštitni prsluci i viziri pregledani'];
+const STEPS=['Zaustavi rad u svim radnim stazama','Medicinar prilazi samo sigurnom ili očišćenom stazom','Prva pomoć i CASEVAC do prve sigurne površine','Obavijesti BHMAC i policiju','Osiguraj mjesto nesreće za istragu','Pošalji Inicijalni izvještaj (Prilog 12)'];
+
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const dayKey=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const hm=t=>{const d=new Date(t);return pad(d.getHours())+':'+pad(d.getMinutes());};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+const gkn=n=>{const s=n.toFixed(2).split('.');return s[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+s[1];};
+const MONTHS=['januar','februar','mart','april','maj','juni','juli','august','septembar','oktobar','novembar','decembar'];
+const DAYS=['nedjelja','ponedjeljak','utorak','srijeda','četvrtak','petak','subota'];
+const NOW0=new Date(); const TODAY=dayKey(NOW0);
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const fmtD=k=>{if(!k)return '—';const [y,m,d]=k.split('-');return d+'.'+m+'.'+y+'.';};
+const longDate=d=>DAYS[d.getDay()]+', '+d.getDate()+'. '+MONTHS[d.getMonth()]+' '+d.getFullYear()+'.';
+function workdaysBack(n){const out=[];let d=addDays(NOW0,0);while(out.length<n){d=addDays(d,-1);if(d.getDay()!==0&&d.getDay()!==6)out.push(dayKey(d));}return out.reverse();}
+const TRI='<svg class="tri" viewBox="0 0 18 16" aria-hidden="true"><path d="M9 1 17 15H1z"/></svg>';
+
+/* ================= site geometry ================= */
+function frame(site){const a=site.az*D2R;return {F:[Math.sin(a),Math.cos(a)],Rt:[Math.cos(a),-Math.sin(a)]};}
+function toGK(site,u,v){const {F,Rt}=frame(site);return {Y:site.nt.Y+u*Rt[0]+v*F[0],X:site.nt.X+u*Rt[1]+v*F[1]};}
+function toLocal(site,Y,X){const {F,Rt}=frame(site);const dy=Y-site.nt.Y,dx=X-site.nt.X;return [dy*Rt[0]+dx*Rt[1],dy*F[0]+dx*F[1]];}
+function inPoly(pt,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>pt[1])!==(yj>pt[1]))&&(pt[0]<(xj-xi)*(pt[1]-yi)/(yj-yi)+xi))c=!c;}return c;}
+function polyArea(poly){let s=0;for(let i=0,j=poly.length-1;i<poly.length;j=i++)s+=(poly[j][0]+poly[i][0])*(poly[j][1]-poly[i][1]);return Math.abs(s/2);}
+function bounds(poly){const xs=poly.map(p=>p[0]),ys=poly.map(p=>p[1]);return {x0:Math.min(...xs),x1:Math.max(...xs),y0:Math.min(...ys),y1:Math.max(...ys)};}
+function laneLen(site,i){const u=i-0.5;if(site._ll&&site._ll[i]!=null)return site._ll[i];let v=0.1,last=0;const b=bounds(site.poly);while(v<=b.y1+0.5){if(inPoly([u,v],site.poly))last=v;v+=0.25;}last=Math.round(last*2)/2;(site._ll=site._ll||{})[i]=last;return last;}
+function laneCount(site){const b=bounds(site.poly);return Math.max(0,Math.floor(b.x1));}
+function findPos(site,f){return toGK(site,f.lane-0.5+(f.off||0),f.dist);}
+function crsFmt(site,gk){if(S.crs==='UTM34'){const w=gk6ToWgs(gk.Y,gk.X),u=wgsToUtm34(w.lat,w.lon);return 'E '+gkn(u.E)+'  N '+gkn(u.N);}return 'Y '+gkn(gk.Y)+'  X '+gkn(gk.X);}
+const crsName=()=>S.crs==='UTM34'?'UTM 34N':'Gaus-Kriger zona 6';
+
+/* ================= seed ================= */
+function seedSite(){
+  const site={id:'s1',msp:{id:'MSP 0412',naziv:'Selište',opcina:'Općina Primjer',ru:'RU Tuzla',karta:'Primjer 1:25.000, list 474-1-1, izdanje 1977.'},
+    ci:{tip:'CI',oznaka:'CI-1',pmin:2600,pmax:3100},
+    nt:{Y:6571250.00,X:4921800.00},az:20,
+    poly:[[-1.5,0],[61.5,0],[64,22],[58,44],[36,51],[12,49],[-3.5,27]],
+    lanes:{},pairs:[
+      {id:'A',a:'D-01',b:'D-02',lane:4,inA:true,shift:Date.now()-12*60e3-20e3},
+      {id:'B',a:'D-03',b:'D-04',lane:30,inA:false,shift:Date.now()-24*60e3-5e3},
+      {id:'C',a:'D-05',b:'D-06',lane:56,inA:true,shift:Date.now()-31*60e3-40e3}],
+    progress:[],finds:[],log:[],qc:[],monitors:[],info:[],
+    start:null,estEnd:null,status:'u radu'};
+  const past=workdaysBack(6);
+  site.start=past[0];
+  const plan={A:{lanes:[1,2,3],part:4,partTo:18.5,today:5.5},B:{lanes:[27,28,29],part:30,partTo:7.0,today:4.0},C:{lanes:[53,54,55],part:56,partTo:12.0,today:5.0}};
+  Object.values(plan).forEach(pl=>{
+    const segs=pl.lanes.map(l=>[l,0,laneLen(site,l)]); segs.push([pl.part,0,pl.partTo]);
+    let total=segs.reduce((s,x)=>s+x[2]-x[1],0), todayAmt=pl.today, pastAmt=total-todayAmt, per=pastAmt/past.length;
+    let di=0, budget=per; const out=[];
+    for(const [l,a,b] of segs){let cur=a;while(cur<b-1e-6){const isToday=di>=past.length;const take=isToday?b-cur:Math.min(b-cur,budget);
+      out.push({day:isToday?TODAY:past[di],lane:l,from:+cur.toFixed(2),to:+(cur+take).toFixed(2)});cur+=take;if(!isToday){budget-=take;if(budget<=1e-6){di++;budget=per;}}}}
+    site.progress.push(...out);
+  });
+  site.progress.forEach(p=>{site.lanes[p.lane]=Math.max(site.lanes[p.lane]||0,p.to);});
+  const mk=(n,cat,type,lane,dist,off,day,time,depth,cond,act,synced,note)=>({id:'N-'+String(n).padStart(3,'0'),cat,type,lane,dist,off,day,time,depth,qty:1,cond,act,synced,note:note||'',photo:null});
+  site.finds=[
+    mk(101,'PP','PMA-2',2,14.5,0.1,past[1],'10:42',6,'Korodirano',ACTIONS[1],true),
+    mk(102,'PP','PMA-2',2,31.0,-0.2,past[2],'09:18',8,'Neoštećeno',ACTIONS[1],true),
+    mk(103,'PP','PROM-1',28,22.5,0.0,past[3],'11:05',4,'Korodirano',ACTIONS[1],true,'Potezna žica presječena prije prilaza'),
+    mk(104,'PT','TMA-3',29,9.0,0.2,past[3],'13:40',18,'Neoštećeno',ACTIONS[2],true),
+    mk(105,'NUS','Ručna bomba M75',54,26.0,0.3,past[4],'08:55',3,'Korodirano',ACTIONS[1],true),
+    mk(106,'PP','PMA-3',55,40.5,-0.1,past[5],'12:12',5,'Neoštećeno',ACTIONS[1],true),
+    mk(107,'PP','PMA-2',4,15.2,0.1,TODAY,'09:12',7,'Neoštećeno',ACTIONS[0],false,'Upaljač UPMAH-1 vidljiv')
+  ];
+  site.log=[
+    {t:'07:00',e:'Dolazak na radilište'},
+    {t:'07:10',e:'Informisanje i podjela zadataka; brifing završen'},
+    {t:'07:25',e:'Test detektora na UPMAH-3 (10 cm): 6 detektora ispravno',k:'det'},
+    {t:'07:35',e:'Početak rada: dvojac A u stazi 4, B u stazi 30, C u stazi 56'},
+    {t:'08:05',e:'Smjena deminera u stazama 4, 30 i 56'},
+    {t:'09:12',e:'Nalaz N-107: PMA-2, staza 4 na 15,2 m, dubina 7 cm',k:'find'},
+    {t:'09:40',e:'Interna KK (vođa tima): staza 29, detektor, uzorak 3 m², bez nalaza',k:'qc'},
+    {t:'10:30',e:'Posjeta: referent za KK, BHMAC RU Tuzla (primjer)'}
+  ];
+  site.qc=[{day:past[1],m2:2.5},{day:past[2],m2:2},{day:past[4],m2:3.5},{day:TODAY,m2:3}];
+  site.monitors=[{day:past[2],by:'Supervizor I. Jukić'}];
+  site.estEnd=dayKey(addDays(NOW0,38));
+  site.casevac=past[3];
+  return site;
+}
+function seedSite2(){
+  return {id:'s2',msp:{id:'MSP 0388',naziv:'Brdo',opcina:'Općina Primjer',ru:'RU Tuzla',karta:'Primjer 1:25.000, list 474-1-3, izdanje 1977.'},
+    ci:{tip:'SI',oznaka:'SI-2',pmin:1800,pmax:2400},nt:{Y:6574610.00,X:4918420.00},az:305,
+    poly:[[-1,0],[44,0],[47,30],[30,46],[6,40]],lanes:{},pairs:[],progress:[],finds:[],log:[],qc:[],monitors:[],info:[],start:null,estEnd:null,status:'planirano'};
+}
+function seed(){
+  return {sites:[seedSite(),seedSite2()],active:'s1',crs:'GK6',queue:[
+      {t:'Nalaz N-107 · PMA-2',at:'09:12'},{t:'Interna KK · staza 29',at:'09:40'},{t:'Napredovanje staza 4, 30, 56',at:'10:45'}],
+    lastSync:'06:52',brief:BRIEF.map(()=>true),briefAt:'07:10',dayStarted:true,incident:null,incidents:[],next:108};
+}
+const KEY='terenska-knjiga-v2';
+let S;
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.sites)return s;}}catch(e){}return seed();}
+function save(){try{const c=JSON.parse(JSON.stringify(S,(k,v)=>k==='_ll'?undefined:v));localStorage.setItem(KEY,JSON.stringify(c));}catch(e){}}
+S=load();
+const site=()=>S.sites.find(s=>s.id===S.active)||S.sites[0];
+
+/* ================= stats ================= */
+function laneDone(s,l){return s.lanes[l]||0;}
+function clearedM2(s){let t=0;for(const l in s.lanes)t+=s.lanes[l]*R.lane;return t;}
+function todayM2(s){return s.progress.filter(p=>p.day===TODAY).reduce((a,p)=>a+(p.to-p.from)*R.lane,0);}
+function rangeM2(s,a,b){return s.progress.filter(p=>p.day>=a&&p.day<=b).reduce((x,p)=>x+(p.to-p.from)*R.lane,0);}
+function totalArea(s){return polyArea(s.poly);}
+function qcM2(s){return s.qc.reduce((a,q)=>a+q.m2,0);}
+function workdaysSince(k){let n=0,d=new Date(k+'T12:00:00');const end=new Date(TODAY+'T12:00:00');while(d<end){d=addDays(d,1);if(d.getDay()!==0&&d.getDay()!==6)n++;}return n;}
+function weeklyWindow(){const now=new Date();let d=new Date(now);const dow=d.getDay();let add=(8-dow)%7;if(dow===1&&now.getHours()<16)add=0;if(add===0&&!(dow===1&&now.getHours()<16))add=7;
+  const dl=addDays(now,add);dl.setHours(16,0,0,0);const wEnd=addDays(dl,-1),wStart=addDays(dl,-7);return {deadline:dl,from:dayKey(wStart),to:dayKey(wEnd)};}
+function addQ(t){S.queue.push({t,at:hm(Date.now())});}
+
+/* ================= UI basics ================= */
+let tab='danas', docView=null, selLane=null, photoData=null, prefill=null;
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800);}
+function openSheet(html){$('#sheet').innerHTML=html;$('#scrim').hidden=false;const f=$('#sheet .x');if(f)f.focus();}
+function closeSheet(){$('#scrim').hidden=true;if(selLane!=null){selLane=null;if(tab==='mapa')renderMapa();}}
+const inFrame=(()=>{try{return window.self!==window.top;}catch(e){return true;}})();
+
+function renderHeader(){
+  const s=site();
+  $('#hdrSite').textContent=s.msp.id+' · '+s.ci.oznaka;
+  $('#hdrMeta').innerHTML=esc(s.msp.naziv+' · '+s.msp.ru)+' <span class="pack">'+P.kratko+'</span>';
+  const b=$('#syncBtn');if(b.classList.contains('busy'))return;const n=S.queue.length;
+  b.classList.toggle('ok',n===0);$('#syncLabel').textContent=n?('Bez mreže · '+n):('Poslato '+S.lastSync);
+  b.setAttribute('aria-label',n?('Bez mreže, '+n+' zapisa čeka slanje'):'Sve poslato');
+}
+
+/* ================= DANAS ================= */
+function pairState(p){const rem=R.shiftMax*60e3-(Date.now()-p.shift);return {rem,over:rem<0,inLane:p.inA?p.a:p.b,support:p.inA?p.b:p.a};}
+function fmtRem(ms){const neg=ms<0;ms=Math.abs(ms);const s=Math.floor(ms/1000);return (neg?'+':'')+pad(Math.floor(s/60))+':'+pad(s%60);}
+function compliance(s){
+  const out=[];
+  const det=s.log.some(l=>l.k==='det');
+  out.push({st:det?'ok':'bad',t:'Test detektora na UPMAH-3 danas',v:det?'urađen':'nije urađen'});
+  const lanes=s.pairs.filter(p=>s.lanes[p.lane]!==undefined||true).map(p=>p.lane).sort((a,b)=>a-b);
+  let minGap=Infinity;for(let i=1;i<lanes.length;i++)minGap=Math.min(minGap,(lanes[i]-lanes[i-1])*R.lane);
+  if(lanes.length>1)out.push({st:minGap>=R.pairGap?'ok':'bad',t:'Razmak između aktivnih staza (min. '+R.pairGap+' m)',v:num(minGap)+' m'});
+  const over=s.pairs.filter(p=>pairState(p).over);
+  if(s.pairs.length)out.push({st:over.length?'bad':'ok',t:'Smjena u stazi najviše '+R.shiftMax+' min',v:over.length?('prekoračeno: '+over.map(p=>p.id).join(', ')):'u redu'});
+  const cl=clearedM2(s),q=qcM2(s),pct=cl?q/cl*100:0;
+  out.push({st:pct>=R.qcMin?'ok':'warn',t:'Interna KK najmanje '+R.qcMin+'% očišćene površine',v:num(pct,1)+'% ('+num(q,1)+' m²)'});
+  const lastMon=s.monitors.length?s.monitors[s.monitors.length-1].day:s.start;const wd=lastMon?workdaysSince(lastMon):0;
+  out.push({st:wd<R.monitorDays?(wd>=R.monitorDays-1?'warn':'ok'):'bad',t:'Interni nadzor svakih '+R.monitorDays+' radnih dana',v:'prije '+wd+' r. d.'});
+  const w=weeklyWindow();const ms=w.deadline-Date.now();const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);
+  out.push({st:ms<864e5?'warn':'ok',t:'Sedmični izvještaj (Prilog 11), ponedjeljak 16:00',v:'za '+(d?d+' d ':'')+h+' h'});
+  return out;
+}
+function renderDanas(){
+  const s=site(), v=$('#v-danas');
+  if(!s.pairs.length&&s.status==='planirano'){
+    v.innerHTML=`<div class="card"><div class="label">${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><h2 style="margin-top:4px">Radilište još nije otvoreno</h2>
+      <p class="sub">Dosije je unesen: nulta tačka, azimut ${s.az}° i ${s.poly.length} lomnih tačaka. Površina ${num(totalArea(s))} m², oko ${laneCount(s)} radnih staza po 1 m.</p>
+      <div class="btnrow"><button class="btn primary" type="button" data-act="openSite">Otvori radilište i rasporedi dvojce</button><button class="btn" type="button" data-act="tab" data-tab="mapa">Pogledaj staze</button></div></div>`;
+    return;
+  }
+  const t=todayM2(s), cl=clearedM2(s), tot=totalArea(s), ft=s.finds.filter(f=>f.day===TODAY);
+  const briefDone=S.brief.every(Boolean);
+  let h=`<div class="card">
+    <div class="label">Očišćeno danas · ${esc(s.ci.oznaka)}</div>
+    <div class="big">${num(t,1)}<span class="unit">m²</span></div>
+    <div class="sub">${s.pairs.length} dvojca u radnim stazama širine ${R.lane} m</div>
+    <div class="bar" role="img" aria-label="${Math.round(cl/tot*100)}% površine"><span style="width:${Math.min(100,cl/tot*100)}%"></span></div>
+    <dl class="kv3">
+      <div><dt>${esc(s.ci.oznaka)} ukupno</dt><dd>${num(cl)} / ${num(tot)} m²</dd></div>
+      <div><dt>Nalazi danas</dt><dd>${ft.length}</dd></div>
+      <div><dt>Početak rada</dt><dd>${fmtD(s.start).slice(0,6)}</dd></div>
+    </dl></div>`;
+
+  h+=`<div class="card"><div class="card-h"><h3>Dvojci</h3><span class="sub">smjena najviše ${R.shiftMax} min</span></div>`;
+  s.pairs.forEach(p=>{const st=pairState(p);const a=TEAM.find(x=>x.id===st.inLane),b=TEAM.find(x=>x.id===st.support);
+    h+=`<div class="pair${st.over?' over':''}" data-pair="${p.id}"><span class="tag">${p.id}</span>
+      <span class="grow"><b>Staza ${p.lane}</b> · ${num(laneDone(s,p.lane),1)} m<br><span class="sub">${a.id} u stazi · ${b.id} podrška na ${R.pairGap} m</span></span>
+      <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="t" data-timer="${p.id}">--:--</span><button class="btn sm" type="button" data-act="shift" data-p="${p.id}">Smjena</button></span></div>`;});
+  h+=`</div>`;
+
+  h+=`<div class="card"><div class="card-h"><h3>Usklađenost sa standardom</h3><span class="sub">${esc(P.kratko)}</span></div><ul class="chk">${compliance(s).map(c=>`<li class="${c.st}"><span class="ic">${c.st==='ok'?'✓':'!'}</span><span>${esc(c.t)}</span><span class="v">${esc(c.v)}</span></li>`).join('')}</ul></div>`;
+
+  const log=s.log.slice().sort((a,b)=>a.t.localeCompare(b.t));
+  h+=`<div class="card"><div class="card-h"><h3>Dnevnik rada</h3><span class="sub">kolona (b), Prilog 9</span></div>
+    <ul class="log">${log.map(l=>`<li class="${l.k==='find'?'find':''}"><span class="tm">${esc(l.t)}</span><span class="ev">${esc(l.e)}</span></li>`).join('')}</ul>
+    <div class="quick">
+      <button class="btn" type="button" data-act="ev" data-k="det">Test detektora</button>
+      <button class="btn" type="button" data-act="ev" data-k="qc">Interna KK</button>
+      <button class="btn" type="button" data-act="ev" data-k="mon">Interni nadzor</button>
+      <button class="btn" type="button" data-act="ev" data-k="dem">Uništavanje</button>
+      <button class="btn" type="button" data-act="ev" data-k="visit">Posjeta</button>
+      <button class="btn" type="button" data-act="ev" data-k="info">Nova informacija</button>
+    </div></div>`;
+
+  h+=`<div class="card"><div class="card-h"><h3>Brifing prije rada</h3><span class="chip ${briefDone?'ok':'work'}">${S.brief.filter(Boolean).length}/${BRIEF.length}${briefDone&&S.briefAt?' · '+S.briefAt:''}</span></div>
+    ${!S.dayStarted?'<div class="notice">Rad ne može početi dok sve stavke nisu potvrđene.</div>':''}
+    <ul class="checks">${BRIEF.map((b,i)=>`<li><label><input type="checkbox" id="brief${i}" data-act="brief" data-i="${i}" ${S.brief[i]?'checked':''} ${S.dayStarted?'disabled':''}><span>${esc(b)}</span></label></li>`).join('')}</ul>
+    ${!S.dayStarted?`<button class="btn primary block" type="button" data-act="start" ${briefDone?'':'disabled'}>Započni radni dan</button>`:''}</div>`;
+
+  h+=`<div class="btnrow noprint" style="justify-content:center"><button class="linkbtn" type="button" data-act="reset">Vrati početne podatke demoa</button></div>`;
+  v.innerHTML=h; tick();
+}
+
+/* ================= MAPA (staze) ================= */
+function mapSVG(s,opts={}){
+  const b=bounds(s.poly), W=opts.w||330, padL=26, padR=14, padT=22, padB=opts.paper?44:56;
+  const sc=(W-padL-padR)/(b.x1-b.x0+2);
+  const H=Math.round((b.y1+2.5)*sc+padT+padB);
+  const X=u=>padL+(u-b.x0+1)*sc, Y=v=>padT+(b.y1+0.5-v)*sc;
+  const lc=laneCount(s);
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Skica ${esc(s.ci.oznaka)}: radne staze od nulte linije">`;
+  g+=`<rect class="m-safe" x="${X(b.x0-0.5)}" y="${Y(0)}" width="${(b.x1-b.x0+1)*sc}" height="${2*sc}"/>`;
+  g+=`<path class="m-poly" d="M${s.poly.map(p=>X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('L')}Z"/>`;
+  const active={};s.pairs.forEach(p=>active[p.lane]=p.id);
+  for(let i=1;i<=lc;i++){const L=laneLen(s,i);if(L<=0)continue;const d=Math.min(laneDone(s,i),L);
+    if(d>0)g+=`<rect class="${active[i]?'m-lane-p':'m-lane'}" x="${X(i-1)+.3}" y="${Y(d)}" width="${Math.max(.6,sc-.6)}" height="${d*sc}"/>`;
+    if(!opts.paper)g+=`<rect class="m-hit" x="${X(i-1)}" y="${Y(L)}" width="${sc}" height="${L*sc}" data-act="lane" data-l="${i}"><title>Staza ${i}</title></rect>`;
+    if(selLane===i&&!opts.paper)g+=`<rect class="m-sel" x="${X(i-1)}" y="${Y(L)}" width="${sc}" height="${L*sc}"/>`;}
+  g+=`<line class="m-zero" x1="${X(b.x0-0.5)}" x2="${X(b.x1+0.5)}" y1="${Y(0)}" y2="${Y(0)}"/>`;
+  s.finds.forEach(f=>{const cx=X(f.lane-0.5+(f.off||0)),cy=Y(f.dist),r=opts.paper?3.2:4;g+=`<path class="m-mk" d="M${cx} ${cy-r}L${cx+r} ${cy+r*.8}H${cx-r}Z"/>`;});
+  if(opts.paper){s.poly.forEach((p,i)=>{g+=`<circle class="m-tp" cx="${X(p[0])}" cy="${Y(p[1])}" r="2.4"/><text class="m-t ink" x="${X(p[0])+4}" y="${Y(p[1])-3}">T${i+1}</text>`;});}
+  else{const ps=s.pairs.slice().sort((a,b)=>a.lane-b.lane);ps.forEach(p=>{g+=`<text class="m-t big" x="${X(p.lane-0.5)}" y="${Y(laneLen(s,p.lane))-4}" text-anchor="middle">${p.id}</text>`;});
+    for(let i=1;i<ps.length;i++){const y=Y(0)+12+((i%2)*9);g+=`<line class="m-gap" x1="${X(ps[i-1].lane-0.5)}" x2="${X(ps[i].lane-0.5)}" y1="${y}" y2="${y}"/><text class="m-t" x="${(X(ps[i-1].lane-0.5)+X(ps[i].lane-0.5))/2}" y="${y-2}" text-anchor="middle">${(ps[i].lane-ps[i-1].lane)*R.lane} m</text>`;}}
+  g+=`<circle cx="${X(0)}" cy="${Y(0)}" r="4.5" fill="var(--ink)"/><text class="m-t ink" x="${X(0)+2}" y="${Y(0)+(opts.paper?24:36)}">NT · nulta tačka</text>`;
+  g+=`<text class="m-t" x="${X(b.x1+0.5)}" y="${Y(0)+(opts.paper?24:36)}" text-anchor="end">sigurna staza · nulta linija</text>`;
+  Array.from({length:Math.floor(b.y1/10)+1},(_,i)=>i*10).forEach(m=>{g+=`<text class="m-t" x="${padL-4}" y="${Y(m)+3}" text-anchor="end">${m}</text>`;});
+  const a=-s.az*D2R, nx=W-22, ny=24, L2=11, vx=Math.sin(-a)*-1, vy=Math.cos(a);
+  const ex=nx+(-Math.sin(s.az*D2R))*L2, ey=ny-Math.cos(s.az*D2R)*L2;
+  g+=`<circle class="m-n" cx="${nx}" cy="${ny}" r="13"/><line class="m-n" x1="${nx}" y1="${ny}" x2="${ex}" y2="${ey}" stroke-width="2"/><text class="m-t ink" x="${nx+(-Math.sin(s.az*D2R))*20}" y="${ny-Math.cos(s.az*D2R)*20+3}" text-anchor="middle">S</text>`;
+  g+=`<text class="m-t" x="${padL}" y="12">m od nulte linije · azimut napredovanja ${s.az}°</text>`;
+  g+='</svg>';return g;
+}
+function renderMapa(){
+  const s=site(), lc=laneCount(s);
+  let done=0,full=0;for(let i=1;i<=lc;i++){const L=laneLen(s,i);if(L<=0)continue;if(laneDone(s,i)>=L-0.01)full++;else if(laneDone(s,i)>0)done++;}
+  $('#v-mapa').innerHTML=`
+    <div><div class="label">${esc(s.msp.id)} ${esc(s.msp.naziv)} · ${esc(s.ci.tip==='CI'?'ciljana istraga':'sistematska istraga')} ${esc(s.ci.oznaka)}</div><h2>Radne staze</h2></div>
+    <div class="legend"><span><i style="background:var(--haz-soft);outline:1.5px dashed var(--hazard);outline-offset:-1.5px"></i>POPO</span><span><i style="background:var(--cleared)"></i>Očišćeno</span><span><i style="background:var(--work)"></i>Staza u radu</span><span><i style="background:var(--clr-soft)"></i>Sigurna staza</span><span>${TRI.replace('class="tri"','class="tri" style="width:12px;height:11px;vertical-align:-1px;margin-right:5px"')}Nalaz</span></div>
+    <div class="mapwrap">${mapSVG(s)}</div>
+    <div class="sub">Dodirni stazu. Staza je široka ${R.lane} m; dužina se mjeri od nulte linije u smjeru azimuta ${s.az}°.</div>
+    <div class="card"><dl class="kv">
+      <dt>Nulta tačka</dt><dd class="mono">${crsFmt(s,s.nt)}</dd>
+      <dt>Koord. sistem</dt><dd>${crsName()}</dd>
+      <dt>Površina</dt><dd>${num(totalArea(s))} m² (plan ${num(s.ci.pmin)}–${num(s.ci.pmax)} m²)</dd>
+      <dt>Staze</dt><dd>${full} završeno · ${done} u radu · ${lc} ukupno</dd>
+      <dt>Lomne tačke</dt><dd>${s.poly.length} (T1–T${s.poly.length})</dd>
+    </dl></div>`;
+}
+function openLane(i){
+  const s=site(); selLane=i; renderMapa();
+  const L=laneLen(s,i), d=laneDone(s,i), p=s.pairs.find(x=>x.lane===i), fs=s.finds.filter(f=>f.lane===i);
+  const head=toGK(s,i-0.5,d);
+  openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · širina ${R.lane} m</div><h2>Radna staza ${i}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+    <dl class="kv"><dt>Očišćeno</dt><dd>${num(d,1)} m od ${num(L,1)} m · ${num(d*R.lane,1)} m²</dd>
+      <dt>Čelo staze</dt><dd class="mono">${crsFmt(s,head)}</dd>
+      ${p?`<dt>Dvojac</dt><dd>${p.id}: ${pairState(p).inLane} u stazi, ${pairState(p).support} podrška</dd>`:''}
+      <dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)+' na '+num(f.dist,1)+' m').join(', '):'nema'}</dd></dl>
+    ${d<L?`<div class="grid3">
+      <button class="btn" type="button" data-act="adv" data-l="${i}" data-m="0.5">+0,5 m</button>
+      <button class="btn" type="button" data-act="adv" data-l="${i}" data-m="1">+1 m</button>
+      <button class="btn" type="button" data-act="adv" data-l="${i}" data-m="${(L-d).toFixed(2)}">Do kraja</button></div>`:'<div class="notice" style="background:var(--clr-soft)">Staza je očišćena cijelom dužinom.</div>'}
+    <div class="btnrow">${p?'':`<button class="btn" type="button" data-act="moveA" data-l="${i}">Premjesti dvojac ovdje</button>`}<button class="btn primary" type="button" data-act="findHere" data-l="${i}">Dodaj nalaz u stazi ${i}</button></div>`);
+}
+
+/* ================= NALAZ ================= */
+function renderNalaz(){
+  const s=site(), lc=laneCount(s);
+  const pl=prefill&&prefill.lane||(s.pairs[0]&&s.pairs[0].lane)||1;
+  const pd=prefill&&prefill.dist!=null?prefill.dist:laneDone(s,pl);
+  prefill=null;
+  const laneOpts=[];for(let i=1;i<=lc;i++)if(laneLen(s,i)>0)laneOpts.push(`<option value="${i}" ${i===pl?'selected':''}>Staza ${i}${s.pairs.find(p=>p.lane===i)?' · dvojac '+s.pairs.find(p=>p.lane===i).id:''}</option>`);
+  $('#v-nalaz').innerHTML=`<div><div class="label">${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><h2>Novi nalaz</h2></div>
+  <form id="findForm" autocomplete="off">
+    <fieldset><legend>Kategorija</legend><div class="chips" id="catChips">${Object.keys(P.cats).map((c,i)=>`<label><input type="radio" name="fcat" value="${c}" id="fcat${c}" ${i===0?'checked':''}><span>${P.cats[c]}</span></label>`).join('')}</div></fieldset>
+    <fieldset><legend>Vrsta</legend><div class="chips mono" id="typeChips"></div></fieldset>
+    <label class="field">Radna staza<select id="fLane">${laneOpts.join('')}</select></label>
+    <div class="grid2">
+      <label class="field">Udaljenost od startne linije (m)<input id="fDist" type="number" step="0.1" min="0" value="${pd.toFixed(1)}" inputmode="decimal"></label>
+      <label class="field">Bočno od ose staze (m)<input id="fOff" type="number" step="0.1" min="-0.5" max="0.5" value="0" inputmode="decimal"><small>lijevo −, desno +</small></label>
+    </div>
+    <div class="calc" id="fCalc"></div>
+    <div class="grid2">
+      <label class="field">Dubina (cm)<input id="fDepth" type="number" min="0" max="100" value="8" inputmode="numeric"></label>
+      <label class="field">Količina<input id="fQty" type="number" min="1" max="50" value="1" inputmode="numeric"></label>
+    </div>
+    <fieldset><legend>Stanje</legend><div class="chips">${CONDS.map((c,i)=>`<label><input type="radio" name="fcond" value="${c}" id="fc${i}" ${i===0?'checked':''}><span>${c}</span></label>`).join('')}</div></fieldset>
+    <label class="field">Postupak<select id="fAct">${ACTIONS.map(a=>`<option>${a}</option>`).join('')}</select></label>
+    <div><span class="flabel">Fotografija</span>
+      <label class="photo" for="fPhoto"><input id="fPhoto" type="file" accept="image/*" capture="environment">
+      <span class="ph" id="fPh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+      <img id="fPrev" alt="Pregled fotografije" hidden><span id="fPhotoTxt">Fotografiši sredstvo na licu mjesta</span></label></div>
+    <label class="field">Napomena<textarea id="fNote" style="font-family:var(--font-body);min-height:64px" placeholder="npr. upaljač vidljiv, potezna žica"></textarea></label>
+    <button class="btn primary block" type="submit">Sačuvaj nalaz</button>
+  </form>`;
+  fillTypes(); calcPos();
+  $('#catChips').addEventListener('change',fillTypes);
+  ['fLane','fDist','fOff'].forEach(id=>$('#'+id).addEventListener('input',calcPos));
+  $('#fLane').addEventListener('change',()=>{$('#fDist').value=laneDone(site(),+$('#fLane').value).toFixed(1);calcPos();});
+  $('#fPhoto').addEventListener('change',onPhoto);
+  $('#findForm').addEventListener('submit',onSubmit);
+}
+function fillTypes(){const c=(document.querySelector('input[name="fcat"]:checked')||{}).value||'PP';
+  $('#typeChips').innerHTML=P.items[c].map((t,i)=>`<label><input type="radio" name="ftype" value="${esc(t)}" id="ft${c}${i}" ${c==='MI'?'checked':''}><span>${esc(t)}</span></label>`).join('');}
+function calcPos(){
+  const s=site(), l=+$('#fLane').value, d=parseFloat($('#fDist').value)||0, o=Math.max(-0.5,Math.min(0.5,parseFloat($('#fOff').value)||0));
+  const gk=toGK(s,l-0.5+o,d), w=gk6ToWgs(gk.Y,gk.X), done=laneDone(s,l), ahead=d>done+1.0;
+  const dev=(2.1+((l*7+Math.round(d*3))%17)/10).toFixed(1);
+  const c=$('#fCalc'); c.classList.toggle('warn',ahead);
+  c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsFmt(s,gk)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E</span>
+    <span>${ahead?'Udaljenost je ispred očišćenog dijela staze ('+num(done,1)+' m). Provjeri mjerenje.':'Izračunato iz nulte tačke i azimuta. GPS telefona (kontrola): odstupanje '+dev.replace('.',',')+' m'}</span>`;
+}
+function onPhoto(e){const file=e.target.files&&e.target.files[0];if(!file)return;const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const c=document.createElement('canvas'),m=220,sc=Math.min(1,m/Math.max(img.width,img.height));c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);photoData=c.toDataURL('image/jpeg',.7);URL.revokeObjectURL(url);$('#fPrev').src=photoData;$('#fPrev').hidden=false;$('#fPh').hidden=true;$('#fPhotoTxt').textContent='Fotografija dodata';};img.src=url;}
+function onSubmit(e){e.preventDefault();const s=site();
+  const t=document.querySelector('input[name="ftype"]:checked');if(!t){toast('Izaberi vrstu sredstva.');return;}
+  const cat=document.querySelector('input[name="fcat"]:checked').value;
+  const f={id:'N-'+String(S.next).padStart(3,'0'),cat,type:t.value,lane:+$('#fLane').value,dist:Math.max(0,parseFloat($('#fDist').value)||0),off:Math.max(-0.5,Math.min(0.5,parseFloat($('#fOff').value)||0)),
+    day:TODAY,time:hm(Date.now()),depth:Math.max(0,+$('#fDepth').value||0),qty:Math.max(1,+$('#fQty').value||1),cond:document.querySelector('input[name="fcond"]:checked').value,act:$('#fAct').value,synced:false,note:$('#fNote').value.trim(),photo:photoData};
+  S.next++;s.finds.push(f);s.log.push({t:f.time,e:'Nalaz '+f.id+': '+f.type+', staza '+f.lane+' na '+num(f.dist,1)+' m, dubina '+f.depth+' cm',k:'find'});addQ('Nalaz '+f.id+' · '+f.type);save();photoData=null;
+  go('mapa');toast('Nalaz '+f.id+' sačuvan u stazi '+f.lane+'.');}
+
+/* ================= IZVJEŠTAJI ================= */
+const DOCS=[
+  {k:'p9',pn:'P9',t:'Dnevni izvještaj',d:()=>'Danas · '+site().log.length+' događaja u dnevniku'},
+  {k:'p11',pn:'P11',t:'Sedmični izvještaj o aktivnostima TI i čišćenja',d:()=>{const w=weeklyWindow();return 'Sedmica '+fmtD(w.from).slice(0,6)+'–'+fmtD(w.to).slice(0,6)+' · rok pon. 16:00';}},
+  {k:'p13',pn:'P13',t:'Stručni izvještaj o ES',d:()=>site().finds.length+' sredstava · uz izjavu o čišćenju'},
+  {k:'p6',pn:'P6',t:'Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI',d:()=>'Nacrt · popunjeno '+p6Fields().filter(x=>x[2]).length+' od 20 polja'},
+  {k:'p12',pn:'P12',t:'Inicijalni izvještaj o incidentu/nesreći od mina',d:()=>S.incident?'U toku · rok 6 sati':(S.incidents.length?S.incidents.length+' prijavljen':'Popunjava se iz ekrana Hitno')},
+  {k:'exp',pn:'GIS',t:'Izvoz podataka: CSV i GeoJSON',d:()=>'Nalazi, staze i lomne tačke · '+crsName()}
+];
+function renderIzvjestaji(){
+  if(docView){renderDoc(docView);return;}
+  const s=site();
+  $('#v-izvjestaji').innerHTML=`<div><div class="label">${esc(P.standard)}</div><h2>Izvještaji za BHMAC</h2></div>
+    <div class="card"><div class="card-h"><span class="sub">Koordinatni sistem u dokumentima</span></div>
+      <div class="chips" role="radiogroup"><label><input type="radio" name="crs" value="GK6" id="crsGK" data-act="crs" ${S.crs==='GK6'?'checked':''}><span>Gaus-Kriger zona 6</span></label><label><input type="radio" name="crs" value="UTM34" id="crsUTM" data-act="crs" ${S.crs==='UTM34'?'checked':''}><span>UTM 34N</span></label></div>
+      <p class="fine">Standard zabranjuje miješanje sistema u istom dokumentu, pa svi izvještaji koriste jedan.</p></div>
+    <ul class="doclist">${DOCS.map(d=>`<li><button class="docitem" type="button" data-act="doc" data-k="${d.k}"><span class="pn">${d.pn}</span><span><b>${esc(d.t)}</b><span class="sub">${esc(d.d())}</span></span><span aria-hidden="true">›</span></button></li>`).join('')}</ul>`;
+}
+function docShell(inner,k){
+  return `<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">‹ Svi izvještaji</button>${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">Štampaj / PDF</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">Kopiraj tekst</button></div>
+    <pre class="out noprint" id="copyOut" hidden></pre><div class="tbl"><article class="doc" id="docEl">${inner}</article></div>`;
+}
+const mspNo=s=>s.msp.id.replace(/^MSP\s*/i,'');
+const box=on=>`<span class="box">${on?'×':''}</span>`;
+function renderDoc(k){
+  const s=site(), v=$('#v-izvjestaji'); let h='';
+  const orgLine=`<div class="dorg">${esc(ORG)} · vođa tima ${esc(LEADER)} · Tim 1</div><div class="dsmall">(deminerska organizacija, naziv funkcije i oznaka odjeljenja-sekcije, tima)</div>`;
+  if(k==='p9'){
+    const log=s.log.slice().sort((a,b)=>a.t.localeCompare(b.t)), ft=s.finds.filter(f=>f.day===TODAY);
+    const dest=ft.filter(f=>f.act===ACTIONS[1]);const ex=s.log.filter(l=>l.k==='dem').map(l=>l.kg||0).reduce((a,b)=>a+b,0);
+    h=`<h4>DNEVNI IZVJEŠTAJ</h4>${orgLine}
+      <table><tr><td><b>Datum:</b> ${fmtD(TODAY)}</td><td><b>MSP:</b> ${esc(s.msp.id)} ${esc(s.msp.naziv)}</td><td><b>Naziv CI ili SI:</b> ${esc(s.ci.oznaka)}</td></tr></table>
+      <table><thead><tr><th style="width:62px">Vrijeme (a)</th><th>Evidencija trajanja deminerskih aktivnosti i događaja (b)</th></tr></thead>
+      <tbody>${log.map(l=>`<tr><td class="mono">${esc(l.t)}</td><td>${esc(l.e)}</td></tr>`).join('')}</tbody></table>
+      <div class="sec">PODACI O RADU I POSTIGNUTIM EFEKTIMA</div>
+      <table><tr><td class="k">Metode rada</td><td>a-detektor${box(1)} b-pipalica${box(1)} c-kombinacija${box(1)} d-prege${box(0)} e-mašina${box(0)}</td></tr>
+      <tr><td class="k">Očišćeno</td><td>${num(todayM2(s),1)} m² deminera · 0 m² prege · <b>ukupno ${num(todayM2(s),1)} m²</b></td></tr>
+      <tr><td class="k">Otkriveno mina/ESZR</td><td>${ft.length?ft.map(f=>esc(f.type)+' ×'+f.qty+' (staza '+f.lane+')').join('; '):'nema'}</td></tr>
+      <tr><td class="k">Uništeno mina/ESZR</td><td>${dest.length?dest.map(f=>esc(f.type)+' ×'+f.qty).join('; '):'nema'}</td></tr>
+      <tr><td class="k">Utrošeno ES za uništavanje</td><td>${ex?num(ex,2)+' kg TNT':'—'}</td></tr>
+      <tr><td class="k">CASEVAC vježba izvedena</td><td>${s.casevac?fmtD(s.casevac):'<span class="miss">nije unijeto</span>'}</td></tr>
+      <tr><td class="k">Napomena</td><td>${s.info.filter(i=>i.day===TODAY).map(i=>'Nova informacija o miniranosti: '+esc(i.t)).join('<br>')||'—'}</td></tr></table>
+      <div class="sig"><div>Vođa tima: ${esc(LEADER)}</div><div>Potpis</div></div>`;
+  }
+  if(k==='p11'){
+    const w=weeklyWindow(), wk=rangeM2(s,w.from,w.to), cum=rangeM2(s,'0000',w.to);
+    const wf=s.finds.filter(f=>f.day>=w.from&&f.day<=w.to);const by={};wf.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);
+    h=`<h4>SEDMIČNI IZVJEŠTAJ O AKTIVNOSTIMA TEHNIČKOG IZVIĐANJA I ČIŠĆENJA ZA MSP ${esc(mspNo(s))}</h4>
+      <table><tr><td><b>Deminerska organizacija:</b> ${esc(ORG)}</td><td><b>Broj:</b> ${s.msp.id.replace(/\D/g,'')}/${new Date().getFullYear()}-S</td><td><b>Od:</b> ${fmtD(TODAY)}</td></tr>
+      <tr><td colspan="3"><b>Za:</b> ${esc(s.msp.ru.replace('RU','Ured'))} BHMAC · <b>Za završenu sedmicu od</b> ${fmtD(w.from)} <b>do</b> ${fmtD(w.to)}</td></tr></table>
+      <table><thead><tr><th>Red. br.</th><th>Ciljana ili sistematska istraga (b)</th><th>Zadana površina m² (c)</th><th>Realizirano m² (d)</th><th>Ukupno realizirano m² (e)</th><th>Datum početka (f)</th><th>Procijenjeni datum završetka (g)</th><th>Pronađena ES (h)</th></tr></thead>
+      <tbody><tr><td>1.</td><td>${esc(s.ci.oznaka)}</td><td class="n">${num(s.ci.pmax)}</td><td class="n">${num(wk,1)}</td><td class="n">${num(cum,1)}</td><td>${fmtD(s.start)}</td><td>${fmtD(s.estEnd)}</td><td>${Object.keys(by).length?Object.entries(by).map(([t,n])=>esc(t)+' ×'+n).join(', '):'—'}</td></tr>
+      <tr><td></td><td colspan="7"><b>Opis toka aktivnosti:</b> Operacije se odvijaju po izvedbenom planu. Rad u ${s.pairs.length} dvojca u radnim stazama širine ${R.lane} m (staze ${s.pairs.map(p=>p.lane).join(', ')}). ${wf.length?'Pronađena sredstva odgovaraju očekivanim tipovima iz dosijea.':'Bez nalaza u sedmici.'} Nije uvedena nova tehnička metoda.</td></tr></tbody></table>
+      <div class="sec">NOVE INFORMACIJE O MINIRANOSTI PRIKUPLJENE NETEHNIČKIM METODAMA ZA MSP ${esc(mspNo(s))}</div>
+      <table><thead><tr><th style="width:50px">Red. broj</th><th>Zapisnik o miniranju, informator, broj i raspored mina, itd.</th></tr></thead><tbody>${s.info.length?s.info.map((i,n)=>`<tr><td>${n+1}.</td><td>${esc(i.t)} (${fmtD(i.day)})</td></tr>`).join(''):'<tr><td>1.</td><td>Nema novih informacija.</td></tr>'}</tbody></table>
+      <div class="sig"><div>Odgovorna osoba dem. organizacije</div><div>Potpis</div></div>
+      <p class="note">Rok: ${longDate(w.deadline)} do 16:00 (za prethodnu sedmicu).</p>`;
+  }
+  if(k==='p13'){
+    const g=c=>{const by={};s.finds.filter(f=>f.cat===c).forEach(f=>{by[f.type]=by[f.type]||{n:0,r:[]};by[f.type].n+=f.qty;by[f.type].r.push(f.id+' (st. '+f.lane+', '+num(f.dist,1)+' m)');});return Object.entries(by);};
+    const rows=(arr)=>{const L=['a','b','c','d'];let o='';for(let i=0;i<Math.max(4,arr.length);i++){const e=arr[i];o+=`<tr><td style="width:28px">(${L[i]||i+1})</td><td>${e?esc(e[0]):''}</td><td class="n" style="width:44px">${e?e[1].n:''}</td><td>${e?esc(e[1].r.join(', ')):''}</td></tr>`;}return o;};
+    const mi=s.finds.filter(f=>f.cat==='MI').reduce((a,f)=>a+f.qty,0);
+    h=`<h4>STRUČNI IZVJEŠTAJ O ES</h4>
+      <div class="sec">PRVI DIO</div>
+      <table><tr><td>1.</td><td class="k">Ime deminerske ili UES organizacije</td><td>${esc(ORG)}</td><td class="k">Izvjestio (ime i prezime), funkcija</td><td>${esc(LEADER)}, vođa tima</td></tr>
+      <tr><td>2.</td><td class="k">MSP</td><td>${esc(s.msp.id)} ${esc(s.msp.naziv)}</td><td class="k">Datum izvještaja</td><td>${fmtD(TODAY)}</td></tr>
+      <tr><td>3.</td><td class="k">Najbliži grad</td><td>${esc(s.msp.opcina)}</td><td class="k">CI ili SI</td><td>${esc(s.ci.oznaka)}</td></tr>
+      <tr><td>4.</td><td class="k">Naziv karte</td><td colspan="3">${esc(s.msp.karta)}</td></tr>
+      <tr><td>5.</td><td class="k">Razmjera</td><td>1:25.000</td><td class="k">Koordinate zadatka</td><td class="mono">${crsFmt(s,s.nt)}<br>(${crsName()}, nulta tačka)</td></tr></table>
+      <div class="sec">DRUGI DIO</div>
+      <table><thead><tr><th colspan="2">6. VRSTA UKLONJENIH PP MINA</th><th>Kom</th><th>OPIS ILI PRIMJEDBA</th></tr></thead><tbody>${rows(g('PP'))}</tbody></table>
+      <table><thead><tr><th colspan="2">7. VRSTA UKLONJENIH PT MINA</th><th>Kom</th><th>OPIS ILI PRIMJEDBA</th></tr></thead><tbody>${rows(g('PT'))}</tbody></table>
+      <table><thead><tr><th colspan="2">8. VRSTA UKLONJENOG NUS-a</th><th>Kom</th><th>OPIS ILI PRIMJEDBA</th></tr></thead><tbody>${rows(g('NUS'))}</tbody></table>
+      <table><tr><td class="k">9. BROJ UKLONJENIH MINA IZNENAĐENJA</td><td class="n">${mi}</td></tr></table>
+      <p class="note">Popunjava se i po potrebi prilaže uz Izjavu o čišćenju površine. Fotografije su dodatni dokaz za neidentifikovana ili neobična sredstva.</p>`;
+  }
+  if(k==='p6'){
+    const f=p6Fields(), missing=f.filter(x=>!x[2]);
+    h=`<p class="note noprint" style="margin-top:0">Na osnovu člana 35. Zakona o deminiranju u Bosni i Hercegovini („Službeni glasnik BiH”, broj 5/02)</p>
+      <h4>Z A P I S N I K</h4><div class="dsub">o izvršenim aktivnostima tehničkog izviđanja i čišćenja CI/SI · <b>NACRT</b></div>
+      <div class="sec">I – IZJAVA DEMINERSKE ORGANIZACIJE</div>
+      <table>${f.map(x=>`<tr><td style="width:24px">${x[0]}.</td><td class="k">${esc(x[1])}</td><td>${x[2]?x[2]:'<span class="miss">nedostaje</span>'}</td></tr>`).join('')}</table>
+      <div class="sec">III – PRILOZI (automatski iz terenskih podataka)</div>
+      <table>${p6Annex(s).map(a=>`<tr><td style="width:24px">${a[0]})</td><td>${esc(a[1])}</td><td style="width:90px">${a[2]?'<b>spremno</b>':'<span class="miss">nedostaje</span>'}</td></tr>`).join('')}</table>
+      <div class="sec">Prilog e) Grafički prikaz očišćene površine ${esc(s.ci.oznaka)} sa lomnim tačkama i nalazima</div>
+      ${mapSVG(s,{paper:true,w:520})}
+      <table><thead><tr><th>Lomna tačka</th><th>${S.crs==='UTM34'?'E':'Y'}</th><th>${S.crs==='UTM34'?'N':'X'}</th></tr></thead><tbody>${s.poly.map((p,i)=>{const g=toGK(s,p[0],p[1]);const c=crsFmt(s,g).replace(/^[YE] /,'').split(/\s{2}[XN] /);return `<tr><td>T${i+1}</td><td class="n mono">${c[0]}</td><td class="n mono">${c[1]}</td></tr>`;}).join('')}</tbody></table>
+      <table><thead><tr><th>Nalaz</th><th>Vrsta</th><th>Koordinate (${crsName()})</th></tr></thead><tbody>${s.finds.map(fd=>`<tr><td>${fd.id}</td><td>${esc(fd.type)}</td><td class="mono">${crsFmt(s,findPos(s,fd))}</td></tr>`).join('')}</tbody></table>
+      ${missing.length?`<p class="note noprint">Prije predaje dopuniti: ${missing.map(x=>'polje '+x[0]).join(', ')}.</p>`:''}
+      <div class="sig"><div>21. Odgovorna osoba deminerske organizacije</div><div>22. Šef ureda/kancelarije BHMAC-a</div></div>`;
+  }
+  if(k==='p12'){
+    const i=S.incident||S.incidents[S.incidents.length-1];
+    const gk=i?toGK(s,i.lane-0.5,i.dist):null;
+    h=`<h4>INICIJALNI IZVJEŠTAJ O INCIDENTU/NESREĆI OD MINA</h4><div class="dsub">Izvještaj poslati u roku od 6 sati u BHMAC</div>
+      ${!i?'<p class="note">Nema prijavljene nesreće. Obrazac se popunjava automatski kad se na ekranu Hitno pokrene prijava.</p>':''}
+      <table><tr><td class="k">Izvještaj popunio</td><td>${esc(LEADER)}, vođa tima, ${esc(ORG)}</td></tr>
+      <tr><td class="k">Datum incidenta/nesreće</td><td>${i?fmtD(i.day):''}</td></tr>
+      <tr><td class="k">Vrijeme nesreće</td><td>${i?esc(i.start):''}</td></tr>
+      <tr><td class="k">Mjesto / selo; najbliži grad</td><td>${esc(s.msp.naziv)}; ${esc(s.msp.opcina)}</td></tr>
+      <tr><td class="k">Koordinate</td><td>${gk?'<span class="mono">'+crsFmt(s,gk)+'</span>':''} ${box(S.crs==='UTM34')}UTM ${box(S.crs!=='UTM34')}Gaus-Kriger</td></tr>
+      <tr><td class="k">Vrsta ES</td><td>${box(i&&i.cat==='PP')}PP mina ${box(i&&i.cat==='PT')}PT mina ${box(i&&i.cat==='NUS')}NUS ${box(i&&i.cat==='?')}Nepoznato · model: ${i?esc(i.model||'—'):''}</td></tr>
+      <tr><td class="k">Žrtve</td><td>${i?`odrasli ${i.v.ad}, djeca ${i.v.ch} · lakše povrijeđeni ${i.v.lt}, teže ${i.v.hv}, poginuli ${i.v.k}`:''}</td></tr>
+      <tr><td class="k">Namjena zemljišta</td><td>Poljoprivredno (iz dosijea)</td></tr>
+      <tr><td class="k">Da li je zona označena?</td><td>${box(0)}Da, priručnim sredstvima ${box(1)}Da, službenim znacima ${box(0)}Ne</td></tr>
+      <tr><td class="k">Opis</td><td>${i?esc(i.desc||'Nesreća pri radu u radnoj stazi '+i.lane+' na '+num(i.dist,1)+' m od nulte linije.'):''}</td></tr>
+      <tr><td class="k">Policijska stanica, istražitelj, broj predmeta</td><td><span class="miss">dopuniti</span></td></tr></table>
+      <p class="note">Uz obrazac ide skica mjesta nesreće sa oznakom sjevera (prilog e iz P6 može poslužiti kao osnova).</p>`;
+  }
+  if(k==='exp'){
+    h=`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · ${crsName()} i WGS84</div>
+      <p>CSV nalaza se otvara u Excelu. GeoJSON se otvara u QGIS-u ili ArcGIS-u i služi za unos u IMSMA kad centar to prihvati.</p>
+      <table><tr><td class="k">Nalaza</td><td>${s.finds.length}</td></tr><tr><td class="k">Radnih staza sa napretkom</td><td>${Object.keys(s.lanes).length}</td></tr><tr><td class="k">Lomnih tačaka</td><td>${s.poly.length}</td></tr></table>
+      <div class="btnrow noprint"><button class="btn" type="button" data-act="copyCsv">Kopiraj CSV nalaza</button><button class="btn" type="button" data-act="copyGeo">Kopiraj GeoJSON</button></div>`;
+  }
+  v.innerHTML=docShell(h,k);if(k==='p11')$('#docEl').classList.add('wide');
+}
+function p6Fields(){const s=site();const done=s.status==='završeno';const fs=s.finds,by={};fs.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);
+  return [
+    [1,'Naziv deminerske organizacije',esc(ORG)],[2,'Izjavu sastavio (operativni oficir ili program-menadžer)',''],[3,'Naziv MSP',esc(s.msp.id+' '+s.msp.naziv)],
+    [4,'Naziv CI/SI',esc(s.ci.oznaka+' ('+(s.ci.tip==='CI'?'ciljana':'sistematska')+' istraga)')],[5,'Karta (naziv-broj, razmjer, godina izdanja)',esc(s.msp.karta)],
+    [6,'Koordinatni sistem',box(S.crs==='UTM34')+'UTM '+box(S.crs!=='UTM34')+'Gaus Kruger'],[7,'Koordinate ulaska u SOPO/POPO','<span class="mono">'+crsFmt(s,s.nt)+'</span>'],
+    [8,'Datum početka / datum završetka radova – zadnji dan uzorkovanja',fmtD(s.start)+' / '+(done?fmtD(TODAY):'')],
+    [9,'Korištene metode rada',box(1)+'Manuelna '+box(0)+'Mašinska '+box(0)+'Pregiranje'],
+    [10,'Očišćena definisana površina manuelno u m²',num(clearedM2(s),1)],[11,'Tretirano površine mašinskom pripremom u m²','0'],
+    [12,'Očišćeno pregama kroz radne staze unutar redukovane površine u m²','0'],[13,'Očišćeno manuelno kroz radne staze unutar redukovane površine u m²','0'],
+    [14,'Redukovana površina u m²',''],[15,'Dubina pretrage u radnim stazama u cm',R.minDepth+' (minimum po standardu)'],
+    [16,'Metode internog monitoringa','Vizuelno, detektor, pipalica'],[17,'Interni monitoring obavio i veličina internog uzorkovanja u m²',esc((s.monitors[0]||{}).by||'')+' · '+num(qcM2(s),1)+' m²'],
+    [18,'Monitorska organizacija koja je obavljala monitoring',''],[19,'Vrste i količine otkrivenih ES',Object.entries(by).map(([t,n])=>esc(t)+' ×'+n).join(', ')],
+    [20,'Vrste i količine aktiviranih ES i ostalih naznaka ES',fs.filter(f=>/žic/i.test(f.note)).length?'Potezna žica ('+fs.filter(f=>/žic/i.test(f.note)).length+'), uz '+fs.filter(f=>/žic/i.test(f.note)).map(f=>esc(f.type)).join(', '):'Nema']
+  ];}
+function p6Annex(s){return [['a','Spisak osoba tima sa funkcijama',true],['b','Pregled radnih dana i sati rada sa postignutim efektima',true],['c','Dnevni izvještaji ('+new Set(s.progress.map(p=>p.day)).size+')',true],['d','Pregled korištene opreme',true],['e','Karta očišćene površine sa lomnim tačkama i nalazima',true],['f','Radna skica napredovanja',true],['g','Interni izvještaji o monitoringu ('+s.monitors.length+')',s.monitors.length>0],['h','Opis toka izvođenja aktivnosti',false],['i','Zapisnik o upoznavanju organa vlasti/krajnjeg korisnika',false],['k','Zapisnik o prikupljenim informacijama tokom TI',true]];}
+function csvText(){const s=site();const q=v=>{v=String(v==null?'':v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const head=['id','msp','ci_si','datum','vrijeme','kategorija','vrsta','kolicina','staza','udaljenost_m','bocno_m','dubina_cm','stanje','postupak',S.crs==='UTM34'?'utm34_E':'gk6_Y',S.crs==='UTM34'?'utm34_N':'gk6_X','wgs84_lat','wgs84_lon','napomena'];
+  return [head.join(',')].concat(s.finds.map(f=>{const g=findPos(s,f),w=gk6ToWgs(g.Y,g.X);let a=g.Y,b=g.X;if(S.crs==='UTM34'){const u=wgsToUtm34(w.lat,w.lon);a=u.E;b=u.N;}
+    return [f.id,s.msp.id,s.ci.oznaka,f.day,f.time,P.cats[f.cat],f.type,f.qty,f.lane,f.dist,f.off,f.depth,f.cond,f.act,a.toFixed(2),b.toFixed(2),w.lat.toFixed(7),w.lon.toFixed(7),f.note].map(q).join(',');})).join('\n');}
+function geoText(){const s=site();const w=(u,v)=>{const g=toGK(s,u,v),p=gk6ToWgs(g.Y,g.X);return [+p.lon.toFixed(7),+p.lat.toFixed(7)];};
+  const feats=[{type:'Feature',properties:{vrsta:'POPO',msp:s.msp.id,ci_si:s.ci.oznaka},geometry:{type:'Polygon',coordinates:[s.poly.concat([s.poly[0]]).map(p=>w(p[0],p[1]))]}}];
+  for(const l in s.lanes){const d=s.lanes[l];if(d>0)feats.push({type:'Feature',properties:{vrsta:'radna_staza',staza:+l,ocisceno_m:d,sirina_m:R.lane},geometry:{type:'LineString',coordinates:[w(l-0.5,0),w(l-0.5,d)]}});}
+  s.finds.forEach(f=>feats.push({type:'Feature',properties:{vrsta:'nalaz',id:f.id,sredstvo:f.type,kategorija:P.cats[f.cat],dubina_cm:f.depth,datum:f.day},geometry:{type:'Point',coordinates:w(f.lane-0.5+(f.off||0),f.dist)}}));
+  return JSON.stringify({type:'FeatureCollection',features:feats},null,1);}
+function copy(text,label){const out=$('#copyOut');const show=()=>{if(out){out.textContent=text;out.hidden=false;}toast('Kopiranje nije dozvoljeno ovdje. Tekst je ispod.');};
+  try{navigator.clipboard.writeText(text).then(()=>{if(out)out.hidden=true;toast(label+' kopiran.');},show);}catch(e){show();}}
+
+/* ================= HITNO ================= */
+function renderHitno(){
+  const s=site(), i=S.incident;let h='';
+  if(!i){h+=`<button class="sos" type="button" data-act="incStart"><b>PRIJAVI NESREĆU</b><span>Zaustavlja rad, mjeri rok od 6 sati i popunjava Prilog 12</span></button>`;}
+  else{
+    h+=`<div class="inc"><div><div class="label">Od nesreće</div><div class="tv" id="incEl">00:00</div><div style="font-size:12.5px">${esc(i.start)} · staza ${i.lane}</div></div><div><div class="label">Rok za Prilog 12</div><div class="tv" id="incDl">6:00:00</div><div style="font-size:12.5px">BHMAC, 6 sati</div></div></div>
+    <div class="card"><h3 style="margin-bottom:6px">Postupak</h3><ol class="steps">${STEPS.map((x,n)=>`<li><label><input type="checkbox" id="step${n}" data-act="step" data-i="${n}" ${i.steps[n]?'checked':''}><span>${esc(x)}</span><span class="t">${i.steps[n]||''}</span></label></li>`).join('')}</ol></div>
+    <div class="card"><h3 style="margin-bottom:8px">Podaci za Prilog 12</h3>
+      <div class="grid3">${[['ad','Odrasli'],['ch','Djeca'],['lt','Lakše povr.'],['hv','Teže povr.'],['k','Poginuli']].map(([k2,l])=>`<label class="field">${l}<input type="number" min="0" max="20" id="v_${k2}" data-v="${k2}" value="${i.v[k2]}" inputmode="numeric"></label>`).join('')}
+      <label class="field">Vrsta ES<select id="iCat" data-ic="cat">${[['PP','PP mina'],['PT','PT mina'],['NUS','NUS'],['?','Nepoznato']].map(([a,b])=>`<option value="${a}" ${i.cat===a?'selected':''}>${b}</option>`).join('')}</select></label></div>
+      <label class="field" style="margin-top:10px">Opis<textarea id="iDesc" data-ic="desc" style="font-family:var(--font-body);min-height:60px">${esc(i.desc||'')}</textarea></label>
+      <div class="btnrow" style="margin-top:10px"><button class="btn primary" type="button" data-act="doc" data-k="p12" data-from="hitno">Pregledaj Prilog 12</button><button class="btn" type="button" data-act="incEnd">Zatvori incident</button></div></div>`;
+  }
+  h+=`<div class="card"><h3 style="margin-bottom:6px">Kontakti</h3><ul class="rows">${P.contacts.map(c=>`<li class="contact"><span class="grow"><span class="num">${esc(c[0])}</span><br><span class="sub">${esc(c[1])}</span></span><button class="btn sm" type="button" data-act="copyNum" data-v="${esc(c[0])}">Kopiraj</button></li>`).join('')}
+    <li class="contact"><span class="grow"><b>Medicinar: ${esc(MEDIC)}</b><br><span class="sub">Na kontrolnoj tački, ${R.rest} m od radnih staza</span></span></li></ul></div>
+  <div class="card"><h3>Sigurnosne udaljenosti</h3>
+    <table class="dtab" style="margin-top:6px">${P.distances.map(d=>`<tr><td>${esc(d[0])}</td><td class="n">${esc(d[1])}</td></tr>`).join('')}</table>
+    <div class="label" style="margin-top:12px">Pri uništavanju</div>
+    <table class="dtab">${P.demolition.map(d=>`<tr><td>${esc(d[0])}</td><td class="n">${esc(d[1])}</td></tr>`).join('')}</table>
+    <p class="fine">Izvor: Standard za PMA u BiH, poglavlje 3, Prilog 2. Vrijednosti dolaze iz paketa zemlje i ne mijenjaju se na terenu.</p></div>`;
+  $('#v-hitno').innerHTML=h;tick();
+}
+
+/* ================= sites sheet ================= */
+function openSites(){
+  openSheet(`<div class="sheet-h"><div><div class="label">${esc(ORG)}</div><h2>Radilišta</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+    ${S.sites.map(x=>`<button class="sitecard${x.id===S.active?' on':''}" type="button" data-act="pickSite" data-id="${x.id}"><span class="grow"><b>${esc(x.msp.id)} ${esc(x.msp.naziv)} · ${esc(x.ci.oznaka)}</b><br><span class="sub">${esc(x.msp.ru)} · ${num(clearedM2(x))} / ${num(totalArea(x))} m² · ${esc(x.status)}</span></span><span class="chip ${x.status==='u radu'?'work':''}">${x.id===S.active?'aktivno':'otvori'}</span></button>`).join('')}
+    <button class="btn primary" type="button" data-act="newSite">+ Novo radilište iz dosijea</button>
+    <div><div class="label" style="margin-bottom:6px">Paket zemlje</div><div class="packs">
+      <div class="packrow"><span><b>Bosna i Hercegovina</b><br><span class="sub">BHMAC · ${esc(P.standard)}</span></span><span class="chip ok">aktivan</span></div>
+      <div class="packrow"><span><b>Srbija</b><br><span class="sub">CZRS · IMSMA Core, obrasci se traže od CZRS-a</span></span><span class="chip">u pripremi</span></div>
+      <div class="packrow"><span><b>Slovenija</b><br><span class="sub">URSZR / DEVNUS · samo državna služba</span></span><span class="chip">nije tržište</span></div></div>
+      <p class="fine">Jedna aplikacija za sve firme i zemlje. Paket određuje obrasce, koordinatni sistem, pravila i listu sredstava.</p></div>`);
+}
+function openNewSite(){
+  const ex='6 571 898,00 4 922 400,00\n6 571 950,00 4 922 400,00\n6 571 956,00 4 922 440,00\n6 571 930,00 4 922 470,00\n6 571 900,00 4 922 462,00';
+  openSheet(`<div class="sheet-h"><div><div class="label">Iz crvene fascikle / operativnog plana</div><h2>Novo radilište</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+  <form id="siteForm">
+    <div class="grid2"><label class="field">Oznaka MSP<input id="nsMsp" value="MSP 0455"></label><label class="field">Naziv<input id="nsName" value="Kosa"></label></div>
+    <div class="grid2"><label class="field">CI / SI<select id="nsTip"><option value="CI">CI · ciljana</option><option value="SI">SI · sistematska</option></select></label><label class="field">Oznaka<input id="nsCi" value="CI-1"></label></div>
+    <label class="field">Koordinatni sistem dosijea<select id="nsCrs"><option value="GK6">Gaus-Kriger zona 6</option><option value="UTM34">UTM 34N</option></select></label>
+    <div class="grid3"><label class="field">Nulta tačka Y/E<input id="nsY" value="6571900.00" inputmode="decimal"></label><label class="field">X/N<input id="nsX" value="4922400.00" inputmode="decimal"></label><label class="field">Azimut (°)<input id="nsAz" type="number" min="0" max="359" value="0" inputmode="numeric"></label></div>
+    <label class="field">Lomne tačke (Y X, jedna po redu)<textarea id="nsTp">${ex}</textarea><small>Prepiši iz dosijea. Razmaci u broju su dozvoljeni, decimalni zarez ili tačka.</small></label>
+    <button class="btn primary block" type="submit">Kreiraj radilište i staze</button>
+  </form>`);
+  $('#siteForm').addEventListener('submit',e=>{e.preventDefault();createSite();});
+}
+function parseNum(str){return parseFloat(String(str).replace(/\s/g,'').replace(',','.'));}
+function toGkFromCrs(crs,a,b){if(crs==='UTM34'){const w=utm34ToWgs(a,b);return wgsToGk6(w.lat,w.lon);}return {Y:a,X:b};}
+function createSite(){
+  const crs=$('#nsCrs').value;const nt=toGkFromCrs(crs,parseNum($('#nsY').value),parseNum($('#nsX').value));
+  const az=(+$('#nsAz').value||0)%360;
+  const tps=$('#nsTp').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.replace(/(\d)\s+(?=\d{3}(\D|$))/g,'$1').split(/[\s;\t]+/).filter(Boolean);return toGkFromCrs(crs,parseNum(m[0]),parseNum(m[1]));});
+  if(!isFinite(nt.Y)||!isFinite(nt.X)||tps.length<3||tps.some(p=>!isFinite(p.Y)||!isFinite(p.X))){toast('Provjeri koordinate: treba nulta tačka i najmanje 3 lomne tačke.');return;}
+  const s={id:'s'+Date.now(),msp:{id:$('#nsMsp').value.trim()||'MSP',naziv:$('#nsName').value.trim()||'Novo',opcina:'Općina Primjer',ru:'RU Tuzla',karta:'—'},ci:{tip:$('#nsTip').value,oznaka:$('#nsCi').value.trim()||'CI-1',pmin:0,pmax:0},nt,az,poly:[],lanes:{},pairs:[],progress:[],finds:[],log:[],qc:[],monitors:[],info:[],start:null,estEnd:null,status:'planirano'};
+  s.poly=tps.map(p=>toLocal(s,p.Y,p.X).map(v=>+v.toFixed(2)));
+  const b=bounds(s.poly);if(b.y1<=0||b.x1<=0){toast('Lomne tačke su iza nulte linije ili lijevo od nulte tačke. Provjeri azimut.');return;}
+  const A=polyArea(s.poly);s.ci.pmin=Math.round(A*0.9);s.ci.pmax=Math.round(A*1.1);
+  S.sites.push(s);S.active=s.id;addQ('Novo radilište '+s.msp.id);save();closeSheet();go('mapa');toast('Radilište kreirano: '+num(A)+' m², '+laneCount(s)+' staza.');
+}
+function openSiteWork(){const s=site();const lc=laneCount(s);const l1=1,l2=Math.min(lc,1+R.pairGap+1),l3=Math.min(lc,l2+R.pairGap+1);
+  s.pairs=[{id:'A',a:'D-01',b:'D-02',lane:l1,inA:true,shift:Date.now()}];if(l2-l1>=R.pairGap)s.pairs.push({id:'B',a:'D-03',b:'D-04',lane:l2,inA:true,shift:Date.now()});if(l3-l2>=R.pairGap)s.pairs.push({id:'C',a:'D-05',b:'D-06',lane:l3,inA:true,shift:Date.now()});
+  s.status='u radu';s.start=TODAY;s.estEnd=dayKey(addDays(NOW0,30));s.log.push({t:hm(Date.now()),e:'Otvaranje radilišta; dvojci u stazama '+s.pairs.map(p=>p.lane).join(', ')});save();rerender();toast('Radilište otvoreno. Dvojci raspoređeni na najmanje '+R.pairGap+' m.');}
+
+/* ================= event sheets ================= */
+function openEvent(k){
+  const s=site();const lanes=s.pairs.map(p=>p.lane);
+  const F={
+    det:{t:'Test detektora',body:`<p class="sub">Test na UPMAH-3 ukopanom na 10 cm (13 cm s vegetacijom).</p><label class="field">Ispravnih detektora<input id="eN" type="number" min="0" value="6"></label>`},
+    qc:{t:'Interna kontrola kvaliteta',body:`<div class="grid2"><label class="field">Staza<input id="eLane" type="number" min="1" value="${lanes[0]||1}"></label><label class="field">Uzorak (m²)<input id="eM2" type="number" step="0.5" min="0.5" value="3"></label></div><label class="field">Metoda<select id="eMet"><option>detektor</option><option>pipalica</option><option>kombinacija</option><option>vizuelno</option></select></label><label class="field">Rezultat<select id="eRes"><option>bez nalaza</option><option>pronađena greška, staza vraćena na ponovni tretman</option></select></label>`},
+    mon:{t:'Interni nadzor',body:`<label class="field">Nadzor obavio<input id="eBy" value="Supervizor I. Jukić"></label>`},
+    dem:{t:'Uništavanje',body:`<p class="sub">Sredstva koja čekaju uništavanje:</p>${s.finds.filter(f=>f.act===ACTIONS[0]).map(f=>`<label style="display:flex;gap:10px;align-items:center;padding:6px 0"><input type="checkbox" class="dmf" value="${f.id}" checked style="width:20px;height:20px">${esc(f.id+' '+f.type+' · staza '+f.lane)}</label>`).join('')||'<p class="sub">Nema sredstava na čekanju.</p>'}<label class="field">Utrošeno ES (kg TNT)<input id="eKg" type="number" step="0.05" min="0" value="0.2"></label>`},
+    visit:{t:'Posjeta',body:`<label class="field">Ko je posjetio<input id="eWho" value="Inspektor za KK, BHMAC"></label>`},
+    info:{t:'Nova informacija o miniranosti',body:`<label class="field">Opis i izvor<textarea id="eInfo" style="font-family:var(--font-body)">Mještanin navodi da je 1993. put ispod kote miniran PROM-1.</textarea></label>`}
+  }[k];
+  openSheet(`<div class="sheet-h"><div><div class="label">Dnevnik · ${hm(Date.now())}</div><h2>${F.t}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>${F.body}<button class="btn primary block" type="button" data-act="evSave" data-k="${k}">Upiši u dnevnik</button>`);
+}
+function saveEvent(k){const s=site(),t=hm(Date.now());let e='';
+  if(k==='det'){e='Test detektora na UPMAH-3 (10 cm): '+(+$('#eN').value||0)+' detektora ispravno';s.log.push({t,e,k:'det'});}
+  if(k==='qc'){const m2=parseFloat($('#eM2').value)||0;e='Interna KK (vođa tima): staza '+$('#eLane').value+', '+$('#eMet').value+', uzorak '+num(m2,1)+' m², '+$('#eRes').value;s.qc.push({day:TODAY,m2});s.log.push({t,e,k:'qc'});}
+  if(k==='mon'){const by=$('#eBy').value.trim();s.monitors.push({day:TODAY,by});e='Interni nadzor: '+by;s.log.push({t,e,k:'mon'});}
+  if(k==='dem'){const ids=[...document.querySelectorAll('.dmf:checked')].map(x=>x.value);const kg=parseFloat($('#eKg').value)||0;ids.forEach(id=>{const f=s.finds.find(x=>x.id===id);if(f)f.act=ACTIONS[1];});e='Uništavanje na licu mjesta: '+(ids.join(', ')||'—')+'; utrošeno '+num(kg,2)+' kg TNT';s.log.push({t,e,k:'dem',kg});}
+  if(k==='visit'){e='Posjeta: '+$('#eWho').value.trim();s.log.push({t,e});}
+  if(k==='info'){const x=$('#eInfo').value.trim();s.info.push({day:TODAY,t:x});e='Nova informacija o miniranosti: '+x;s.log.push({t,e,k:'info'});}
+  addQ(e.slice(0,40));save();closeSheet();rerender();toast('Upisano u dnevnik u '+t+'.');}
+
+/* ================= timers ================= */
+function tick(){
+  const s=site();
+  document.querySelectorAll('[data-timer]').forEach(el=>{const p=s.pairs.find(x=>x.id===el.dataset.timer);if(!p)return;const st=pairState(p);el.textContent=fmtRem(st.rem);const row=el.closest('.pair');if(row)row.classList.toggle('over',st.over);});
+  const i=S.incident;if(i){const e=$('#incEl'),d=$('#incDl');const el=Date.now()-i.t0;if(e){const sec=Math.floor(el/1000);e.textContent=pad(Math.floor(sec/60))+':'+pad(sec%60);}
+    if(d){const rem=Math.max(0,R.accidentH*36e5-el),sec=Math.floor(rem/1000);d.textContent=Math.floor(sec/3600)+':'+pad(Math.floor(sec%3600/60))+':'+pad(sec%60);}}
+}
+setInterval(tick,1000);
+
+/* ================= nav ================= */
+const RENDER={danas:renderDanas,mapa:renderMapa,nalaz:renderNalaz,izvjestaji:renderIzvjestaji,hitno:renderHitno};
+function go(t){tab=t;if(t!=='izvjestaji')docView=null;
+  document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-'+t);
+  document.querySelectorAll('.tab').forEach(b=>{if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  RENDER[t]();renderHeader();$('#main').scrollTop=0;try{localStorage.setItem(KEY+'-tab',t);}catch(e){}}
+function rerender(){if(tab!=='nalaz')RENDER[tab]();renderHeader();}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');
+  if(!el){if(e.target.id==='scrim')closeSheet();return;}
+  const a=el.dataset.act, s=site();
+  switch(a){
+    case 'tab':closeSheet();go(el.dataset.tab);break;
+    case 'close':closeSheet();break;
+    case 'sites':openSites();break;
+    case 'pickSite':S.active=el.dataset.id;save();closeSheet();go(tab==='nalaz'?'danas':tab);break;
+    case 'newSite':openNewSite();break;
+    case 'openSite':openSiteWork();break;
+    case 'lane':openLane(+el.dataset.l);break;
+    case 'adv':{const l=+el.dataset.l,m=parseFloat(el.dataset.m),L=laneLen(s,l),from=laneDone(s,l),to=Math.min(L,+(from+m).toFixed(2));if(to>from){s.progress.push({day:TODAY,lane:l,from,to});s.lanes[l]=to;addQ('Napredovanje staza '+l);save();}openLane(l);renderHeader();toast('Staza '+l+': očišćeno do '+num(to,1)+' m.');break;}
+    case 'moveA':{const l=+el.dataset.l;const p=s.pairs[0];if(p){const others=s.pairs.filter(x=>x!==p);if(others.some(o=>Math.abs(o.lane-l)*R.lane<R.pairGap)){toast('Staza '+l+' je bliže od '+R.pairGap+' m drugom dvojcu. Izaberi drugu stazu.');break;}p.lane=l;s.log.push({t:hm(Date.now()),e:'Dvojac '+p.id+' premješten u stazu '+l});save();openLane(l);}break;}
+    case 'findHere':{prefill={lane:+el.dataset.l,dist:laneDone(s,+el.dataset.l)};closeSheet();go('nalaz');break;}
+    case 'shift':{const p=s.pairs.find(x=>x.id===el.dataset.p);const st=pairState(p);p.inA=!p.inA;p.shift=Date.now();s.log.push({t:hm(Date.now()),e:'Smjena u stazi '+p.lane+': '+st.support+' ulazi, '+st.inLane+' podrška na '+R.pairGap+' m'});save();renderDanas();break;}
+    case 'ev':openEvent(el.dataset.k);break;
+    case 'evSave':saveEvent(el.dataset.k);break;
+    case 'brief':S.brief[+el.dataset.i]=el.checked;if(S.brief.every(Boolean))S.briefAt=hm(Date.now());save();renderDanas();break;
+    case 'start':S.dayStarted=true;s.log.push({t:hm(Date.now()),e:'Početak rada'});save();renderDanas();break;
+    case 'crs':S.crs=el.value;save();break;
+    case 'doc':docView=el.dataset.k;if(tab!=='izvjestaji'){tab='izvjestaji';document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-izvjestaji');document.querySelectorAll('.tab').forEach(b=>{if(b.dataset.tab==='izvjestaji')b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});}renderDoc(docView);$('#main').scrollTop=0;break;
+    case 'docBack':docView=null;renderIzvjestaji();break;
+    case 'print':try{window.print();}catch(err){}break;
+    case 'copyDoc':copy($('#docEl').innerText,'Izvještaj');break;
+    case 'copyCsv':copy(csvText(),'CSV');break;
+    case 'copyGeo':copy(geoText(),'GeoJSON');break;
+    case 'copyNum':copy(el.dataset.v,'Broj');break;
+    case 'incStart':{const p=s.pairs[0]||{lane:1};S.incident={t0:Date.now(),day:TODAY,start:hm(Date.now()),lane:p.lane,dist:laneDone(s,p.lane),steps:STEPS.map(()=>null),v:{ad:1,ch:0,lt:0,hv:1,k:0},cat:'PP',desc:''};s.log.push({t:S.incident.start,e:'NESREĆA u stazi '+p.lane+'; rad zaustavljen',k:'find'});addQ('NESREĆA prijavljena');save();renderHitno();renderHeader();break;}
+    case 'step':S.incident.steps[+el.dataset.i]=el.checked?hm(Date.now()):null;save();renderHitno();{const f=$('#step'+el.dataset.i);if(f)f.focus();}break;
+    case 'incEnd':S.incidents.push(Object.assign({},S.incident,{end:hm(Date.now())}));S.incident=null;save();renderHitno();toast('Incident zatvoren i sačuvan.');break;
+    case 'sync':{const b=$('#syncBtn');if(b.classList.contains('busy'))break;if(!S.queue.length){toast('Sve je već poslato.');break;}const n=S.queue.length;b.classList.add('busy');$('#syncLabel').textContent='Šaljem '+n+'…';
+      setTimeout(()=>{S.queue=[];S.sites.forEach(x=>x.finds.forEach(f=>f.synced=true));S.lastSync=hm(Date.now());save();b.classList.remove('busy');renderHeader();toast('Poslato '+n+' zapisa šefu projekta.');},1300);break;}
+    case 'reset':try{localStorage.removeItem(KEY);}catch(err){}S=seed();save();go('danas');toast('Početni podaci vraćeni.');break;
+  }
+});
+document.addEventListener('input',e=>{const t=e.target;if(!S.incident)return;if(t.dataset.v){S.incident.v[t.dataset.v]=Math.max(0,+t.value||0);save();}if(t.dataset.ic){S.incident[t.dataset.ic]=t.value;save();}});
+document.addEventListener('change',e=>{const t=e.target;if(S.incident&&t.dataset.ic==='cat'){S.incident.cat=t.value;save();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#scrim').hidden)closeSheet();});
+
+let start='danas';try{const t=localStorage.getItem(KEY+'-tab');if(t&&RENDER[t])start=t;}catch(e){}
+const hash=(location.hash||'').slice(1);if(RENDER[hash])start=hash;
+go(start);
+})();
+</script>
