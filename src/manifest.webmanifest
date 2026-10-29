@@ -1,0 +1,17 @@
+{
+  "name": "Terenska knjiga",
+  "short_name": "Terenska knjiga",
+  "description": "Terenski dnevnik za timove u humanitarnom deminiranju. Radi bez mreže.",
+  "lang": "bs",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E8EBE3",
+  "theme_color": "#1F3D35",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

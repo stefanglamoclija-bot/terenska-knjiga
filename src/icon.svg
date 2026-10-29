@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Full-bleed background so the same file works as a maskable icon; artwork stays inside the 80% safe zone. -->
+  <rect width="512" height="512" fill="#1F3D35"/>
+  <rect x="140" y="112" width="232" height="288" rx="14" fill="#F3F7F2"/>
+  <rect x="140" y="112" width="30" height="288" rx="10" fill="#C8E2D0"/>
+  <path d="M200 176h132M200 212h132M200 248h86" stroke="#59625A" stroke-width="14" stroke-linecap="round"/>
+  <path d="M300 268 356 364H244z" fill="#BF2A1C" stroke="#BF2A1C" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M300 300v30" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="300" cy="347" r="7" fill="#FFFFFF"/>
+</svg>

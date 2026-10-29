@@ -283,6 +283,12 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
   .doc svg.sk{width:190mm!important;height:auto!important}
   .doc.skdoc{padding:0}
 }
+/* photo record: two per row on paper, one per row on a phone */
+.phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:8px 0}
+.phf{margin:0;border:1px solid #9AA095;padding:6px;break-inside:avoid;page-break-inside:avoid}
+.phf img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#E6E8E2}
+.phf figcaption{font-size:9.5pt;line-height:1.35;margin-top:5px}
+@media print{.phgrid{grid-template-columns:1fr 1fr}.phf img{aspect-ratio:auto;max-height:95mm;object-fit:contain}}
 </style>
 
 <div class="app" id="app">
@@ -476,10 +482,38 @@ function seed(){
     lastSync:'06:52',brief:BRIEF.map(()=>true),briefAt:'07:10',dayStarted:true,incident:null,incidents:[],next:108};
 }
 const KEY='terenska-knjiga-v3';
-let S;
-function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.sites)return s;}}catch(e){}return seed();}
-function save(){try{const c=JSON.parse(JSON.stringify(S,(k,v)=>k==='_ll'?undefined:v));localStorage.setItem(KEY,JSON.stringify(c));}catch(e){}}
-S=load();
+let S=null;
+
+/* ================= storage: IndexedDB on the device (state + full photos), localStorage fallback ================= */
+const ST={db:null,mode:'mem',persisted:false,failed:false};
+function idbOpen(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('no indexedDB'));const r=indexedDB.open('terenska-knjiga',1);
+  r.onupgradeneeded=()=>{const d=r.result;['kv','photos'].forEach(n=>{if(!d.objectStoreNames.contains(n))d.createObjectStore(n);});};
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('blocked'));});}
+function idb(store,mode,fn){return new Promise((res,rej)=>{const tx=ST.db.transaction(store,mode);const q=fn(tx.objectStore(store));let out;
+  if(q)q.onsuccess=()=>{out=q.result;};tx.oncomplete=()=>res(out);tx.onerror=tx.onabort=()=>rej(tx.error);});}
+const idbGet=(st,k)=>idb(st,'readonly',os=>os.get(k));
+const idbPut=(st,k,v)=>idb(st,'readwrite',os=>os.put(v,k));
+const idbClear=st=>idb(st,'readwrite',os=>os.clear());
+function idbEntries(st){return new Promise((res,rej)=>{const out=[],tx=ST.db.transaction(st,'readonly'),c=tx.objectStore(st).openCursor();
+  c.onsuccess=()=>{const k=c.result;if(k){out.push([k.key,k.value]);k.continue();}};tx.oncomplete=()=>res(out);tx.onerror=()=>rej(tx.error);});}
+function lsGet(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.sites)return s;}}catch(e){}return null;}
+// v3 kept a 220 px photo inside each find; now that is the thumbnail and the full photo lives in the photos store
+function normalize(s){s.sites.forEach(x=>x.finds.forEach(f=>{if(typeof f.photo==='string'&&!f.thumb)f.thumb=f.photo;delete f.photo;}));return s;}
+async function loadState(){
+  try{ST.db=await idbOpen();ST.mode='idb';
+    const s=await idbGet('kv',KEY);if(s&&s.sites)return normalize(s);
+    const old=lsGet();if(old){S=normalize(old);await idbPut('kv',KEY,snapshot());try{localStorage.removeItem(KEY);}catch(e){}return S;}
+  }catch(e){ST.db=null;try{localStorage.setItem(KEY+'-t','1');localStorage.removeItem(KEY+'-t');ST.mode='ls';}catch(e2){ST.mode='mem';}const old=lsGet();if(old)return normalize(old);}
+  return seed();
+}
+const snapshot=()=>JSON.parse(JSON.stringify(S,(k,v)=>k==='_ll'?undefined:v));
+let saveQ=Promise.resolve();
+function saveFailed(){if(ST.failed)return;ST.failed=true;toast('Podaci NISU sačuvani na uređaju. Napravi rezervnu kopiju (Radilišta).',8000);}
+function save(){const c=snapshot();
+  if(ST.mode==='idb'){saveQ=saveQ.then(()=>idbPut('kv',KEY,c)).then(()=>{ST.failed=false;},saveFailed);return;}
+  if(ST.mode==='ls'){try{localStorage.setItem(KEY,JSON.stringify(c));ST.failed=false;}catch(e){saveFailed();}}}
+function requestPersist(){try{if(!navigator.storage||!navigator.storage.persist)return;navigator.storage.persisted().then(p=>p||navigator.storage.persist()).then(p=>{ST.persisted=!!p;}).catch(()=>{});}catch(e){}}
+const phKey=(s,f)=>s.id+'/'+f.id;
 const site=()=>S.sites.find(s=>s.id===S.active)||S.sites[0];
 function syncPack(){P=PACKS[site().pack||'BA'];R=P.rules;}
 
@@ -497,7 +531,7 @@ function addQ(t){S.queue.push({t,at:hm(Date.now())});}
 
 /* ================= UI basics ================= */
 let tab='danas', docView=null, selLane=null, selBox=null, photoData=null, prefill=null;
-let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800);}
+let toastT;function toast(m,ms){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,ms||2800);}
 function openSheet(html){$('#sheet').innerHTML=html;$('#scrim').hidden=false;const f=$('#sheet .x');if(f)f.focus();}
 function closeSheet(){$('#scrim').hidden=true;if(selBox){selBox=null;if(tab==='mapa')renderMapa();}if(selLane!=null){selLane=null;if(tab==='mapa')renderMapa();}}
 const inFrame=(()=>{try{return window.self!==window.top;}catch(e){return true;}})();
@@ -507,8 +541,9 @@ function renderHeader(){
   $('#hdrSite').textContent=s.msp.id+' · '+s.ci.oznaka;
   $('#hdrMeta').innerHTML=esc(s.msp.naziv+' · '+s.msp.ru)+' <span class="pack">'+P.kratko+'</span>';
   const b=$('#syncBtn');if(b.classList.contains('busy'))return;const n=S.queue.length;
-  b.classList.toggle('ok',n===0);$('#syncLabel').textContent=n?('Bez mreže · '+n):('Poslato '+S.lastSync);
-  b.setAttribute('aria-label',n?('Bez mreže, '+n+' zapisa čeka slanje'):'Sve poslato');
+  b.classList.toggle('ok',n===0);const off=navigator.onLine===false;
+  $('#syncLabel').textContent=n?((off?'Bez mreže · ':'Čeka slanje · ')+n):('Poslato '+S.lastSync);
+  b.setAttribute('aria-label',n?((off?'Bez mreže, ':'')+n+' zapisa čeka slanje'):'Sve poslato');
 }
 
 /* ================= DANAS ================= */
@@ -578,7 +613,7 @@ function renderDanas(){
     <ul class="checks">${BRIEF.map((b,i)=>`<li><label><input type="checkbox" id="brief${i}" data-act="brief" data-i="${i}" ${S.brief[i]?'checked':''} ${S.dayStarted?'disabled':''}><span>${esc(b)}</span></label></li>`).join('')}</ul>
     ${!S.dayStarted?`<button class="btn primary block" type="button" data-act="start" ${briefDone?'':'disabled'}>Započni radni dan</button>`:''}</div>`;
 
-  h+=`<div class="btnrow noprint" style="justify-content:center"><button class="linkbtn" type="button" data-act="reset">Vrati početne podatke demoa</button></div>`;
+  h+=backupNag()+`<div class="btnrow noprint" style="justify-content:center"><button class="linkbtn" type="button" data-act="reset">Vrati početne podatke demoa</button></div>`;
   v.innerHTML=h; tick();
 }
 
@@ -690,14 +725,20 @@ function calcPos(){
   c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsFmt(s,gk)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E</span>
     <span>${ahead?'Udaljenost je ispred očišćenog dijela staze ('+num(done,1)+' m). Provjeri mjerenje.':'Izračunato iz nulte tačke i azimuta. GPS telefona (kontrola): odstupanje '+dev.replace('.',',')+' m'}</span>`;
 }
+// full photo (long side 1600 px) goes to IndexedDB as evidence; the 220 px thumbnail stays in the find record
+function scaled(img,m){const c=document.createElement('canvas'),sc=Math.min(1,m/Math.max(img.width,img.height));c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c;}
 function onPhoto(e){const file=e.target.files&&e.target.files[0];if(!file)return;const img=new Image(),url=URL.createObjectURL(file);
-  img.onload=()=>{const c=document.createElement('canvas'),m=220,sc=Math.min(1,m/Math.max(img.width,img.height));c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);photoData=c.toDataURL('image/jpeg',.7);URL.revokeObjectURL(url);$('#fPrev').src=photoData;$('#fPrev').hidden=false;$('#fPh').hidden=true;$('#fPhotoTxt').textContent='Fotografija dodata';};img.src=url;}
+  img.onload=()=>{const thumb=scaled(img,220).toDataURL('image/jpeg',.7);URL.revokeObjectURL(url);const big=scaled(img,1600);
+    photoData={thumb,blob:ST.db?new Promise(r=>big.toBlob(r,'image/jpeg',.82)):null};
+    $('#fPrev').src=thumb;$('#fPrev').hidden=false;$('#fPh').hidden=true;$('#fPhotoTxt').textContent='Fotografija dodata';};img.src=url;}
+function attachPhoto(s,f){if(!photoData)return;f.thumb=photoData.thumb;const p=photoData.blob;if(!p||!ST.db)return;f.ph=1;
+  p.then(b=>{if(!b)throw new Error('no blob');return idbPut('photos',phKey(s,f),b);}).catch(()=>{f.ph=0;save();toast('Fotografija je sačuvana samo kao umanjena slika.');});}
 function onSubmit(e){e.preventDefault();const s=site();
   const t=document.querySelector('input[name="ftype"]:checked');if(!t){toast('Izaberi vrstu sredstva.');return;}
   const cat=document.querySelector('input[name="fcat"]:checked').value;
   const f={id:'N-'+String(S.next).padStart(3,'0'),cat,type:t.value,lane:+$('#fLane').value,dist:Math.max(0,parseFloat($('#fDist').value)||0),off:Math.max(-0.5,Math.min(0.5,parseFloat($('#fOff').value)||0)),
-    day:TODAY,time:hm(Date.now()),depth:Math.max(0,+$('#fDepth').value||0),qty:Math.max(1,+$('#fQty').value||1),cond:document.querySelector('input[name="fcond"]:checked').value,act:$('#fAct').value,synced:false,note:$('#fNote').value.trim(),photo:photoData};
-  S.next++;s.finds.push(f);s.log.push({t:f.time,e:'Nalaz '+f.id+': '+f.type+', staza '+f.lane+' na '+num(f.dist,1)+' m, dubina '+f.depth+' cm',k:'find'});addQ('Nalaz '+f.id+' · '+f.type);save();photoData=null;
+    day:TODAY,time:hm(Date.now()),depth:Math.max(0,+$('#fDepth').value||0),qty:Math.max(1,+$('#fQty').value||1),cond:document.querySelector('input[name="fcond"]:checked').value,act:$('#fAct').value,synced:false,note:$('#fNote').value.trim()};
+  attachPhoto(s,f);S.next++;s.finds.push(f);s.log.push({t:f.time,e:'Nalaz '+f.id+': '+f.type+', staza '+f.lane+' na '+num(f.dist,1)+' m, dubina '+f.depth+' cm',k:'find'});addQ('Nalaz '+f.id+' · '+f.type);save();photoData=null;
   go('mapa');toast('Nalaz '+f.id+' sačuvan u stazi '+f.lane+'.');}
 
 /* ================= IZVJEŠTAJI ================= */
@@ -707,6 +748,7 @@ const DOCS_BA=[
   {k:'p13',pn:'P13',t:'Stručni izvještaj o ES',d:()=>site().finds.length+' sredstava · uz izjavu o čišćenju'},
   {k:'p6',pn:'P6',t:'Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI',d:()=>'Nacrt · popunjeno '+p6Fields().filter(x=>x[2]).length+' od 20 polja'},
   {k:'p12',pn:'P12',t:'Inicijalni izvještaj o incidentu/nesreći od mina',d:()=>S.incident?'U toku · rok 6 sati':(S.incidents.length?S.incidents.length+' prijavljen':'Popunjava se iz ekrana Hitno')},
+  {k:'foto',pn:'FOTO',t:'Fotodokumentacija nalaza',d:()=>photoCount(site())+' · prilog uz P13'},
   {k:'exp',pn:'GIS',t:'Izvoz podataka: CSV i GeoJSON',d:()=>'Nalazi, staze i lomne tačke · '+crsName()}
 ];
 function renderIzvjestaji(){
@@ -720,6 +762,21 @@ function renderIzvjestaji(){
       <p class="fine">Standard zabranjuje miješanje sistema u istom dokumentu, pa svi izvještaji koriste jedan.</p></div>`;
   $('#v-izvjestaji').innerHTML=top+`<ul class="doclist">${list.map(d=>`<li><button class="docitem" type="button" data-act="doc" data-k="${d.k}"><span class="pn">${d.pn}</span><span><b>${esc(d.t)}</b><span class="sub">${esc(d.d())}</span></span><span aria-hidden="true">›</span></button></li>`).join('')}</ul>`;
 }
+/* ---------- photo record (both packs) ---------- */
+const photoCount=s=>{const n=s.finds.filter(f=>f.thumb).length;return n+' od '+s.finds.length+' nalaza sa fotografijom';};
+const findWhere=f=>f.box!=null?'boks '+f.box:'staza '+f.lane+' na '+num(f.dist,1)+' m';
+function fotoDoc(s){
+  const withP=s.finds.filter(f=>f.thumb),without=s.finds.filter(f=>!f.thumb);
+  const rs=s.pack==='RS',head=`<h4>FOTODOKUMENTACIJA ${rs?'PRONAĐENIH NUS':'PRONAĐENIH ES'}</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.msp.naziv)} · ${esc(s.ci.oznaka)} · stanje na dan ${fmtD(TODAY)} · koordinate ${crsName()}</div>`;
+  const cards=withP.map((f,i)=>`<figure class="phf"><img alt="Fotografija ${f.id}" src="${f.thumb}" ${f.ph?`data-ph="${esc(phKey(s,f))}"`:''}>
+    <figcaption><b>Slika ${i+1}. ${f.id} · ${esc(f.type)}${f.qty>1?' ×'+f.qty:''}</b><br>${esc(findWhere(f))}, dubina ${f.depth} cm · ${esc(f.cond)}<br><span class="mono">${crsFmt(s,findPos(s,f))}</span><br>${fmtD(f.day)} u ${esc(f.time)} · ${esc(f.act)}${f.note?'<br>'+esc(f.note):''}${f.ph?'':'<br><span class="miss">samo umanjena slika</span>'}</figcaption></figure>`).join('');
+  return head+(cards?`<div class="phgrid">${cards}</div>`:'<p>Nijedan nalaz još nema fotografiju. Fotografija se dodaje u obrascu Nalaz.</p>')
+    +(without.length?`<div class="sec">Bez fotografije</div><p>${without.map(f=>f.id+' ('+esc(f.type)+')').join(', ')}</p>`:'')
+    +`<div class="sig"><div>${rs?'Rukovodilac radilišta':'Vođa tima: '+esc(LEADER)}</div><div>Potpis</div></div>`;
+}
+let phURLs=[];
+function hydratePhotos(){phURLs.forEach(u=>URL.revokeObjectURL(u));phURLs=[];if(!ST.db)return;
+  document.querySelectorAll('img[data-ph]').forEach(img=>idbGet('photos',img.dataset.ph).then(b=>{if(!b)return;const u=URL.createObjectURL(b);phURLs.push(u);img.src=u;}).catch(()=>{}));}
 function docShell(inner,k){
   return `<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">‹ Svi izvještaji</button>${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">Štampaj / PDF</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">Kopiraj tekst</button></div>
     <pre class="out noprint" id="copyOut" hidden></pre><div class="tbl"><article class="doc" id="docEl">${inner}</article></div>`;
@@ -728,6 +785,7 @@ const mspNo=s=>s.msp.id.replace(/^MSP\s*/i,'');
 const box=on=>`<span class="box">${on?'×':''}</span>`;
 function renderDoc(k){
   const s=site(), v=$('#v-izvjestaji'); let h='';
+  if(k==='foto'){v.innerHTML=docShell(fotoDoc(s),k);hydratePhotos();return;}
   if(s.pack==='RS'&&k!=='exp'){const d=rsDoc(s,k);if(d){v.innerHTML=docShell(d.h,k);if(d.cls)$('#docEl').classList.add(d.cls);return;}}
   const orgLine=`<div class="dorg">${esc(ORG)} · vođa tima ${esc(LEADER)} · Tim 1</div><div class="dsmall">(deminerska organizacija, naziv funkcije i oznaka odjeljenja-sekcije, tima)</div>`;
   if(k==='p9'){
@@ -877,12 +935,58 @@ function openSites(){
   openSheet(`<div class="sheet-h"><div><div class="label">${esc(ORG)}</div><h2>Radilišta</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
     ${S.sites.map(x=>`<button class="sitecard${x.id===S.active?' on':''}" type="button" data-act="pickSite" data-id="${x.id}"><span class="grow"><b>${esc(x.msp.id)} ${esc(x.msp.naziv)} · ${esc(x.ci.oznaka)}</b><br><span class="sub">${esc(x.msp.ru)} · ${num(clearedM2(x))} / ${num(totalArea(x))} m² · ${esc(x.status)}</span></span><span class="chip ${x.status==='u radu'?'work':''}">${x.id===S.active?'aktivno':'otvori'}</span></button>`).join('')}
     <button class="btn primary" type="button" data-act="newSite">+ Novo radilište iz dosijea</button>
+    ${storageCard()}
     <div><div class="label" style="margin-bottom:6px">Paket zemlje</div><div class="packs">
       <div class="packrow"><span><b>Bosna i Hercegovina</b><br><span class="sub">BHMAC · ${esc(P.standard)}</span></span><span class="chip ok">aktivan</span></div>
       <div class="packrow"><span><b>Srbija</b><br><span class="sub">CZRS · boksovi, CEIA i Schonstedt, skica napredovanja 1:1000</span></span><span class="chip ok">aktivan</span></div>
       <div class="packrow"><span><b>Slovenija</b><br><span class="sub">URSZR / DEVNUS · samo državna služba</span></span><span class="chip">nije tržište</span></div></div>
       <p class="fine">Jedna aplikacija za sve firme i zemlje. Paket određuje obrasce, koordinatni sistem, pravila i listu sredstava.</p></div>`);
 }
+/* ---------- device data: status, backup file, restore ---------- */
+const BK_DAYS=7;
+const backupAge=()=>S.lastBackup?(Date.now()-Date.parse(S.lastBackup))/864e5:Infinity;
+const fmtTs=iso=>{const d=new Date(iso);return fmtD(dayKey(d))+' u '+hm(d);};
+function storageCard(){
+  const where={idb:'Na ovom uređaju. Radi bez mreže, fotografije u punoj veličini.',ls:'U pregledniku, ograničen prostor. Fotografije samo umanjene.',mem:'Ne čuvaju se. Podaci nestaju kad se stranica zatvori.'}[ST.mode];
+  const old=backupAge()>BK_DAYS;
+  setTimeout(()=>{try{navigator.storage.estimate().then(e=>{const el=$('#stUse');if(el&&e.usage!=null)el.textContent='Zauzeto: '+num(e.usage/1048576,1)+' MB.';});}catch(e){}},0);
+  return `<div><div class="label" style="margin-bottom:6px">Podaci</div><div class="packs">
+    <div class="packrow"><span><b>Gdje se čuvaju</b><br><span class="sub">${where}${ST.mode==='idb'?(ST.persisted?' Zaštićeno od automatskog brisanja.':' Preglednik ih može obrisati ako ponestane prostora, zato pravi kopije.'):''} <span id="stUse"></span></span></span><span class="chip ${ST.mode==='idb'?'ok':'work'}">${ST.mode==='idb'?'na uređaju':'privremeno'}</span></div>
+    <div class="packrow"><span><b>Rezervna kopija</b><br><span class="sub">${S.lastBackup?'Posljednja: '+fmtTs(S.lastBackup)+'.':'Još nije napravljena.'} Jedan fajl sa svim radilištima i fotografijama. Sačuvaj ga van telefona.</span></span><span class="chip ${old?'work':'ok'}">${old?'potrebna':'u redu'}</span></div></div>
+    <div class="btnrow" style="margin-top:8px"><button class="btn sm primary" type="button" data-act="backup">Napravi rezervnu kopiju</button>
+      <label class="btn sm" for="rsFile">Vrati iz kopije<input id="rsFile" type="file" accept="application/json,.json" style="position:absolute;opacity:0;width:1px;height:1px"></label></div></div>`;
+}
+function backupNag(){if(backupAge()<=BK_DAYS)return '';
+  return `<div class="card noprint"><div class="card-h"><h3>Rezervna kopija</h3><span class="chip work">${S.lastBackup?'starija od '+BK_DAYS+' dana':'nema je'}</span></div>
+    <p class="sub" style="margin:0 0 10px">Ako se telefon izgubi ili pokvari, kopija je jedini način da se vrate dnevnici, nalazi i fotografije.</p>
+    <button class="btn block" type="button" data-act="backup">Napravi rezervnu kopiju</button></div>`;}
+function blobToData(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b);});}
+function dataToBlob(u){const i=u.indexOf(','),bin=atob(u.slice(i+1)),a=new Uint8Array(bin.length);for(let j=0;j<bin.length;j++)a[j]=bin.charCodeAt(j);return new Blob([a],{type:(u.slice(0,i).match(/:(.*?);/)||[])[1]||'image/jpeg'});}
+async function exportBackup(){
+  const photos={};if(ST.db)for(const [k,b] of await idbEntries('photos'))photos[k]=await blobToData(b);
+  const at=new Date().toISOString(),data={app:'terenska-knjiga',format:1,exported:at,state:Object.assign(snapshot(),{lastBackup:at}),photos};
+  const name='terenska-knjiga-kopija-'+TODAY+'-'+hm(Date.now()).replace(':','')+'.json',blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+  let done=false;
+  // on phones the share sheet saves to Files/Drive or sends it on; elsewhere a normal download
+  if(matchMedia('(pointer:coarse)').matches&&navigator.canShare){const file=new File([blob],name,{type:'application/json'});
+    if(navigator.canShare({files:[file]}))try{await navigator.share({files:[file],title:'Terenska knjiga: rezervna kopija'});done=true;}catch(e){if(e.name==='AbortError')return;}}
+  if(!done){if(inFrame){toast('Preuzimanje fajla nije dozvoljeno u ovom prikazu. Otvori aplikaciju preko linka.',5000);return;}
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);}
+  S.lastBackup=at;save();toast('Rezervna kopija napravljena (fotografija: '+Object.keys(photos).length+', '+num(blob.size/1048576,1)+' MB).',4000);
+  if(!$('#scrim').hidden&&$('#rsFile'))openSites();else rerender();
+}
+let pendingRestore=null;
+function onRestoreFile(file){file.text().then(txt=>{const d=JSON.parse(txt);if(d.app!=='terenska-knjiga'||!d.state||!Array.isArray(d.state.sites))throw new Error('not a backup');
+    pendingRestore=d;const finds=d.state.sites.reduce((a,x)=>a+(x.finds||[]).length,0);
+    openSheet(`<div class="sheet-h"><div><div class="label">Rezervna kopija</div><h2>Vratiti podatke?</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+      <div class="packs"><div class="packrow"><span><b>Kopija od ${esc(fmtTs(d.exported))}</b><br><span class="sub">${d.state.sites.length} radilišta · ${finds} nalaza · fotografija: ${Object.keys(d.photos||{}).length}</span></span></div></div>
+      <div class="notice">Svi sadašnji podaci na ovom uređaju bit će zamijenjeni podacima iz kopije. Ako ti trebaju, prvo napravi novu kopiju.</div>
+      <div class="btnrow"><button class="btn primary" type="button" data-act="restoreOk">Zamijeni podatke</button><button class="btn" type="button" data-act="close">Odustani</button></div>`);
+  }).catch(()=>toast('Ovo nije rezervna kopija Terenske knjige.'));}
+async function restoreBackup(){const d=pendingRestore;pendingRestore=null;if(!d)return;
+  try{if(ST.db){await idbClear('photos');for(const [k,u] of Object.entries(d.photos||{}))await idbPut('photos',k,dataToBlob(u));}}
+  catch(e){toast('Fotografije nisu vraćene u cijelosti.',5000);}
+  S=normalize(d.state);if(!ST.db)S.sites.forEach(x=>x.finds.forEach(f=>{f.ph=0;}));save();await saveQ;closeSheet();go('danas');toast('Podaci vraćeni iz kopije od '+fmtTs(d.exported)+'.',4000);}
 const EX_TP={BA:'6 571 898,00 4 922 400,00\n6 571 950,00 4 922 400,00\n6 571 956,00 4 922 440,00\n6 571 930,00 4 922 470,00\n6 571 900,00 4 922 462,00',
   RS:'457 010 4 955 020\n457 080 4 955 000\n457 105 4 955 060\n457 060 4 955 110\n457 000 4 955 090'};
 function openNewSite(){
@@ -1021,7 +1125,7 @@ function renderDanasB(){
     return `<li><span class="mono">${a.who}</span><span class="grow">${esc(m?m.n:'')}<br><span class="sub">Boks <b>${esc(a.box)}</b> · ${esc(P.methods[a.m])}</span></span><button class="btn sm" type="button" data-act="boxDone" data-w="${a.who}">Boks gotov</button></li>`;}).join('')||'<li class="sub">Nema raspoređenih. Dodirni boks na mapi.</li>'}</ul></div>`;
   h+=`<div class="card"><div class="card-h"><h3>Usklađenost</h3><span class="sub">${esc(P.kratko)}</span></div><ul class="chk">${complianceB(s).map(c=>`<li class="${c.st}"><span class="ic">${c.st==='ok'?'✓':'!'}</span><span>${esc(c.t)}</span><span class="v">${esc(c.v)}</span></li>`).join('')}</ul></div>`;
   h+=logCard(s)+briefCard();
-  h+=`<div class="btnrow noprint" style="justify-content:center"><button class="linkbtn" type="button" data-act="reset">Vrati početne podatke demoa</button></div>`;
+  h+=backupNag()+`<div class="btnrow noprint" style="justify-content:center"><button class="linkbtn" type="button" data-act="reset">Vrati početne podatke demoa</button></div>`;
   v.innerHTML=h;
 }
 function complianceB(s){const o=[];const det=s.log.some(l=>l.k==='det');
@@ -1105,8 +1209,8 @@ function renderNalazB(){
   $('#findForm').addEventListener('submit',e=>{e.preventDefault();const s=site();const t=document.querySelector('input[name="ftype"]:checked');if(!t){toast('Izaberi vrstu sredstva.');return;}
     const bx=boxById(s,$('#fBox').value),u=bx.x0+(parseFloat($('#fE').value)||0),v=bx.y0+(parseFloat($('#fN').value)||0);
     const f={id:'N-'+S.next,cat:document.querySelector('input[name="fcat"]:checked').value,type:t.value,box:bx.id,u:+u.toFixed(2),v:+v.toFixed(2),day:TODAY,time:hm(Date.now()),depth:Math.max(0,+$('#fDepth').value||0),qty:Math.max(1,+$('#fQty').value||1),
-      cond:document.querySelector('input[name="fcond"]:checked').value,act:$('#fAct').value,method:document.querySelector('input[name="fmet"]:checked').value,synced:false,note:$('#fNote').value.trim(),photo:photoData};
-    S.next++;s.finds.push(f);s.log.push({t:f.time,e:'Nalaz '+f.id+': '+f.type+', boks '+f.box+', dubina '+f.depth+' cm ('+P.methods[f.method]+')',k:'find'});addQ('Nalaz '+f.id+' · '+f.type);save();photoData=null;go('mapa');toast('Nalaz '+f.id+' sačuvan u boksu '+f.box+'.');});
+      cond:document.querySelector('input[name="fcond"]:checked').value,act:$('#fAct').value,method:document.querySelector('input[name="fmet"]:checked').value,synced:false,note:$('#fNote').value.trim()};
+    attachPhoto(s,f);S.next++;s.finds.push(f);s.log.push({t:f.time,e:'Nalaz '+f.id+': '+f.type+', boks '+f.box+', dubina '+f.depth+' cm ('+P.methods[f.method]+')',k:'find'});addQ('Nalaz '+f.id+' · '+f.type);save();photoData=null;go('mapa');toast('Nalaz '+f.id+' sačuvan u boksu '+f.box+'.');});
 }
 function calcPosB(){const s=site(),bx=boxById(s,$('#fBox').value),e=parseFloat($('#fE').value)||0,n=parseFloat($('#fN').value)||0,u=bx.x0+e,v=bx.y0+n;
   const p=toGK(s,u,v),w=planeToWgs(s,p),inside=inPoly([u,v],bx.poly),c=$('#fCalc');c.classList.toggle('warn',!inside);
@@ -1162,6 +1266,7 @@ const DOCS_RS=[
   {k:'rsd',pn:'DN',t:'Dnevna evidencija učinka i napretka',d:()=>'Danas · po demineru i metodi'},
   {k:'rsn',pn:'NUS',t:'Zapisnik o pronađenim NUS',d:()=>site().finds.length+' nalaza sa koordinatama'},
   {k:'rsp',pn:'PR',t:'Zapisnik o predaji očišćene površine',d:()=>'Nacrt · osnova za uverenje CZRS'},
+  {k:'foto',pn:'FOTO',t:'Fotodokumentacija nalaza',d:()=>photoCount(site())},
   {k:'exp',pn:'GIS',t:'Izvoz podataka: CSV i GeoJSON',d:()=>'SRB_ETRS89 / UTM 34N'}];
 function rsDoc(s,k){
   const head=`<table><tr><td class="k">Izvođač</td><td>${esc(ORG.replace('primjer','primer'))}</td></tr><tr><td class="k">Projekat</td><td>${esc(s.msp.id)} · ${esc(s.msp.naziv)}, ${esc(s.msp.opcina)} · ${esc(s.ci.oznaka)}</td></tr></table>`;
@@ -1197,7 +1302,7 @@ function rsDoc(s,k){
 
 /* ================= timers ================= */
 function tick(){
-  const s=site();
+  if(!S)return;const s=site();
   document.querySelectorAll('[data-timer]').forEach(el=>{const p=s.pairs.find(x=>x.id===el.dataset.timer);if(!p)return;const st=pairState(p);el.textContent=fmtRem(st.rem);const row=el.closest('.pair');if(row)row.classList.toggle('over',st.over);});
   const i=S.incident;if(i){const e=$('#incEl'),d=$('#incDl');const el=Date.now()-i.t0;if(e){const sec=Math.floor(el/1000);e.textContent=pad(Math.floor(sec/60))+':'+pad(sec%60);}
     if(d&&R.accidentH){const rem=Math.max(0,R.accidentH*36e5-el),sec=Math.floor(rem/1000);d.textContent=Math.floor(sec/3600)+':'+pad(Math.floor(sec%3600/60))+':'+pad(sec%60);}}
@@ -1250,15 +1355,18 @@ document.addEventListener('click',e=>{
     case 'incEnd':S.incidents.push(Object.assign({},S.incident,{end:hm(Date.now())}));S.incident=null;save();renderHitno();toast('Incident zatvoren i sačuvan.');break;
     case 'sync':{const b=$('#syncBtn');if(b.classList.contains('busy'))break;if(!S.queue.length){toast('Sve je već poslato.');break;}const n=S.queue.length;b.classList.add('busy');$('#syncLabel').textContent='Šaljem '+n+'…';
       setTimeout(()=>{S.queue=[];S.sites.forEach(x=>x.finds.forEach(f=>f.synced=true));S.lastSync=hm(Date.now());save();b.classList.remove('busy');renderHeader();toast('Poslato '+n+' zapisa šefu projekta.');},1300);break;}
-    case 'reset':try{localStorage.removeItem(KEY);}catch(err){}S=seed();save();go('danas');toast('Početni podaci vraćeni.');break;
+    case 'reset':try{localStorage.removeItem(KEY);}catch(err){}if(ST.db)idbClear('photos').catch(()=>{});S=seed();save();go('danas');toast('Početni podaci vraćeni.');break;
+    case 'backup':if(el.disabled)break;el.disabled=true;exportBackup().catch(()=>toast('Kopija nije napravljena. Pokušaj ponovo.')).finally(()=>{el.disabled=false;});break;
+    case 'restoreOk':restoreBackup();break;
   }
 });
-document.addEventListener('input',e=>{const t=e.target;if(!S.incident)return;if(t.dataset.v){S.incident.v[t.dataset.v]=Math.max(0,+t.value||0);save();}if(t.dataset.ic){S.incident[t.dataset.ic]=t.value;save();}});
-document.addEventListener('change',e=>{const t=e.target;if(S.incident&&t.dataset.ic==='cat'){S.incident.cat=t.value;save();}});
+document.addEventListener('input',e=>{const t=e.target;if(!S||!S.incident)return;if(t.dataset.v){S.incident.v[t.dataset.v]=Math.max(0,+t.value||0);save();}if(t.dataset.ic){S.incident[t.dataset.ic]=t.value;save();}});
+document.addEventListener('change',e=>{const t=e.target;if(t.id==='rsFile'&&t.files&&t.files[0]){onRestoreFile(t.files[0]);t.value='';return;}if(S.incident&&t.dataset.ic==='cat'){S.incident.cat=t.value;save();}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#scrim').hidden)closeSheet();});
 
 let start='danas';try{const t=localStorage.getItem(KEY+'-tab');if(t&&RENDER[t])start=t;}catch(e){}
 const hash=(location.hash||'').slice(1);if(RENDER[hash])start=hash;
-go(start);
+loadState().then(s=>{S=s;go(start);requestPersist();},()=>{S=seed();go(start);});
+['online','offline'].forEach(ev=>addEventListener(ev,()=>{if(S)renderHeader();}));
 })();
 </script>
