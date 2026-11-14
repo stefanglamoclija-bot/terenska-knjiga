@@ -243,6 +243,47 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
 .doc svg{display:block;width:100%;height:auto;border:1px solid #111511;margin:6px 0;background:#fff}
 .tbl{overflow-x:auto}
 .doc.wide{min-width:640px}
+/* BiH forms (BHMAC prilozi): paper in both themes */
+.doc .ptag{text-align:right;font-size:10px;color:#4c544c;margin:-6px 0 4px}
+.doc .pre{font-size:11px;margin:0 0 6px}
+.doc td.k2{width:20%;font-weight:500}
+.doc .opt{display:inline-block;margin:1px 12px 1px 0;white-space:nowrap}
+.doc .opt .box{margin-left:0}
+.doc .l3{display:block;line-height:1.2}.doc .l3 b,.doc .l3 span,.doc .l3 i{display:block}.doc .l3 span{font-size:10px}.doc .l3 i{font-size:10px;color:#3c433c}
+.doc .hdr3{text-align:center;margin:0 0 10px}.doc .hdr3 b{display:block;font-size:13px;letter-spacing:.03em}.doc .hdr3 span{display:block;font-size:10.5px}
+.doc .p12 td{font-size:11px}.doc .p12 .opt{white-space:normal}
+.doc .locg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 8px;font-size:10.5px;border:1px solid #111511;padding:5px}
+.doc .locg .opt{white-space:normal;margin:0}
+.doc .blank{display:inline-block;min-width:34mm;border-bottom:1px dotted #111511;height:1em;vertical-align:-2px}
+.doc .sgl{display:inline-flex;flex-direction:column;min-width:62mm;margin-top:14px;vertical-align:bottom}
+.doc .sgl .sgn{border-bottom:1px solid #111511;min-height:1.5em;padding:0 2px;font-weight:600}
+.doc .sgl small{font-size:9.5px;color:#3c433c;text-align:center}
+.doc .sigrow{display:flex;gap:10px;align-items:flex-end;margin-top:14px;flex-wrap:wrap}
+.doc .sigr{display:flex;justify-content:flex-end;margin-top:10px}
+.doc .sig .sgl{display:flex;min-width:0}
+.doc .sig3{grid-template-columns:1fr 1fr 1fr}
+.doc .stamp{display:grid;place-items:center;width:30mm;height:20mm;border:1px dashed #6b726b;font-size:10px;color:#6b726b;margin:6px 0 0 auto}
+.doc table.decl td{width:50%;font-size:11.5px}
+.doc .gd{font-size:10.5px;color:#3c433c;font-style:italic;margin:0 0 4px}
+.doc .area{min-height:48px;margin-top:3px}
+.doc tr.hand td{height:24px}
+.doc table.lines td{height:24px}
+.doc .p11t th{text-align:center;vertical-align:middle;font-size:10.5px}.doc .p11t tr.let th{font-weight:500;background:#f6f7f3}
+.doc .fnote{font-size:9.5px;border-top:1px solid #9aa095;padding-top:3px;margin-top:18px}
+.doc .dfoot{display:flex;justify-content:space-between;gap:10px;margin-top:16px;padding-top:4px;border-top:1px solid #9aa095;font-size:9.5px;color:#4c544c}
+.doc svg.tsc{border:0;margin:6px auto}
+.doc .legend.paper{color:#111511;font-size:10.5px;margin:4px 0 8px}
+.doc .legend.paper i{border:1px solid #111511}
+.doc .lg-h{background:repeating-linear-gradient(45deg,#2B784A 0 1px,#fff 1px 4px)}.doc .lg-s{background:#dcefe2}.doc .lg-b{background:#fff;border-width:2px!important}.doc .lg-f{background:#BF2A1C;clip-path:polygon(50% 0,100% 100%,0 100%);border:0!important}
+.docs{display:flex;flex-direction:column;gap:14px}
+.pnav{display:flex;flex-wrap:wrap;gap:6px}.pnav .btn{flex:0 0 auto;min-width:44px}
+.orgf details{border:1px solid var(--line);border-radius:10px;padding:4px 12px;background:var(--surface)}
+.orgf summary{font-weight:600;cursor:pointer;min-height:42px;display:flex;align-items:center}
+.orgf .ofs{display:flex;flex-direction:column;gap:10px;padding:2px 0 12px}
+.orow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 40px;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
+.orow.eq{grid-template-columns:minmax(0,1fr) 76px 40px}
+.orow input,.orow select{min-height:42px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:14px;width:100%;min-width:0}
+.orow .span3{grid-column:1/-1}
 .missing{font-size:13px}
 .missing li{margin:3px 0}
 .out{white-space:pre-wrap;font-family:var(--font-mono);font-size:11.5px;background:var(--bg);padding:10px;border-radius:8px;max-height:220px;overflow:auto;margin:0;user-select:all}
@@ -284,16 +325,31 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
 }
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 @media print{
-  @page{size:A4;margin:14mm}
+  @page{size:A4;margin:14mm 14mm 15mm;@bottom-right{content:"Str. " counter(page) " / " counter(pages);font:8pt sans-serif;color:#555}}
+  @page land{size:A4 landscape;margin:12mm 14mm 13mm}
   body{background:#fff;padding:0;height:auto}
   .app{display:block;border:0;height:auto;max-width:none;overflow:visible;background:#fff}
   .top,.tabs,.toast,.scrim,.noprint{display:none!important}
   main{overflow:visible;padding:0;display:block}
   .view{display:block}
-  .doc{border:0;box-shadow:none;padding:0;font-size:11pt}
+  .tbl{overflow:visible}
+  .doc{border:0;box-shadow:none;padding:0;font-size:10.5pt;border-radius:0}
   .doc.wide{min-width:0}
+  .doc.p11{page:land}
+  .docs{display:block}
+  .docs>.doc{break-before:page;page-break-before:always}
+  .docs>.doc:first-child{break-before:auto;page-break-before:auto}
+  .doc .pb,.doc .pbs{break-before:page;page-break-before:always}
+  .doc table{font-size:9.5pt;page-break-inside:auto}
+  .doc thead{display:table-header-group}
+  .doc tfoot{display:table-footer-group}
+  .doc tr,.doc .keep,.doc .sig,.doc .sigrow,.doc .phf,.doc svg{break-inside:avoid;page-break-inside:avoid}
+  .doc h4,.doc .sec,.doc .hdr3,.doc .dsub{break-after:avoid;page-break-after:avoid}
+  .doc .miss{background:none;color:#555;font-size:7.5pt;border-bottom:1px dotted #555;padding:0 1px}
+  .doc svg.tsc{width:180mm!important;height:auto!important;max-width:none}
   .doc svg.sk{width:190mm!important;height:auto!important}
   .doc.skdoc{padding:0}
+  .doc .dfoot{font-size:7.5pt}
 }
 /* photo record: two per row on paper, one per row on a phone */
 .phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:8px 0}
@@ -483,12 +539,14 @@ function seedSite(){
   site.monitors=[{day:past[2],by:'Supervizor I. Jukić'}];
   site.estEnd=dayKey(addDays(NOW0,38));
   site.casevac=past[3];
+  seedBh(site,{km2:0.214,list:'474-1-1',naziv:'Selište, livada uz poljski put',ocekivano:'PMA-2, PMA-3, PROM-1, TMA-3, ručna bomba M75',planOd:past[0],planDo:site.estEnd},past);
   return site;
 }
 function seedSite2(){
-  return {id:'s2',pack:'BA',crs:'GK6',mode:'lanes',msp:{id:'MSP 0388',naziv:'Brdo',opcina:'Općina Primjer',ru:'RU Tuzla',karta:'Primjer 1:25.000, list 474-1-3, izdanje 1977.'},
+  const s={id:'s2',pack:'BA',crs:'GK6',mode:'lanes',msp:{id:'MSP 0388',naziv:'Brdo',opcina:'Općina Primjer',ru:'RU Tuzla',karta:'Primjer 1:25.000, list 474-1-3, izdanje 1977.'},
     ci:{tip:'SI',oznaka:'SI-2',pmin:1800,pmax:2400},nt:{Y:6574610.00,X:4918420.00},az:305,
     poly:[[-1,0],[44,0],[47,30],[30,46],[6,40]],lanes:{},pairs:[],progress:[],finds:[],log:[],qc:[],monitors:[],info:[],start:null,estEnd:null,status:'planirano'};
+  seedBh(s,{km2:0.087,list:'474-1-3',naziv:'Brdo, šumarak iznad sela',ocekivano:'PMA-2, PMR-2A',planOd:dayKey(addDays(NOW0,10)),planDo:dayKey(addDays(NOW0,31))},null);return s;
 }
 function seed(){
   return {sites:[seedRS(),seedSite(),seedSite2()],active:'r1',crs:'GK6',queue:[
@@ -757,11 +815,15 @@ function onSubmit(e){e.preventDefault();const s=site();
 
 /* ================= IZVJEŠTAJI ================= */
 const DOCS_BA=[
-  {k:'p9',pn:'P9',t:'Dnevni izvještaj',d:()=>'Danas · '+site().log.length+' događaja u dnevniku'},
+  {k:'p10',pn:'P10',t:'Izvedbeni plan',d:()=>'Prije početka rada · najmanje 7 dana prije, RU BHMAC'},
+  {k:'p9',pn:'P9',t:'Dnevni izvještaj',d:()=>'Danas · '+dayLog(site(),TODAY).length+' događaja u dnevniku'},
   {k:'p11',pn:'P11',t:'Sedmični izvještaj o aktivnostima TI i čišćenja',d:()=>{const w=weeklyWindow();return 'Sedmica '+fmtD(w.from).slice(0,6)+'–'+fmtD(w.to).slice(0,6)+' · rok pon. 16:00';}},
   {k:'p13',pn:'P13',t:'Stručni izvještaj o ES',d:()=>site().finds.length+' sredstava · uz izjavu o čišćenju'},
-  {k:'p6',pn:'P6',t:'Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI',d:()=>'Nacrt · popunjeno '+p6Fields().filter(x=>x[2]).length+' od 20 polja'},
   {k:'p12',pn:'P12',t:'Inicijalni izvještaj o incidentu/nesreći od mina',d:()=>S.incident?'U toku · rok 6 sati':(S.incidents.length?S.incidents.length+' prijavljen':'Popunjava se iz ekrana Hitno')},
+  {k:'p1',pn:'P1',t:'Obavijest o prikupljanju informacija o miniranosti tokom TI',d:()=>site().info.length+' informacija · predaje se i prazna'},
+  {k:'p7',pn:'P7',t:'Zapisnik o upoznavanju predstavnika vlasti/krajnjeg korisnika',d:()=>'Na kraju CI/SI · prilog i) uz P6'},
+  {k:'p6',pn:'P6',t:'Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI',d:()=>'Popunjeno '+p6Fields().filter(x=>x[2]&&!/class="miss"/.test(x[2])).length+' od 20 polja · prilozi a–k'},
+  {k:'pak',pn:'PAKET',t:'Paket za predaju CI/SI',d:()=>'P6 sa svim prilozima, '+workDays(site()).length+' dnevnih izvještaja, karta, foto'},
   {k:'foto',pn:'FOTO',t:'Fotodokumentacija nalaza',d:()=>photoCount(site())+' · prilog uz P13'},
   {k:'exp',pn:'GIS',t:'Izvoz podataka: CSV i GeoJSON',d:()=>'Nalazi, staze i lomne tačke · '+crsName()}
 ];
@@ -773,7 +835,8 @@ function renderIzvjestaji(){
    :`<div><div class="label">${esc(P.standard)}</div><h2>Izvještaji za BHMAC</h2></div>
     <div class="card"><div class="card-h"><span class="sub">Koordinatni sistem u dokumentima</span></div>
       <div class="chips" role="radiogroup"><label><input type="radio" name="crs" value="GK6" id="crsGK" data-act="crs" ${S.crs==='GK6'?'checked':''}><span>Gaus-Kriger zona 6</span></label><label><input type="radio" name="crs" value="UTM34" id="crsUTM" data-act="crs" ${S.crs==='UTM34'?'checked':''}><span>UTM 34N</span></label></div>
-      <p class="fine">Standard zabranjuje miješanje sistema u istom dokumentu, pa svi izvještaji koriste jedan.</p></div>`;
+      <p class="fine">Standard zabranjuje miješanje sistema u istom dokumentu, pa svi izvještaji koriste jedan.</p>
+      <button class="btn sm" type="button" data-bh="org" style="margin-top:8px">Organizacija, tim i oprema</button></div>`;
   $('#v-izvjestaji').innerHTML=top+`<ul class="doclist">${list.map(d=>`<li><button class="docitem" type="button" data-act="doc" data-k="${d.k}"><span class="pn">${d.pn}</span><span><b>${esc(d.t)}</b><span class="sub">${esc(d.d())}</span></span><span aria-hidden="true">›</span></button></li>`).join('')}</ul>`;
 }
 /* ---------- photo record (both packs) ---------- */
@@ -801,89 +864,7 @@ function renderDoc(k){
   const s=site(), v=$('#v-izvjestaji'); let h='';
   if(k==='foto'){v.innerHTML=docShell(fotoDoc(s),k);hydratePhotos();return;}
   if(s.pack==='RS'&&k!=='exp'){const d=rsDoc(s,k);if(d){v.innerHTML=docShell(d.h,k);if(d.cls)$('#docEl').classList.add(d.cls);return;}}
-  const orgLine=`<div class="dorg">${esc(ORG)} · vođa tima ${esc(LEADER)} · Tim 1</div><div class="dsmall">(deminerska organizacija, naziv funkcije i oznaka odjeljenja-sekcije, tima)</div>`;
-  if(k==='p9'){
-    const log=s.log.slice().sort((a,b)=>a.t.localeCompare(b.t)), ft=s.finds.filter(f=>f.day===TODAY);
-    const dest=ft.filter(f=>f.act===ACTIONS[1]);const ex=s.log.filter(l=>l.k==='dem').map(l=>l.kg||0).reduce((a,b)=>a+b,0);
-    h=`<h4>DNEVNI IZVJEŠTAJ</h4>${orgLine}
-      <table><tr><td><b>Datum:</b> ${fmtD(TODAY)}</td><td><b>MSP:</b> ${esc(s.msp.id)} ${esc(s.msp.naziv)}</td><td><b>Naziv CI ili SI:</b> ${esc(s.ci.oznaka)}</td></tr></table>
-      <table><thead><tr><th style="width:62px">Vrijeme (a)</th><th>Evidencija trajanja deminerskih aktivnosti i događaja (b)</th></tr></thead>
-      <tbody>${log.map(l=>`<tr><td class="mono">${esc(l.t)}</td><td>${esc(l.e)}</td></tr>`).join('')}</tbody></table>
-      <div class="sec">PODACI O RADU I POSTIGNUTIM EFEKTIMA</div>
-      <table><tr><td class="k">Metode rada</td><td>a-detektor${box(1)} b-pipalica${box(1)} c-kombinacija${box(1)} d-prege${box(0)} e-mašina${box(0)}</td></tr>
-      <tr><td class="k">Očišćeno</td><td>${num(todayM2(s),1)} m² deminera · 0 m² prege · <b>ukupno ${num(todayM2(s),1)} m²</b></td></tr>
-      <tr><td class="k">Otkriveno mina/ESZR</td><td>${ft.length?ft.map(f=>esc(f.type)+' ×'+f.qty+' (staza '+f.lane+')').join('; '):'nema'}</td></tr>
-      <tr><td class="k">Uništeno mina/ESZR</td><td>${dest.length?dest.map(f=>esc(f.type)+' ×'+f.qty).join('; '):'nema'}</td></tr>
-      <tr><td class="k">Utrošeno ES za uništavanje</td><td>${ex?num(ex,2)+' kg TNT':'—'}</td></tr>
-      <tr><td class="k">CASEVAC vježba izvedena</td><td>${s.casevac?fmtD(s.casevac):'<span class="miss">nije unijeto</span>'}</td></tr>
-      <tr><td class="k">Napomena</td><td>${s.info.filter(i=>i.day===TODAY).map(i=>'Nova informacija o miniranosti: '+esc(i.t)).join('<br>')||'—'}</td></tr></table>
-      <div class="sig"><div>Vođa tima: ${esc(LEADER)}</div><div>Potpis</div></div>`;
-  }
-  if(k==='p11'){
-    const w=weeklyWindow(), wk=rangeM2(s,w.from,w.to), cum=rangeM2(s,'0000',w.to);
-    const wf=s.finds.filter(f=>f.day>=w.from&&f.day<=w.to);const by={};wf.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);
-    h=`<h4>SEDMIČNI IZVJEŠTAJ O AKTIVNOSTIMA TEHNIČKOG IZVIĐANJA I ČIŠĆENJA ZA MSP ${esc(mspNo(s))}</h4>
-      <table><tr><td><b>Deminerska organizacija:</b> ${esc(ORG)}</td><td><b>Broj:</b> ${s.msp.id.replace(/\D/g,'')}/${new Date().getFullYear()}-S</td><td><b>Od:</b> ${fmtD(TODAY)}</td></tr>
-      <tr><td colspan="3"><b>Za:</b> ${esc(s.msp.ru.replace('RU','Ured'))} BHMAC · <b>Za završenu sedmicu od</b> ${fmtD(w.from)} <b>do</b> ${fmtD(w.to)}</td></tr></table>
-      <table><thead><tr><th>Red. br.</th><th>Ciljana ili sistematska istraga (b)</th><th>Zadana površina m² (c)</th><th>Realizirano m² (d)</th><th>Ukupno realizirano m² (e)</th><th>Datum početka (f)</th><th>Procijenjeni datum završetka (g)</th><th>Pronađena ES (h)</th></tr></thead>
-      <tbody><tr><td>1.</td><td>${esc(s.ci.oznaka)}</td><td class="n">${num(s.ci.pmax)}</td><td class="n">${num(wk,1)}</td><td class="n">${num(cum,1)}</td><td>${fmtD(s.start)}</td><td>${fmtD(s.estEnd)}</td><td>${Object.keys(by).length?Object.entries(by).map(([t,n])=>esc(t)+' ×'+n).join(', '):'—'}</td></tr>
-      <tr><td></td><td colspan="7"><b>Opis toka aktivnosti:</b> Operacije se odvijaju po izvedbenom planu. Rad u ${s.pairs.length} dvojca u radnim stazama širine ${R.lane} m (staze ${s.pairs.map(p=>p.lane).join(', ')}). ${wf.length?'Pronađena sredstva odgovaraju očekivanim tipovima iz dosijea.':'Bez nalaza u sedmici.'} Nije uvedena nova tehnička metoda.</td></tr></tbody></table>
-      <div class="sec">NOVE INFORMACIJE O MINIRANOSTI PRIKUPLJENE NETEHNIČKIM METODAMA ZA MSP ${esc(mspNo(s))}</div>
-      <table><thead><tr><th style="width:50px">Red. broj</th><th>Zapisnik o miniranju, informator, broj i raspored mina, itd.</th></tr></thead><tbody>${s.info.length?s.info.map((i,n)=>`<tr><td>${n+1}.</td><td>${esc(i.t)} (${fmtD(i.day)})</td></tr>`).join(''):'<tr><td>1.</td><td>Nema novih informacija.</td></tr>'}</tbody></table>
-      <div class="sig"><div>Odgovorna osoba dem. organizacije</div><div>Potpis</div></div>
-      <p class="note">Rok: ${longDate(w.deadline)} do 16:00 (za prethodnu sedmicu).</p>`;
-  }
-  if(k==='p13'){
-    const g=c=>{const by={};s.finds.filter(f=>f.cat===c).forEach(f=>{by[f.type]=by[f.type]||{n:0,r:[]};by[f.type].n+=f.qty;by[f.type].r.push(f.id+' (st. '+f.lane+', '+num(f.dist,1)+' m)');});return Object.entries(by);};
-    const rows=(arr)=>{const L=['a','b','c','d'];let o='';for(let i=0;i<Math.max(4,arr.length);i++){const e=arr[i];o+=`<tr><td style="width:28px">(${L[i]||i+1})</td><td>${e?esc(e[0]):''}</td><td class="n" style="width:44px">${e?e[1].n:''}</td><td>${e?esc(e[1].r.join(', ')):''}</td></tr>`;}return o;};
-    const mi=s.finds.filter(f=>f.cat==='MI').reduce((a,f)=>a+f.qty,0);
-    h=`<h4>STRUČNI IZVJEŠTAJ O ES</h4>
-      <div class="sec">PRVI DIO</div>
-      <table><tr><td>1.</td><td class="k">Ime deminerske ili UES organizacije</td><td>${esc(ORG)}</td><td class="k">Izvjestio (ime i prezime), funkcija</td><td>${esc(LEADER)}, vođa tima</td></tr>
-      <tr><td>2.</td><td class="k">MSP</td><td>${esc(s.msp.id)} ${esc(s.msp.naziv)}</td><td class="k">Datum izvještaja</td><td>${fmtD(TODAY)}</td></tr>
-      <tr><td>3.</td><td class="k">Najbliži grad</td><td>${esc(s.msp.opcina)}</td><td class="k">CI ili SI</td><td>${esc(s.ci.oznaka)}</td></tr>
-      <tr><td>4.</td><td class="k">Naziv karte</td><td colspan="3">${esc(s.msp.karta)}</td></tr>
-      <tr><td>5.</td><td class="k">Razmjera</td><td>1:25.000</td><td class="k">Koordinate zadatka</td><td class="mono">${crsFmt(s,s.nt)}<br>(${crsName()}, nulta tačka)</td></tr></table>
-      <div class="sec">DRUGI DIO</div>
-      <table><thead><tr><th colspan="2">6. VRSTA UKLONJENIH PP MINA</th><th>Kom</th><th>OPIS ILI PRIMJEDBA</th></tr></thead><tbody>${rows(g('PP'))}</tbody></table>
-      <table><thead><tr><th colspan="2">7. VRSTA UKLONJENIH PT MINA</th><th>Kom</th><th>OPIS ILI PRIMJEDBA</th></tr></thead><tbody>${rows(g('PT'))}</tbody></table>
-      <table><thead><tr><th colspan="2">8. VRSTA UKLONJENOG NUS-a</th><th>Kom</th><th>OPIS ILI PRIMJEDBA</th></tr></thead><tbody>${rows(g('NUS'))}</tbody></table>
-      <table><tr><td class="k">9. BROJ UKLONJENIH MINA IZNENAĐENJA</td><td class="n">${mi}</td></tr></table>
-      <p class="note">Popunjava se i po potrebi prilaže uz Izjavu o čišćenju površine. Fotografije su dodatni dokaz za neidentifikovana ili neobična sredstva.</p>`;
-  }
-  if(k==='p6'){
-    const f=p6Fields(), missing=f.filter(x=>!x[2]);
-    h=`<p class="note noprint" style="margin-top:0">Na osnovu člana 35. Zakona o deminiranju u Bosni i Hercegovini („Službeni glasnik BiH”, broj 5/02)</p>
-      <h4>Z A P I S N I K</h4><div class="dsub">o izvršenim aktivnostima tehničkog izviđanja i čišćenja CI/SI · <b>NACRT</b></div>
-      <div class="sec">I – IZJAVA DEMINERSKE ORGANIZACIJE</div>
-      <table>${f.map(x=>`<tr><td style="width:24px">${x[0]}.</td><td class="k">${esc(x[1])}</td><td>${x[2]?x[2]:'<span class="miss">nedostaje</span>'}</td></tr>`).join('')}</table>
-      <div class="sec">III – PRILOZI (automatski iz terenskih podataka)</div>
-      <table>${p6Annex(s).map(a=>`<tr><td style="width:24px">${a[0]})</td><td>${esc(a[1])}</td><td style="width:90px">${a[2]?'<b>spremno</b>':'<span class="miss">nedostaje</span>'}</td></tr>`).join('')}</table>
-      <div class="sec">Prilog e) Grafički prikaz očišćene površine ${esc(s.ci.oznaka)} sa lomnim tačkama i nalazima</div>
-      ${mapSVG(s,{paper:true,w:520})}
-      <table><thead><tr><th>Lomna tačka</th><th>${S.crs==='UTM34'?'E':'Y'}</th><th>${S.crs==='UTM34'?'N':'X'}</th></tr></thead><tbody>${s.poly.map((p,i)=>{const g=toGK(s,p[0],p[1]);const c=crsFmt(s,g).replace(/^[YE] /,'').split(/\s{2}[XN] /);return `<tr><td>T${i+1}</td><td class="n mono">${c[0]}</td><td class="n mono">${c[1]}</td></tr>`;}).join('')}</tbody></table>
-      <table><thead><tr><th>Nalaz</th><th>Vrsta</th><th>Koordinate (${crsName()})</th></tr></thead><tbody>${s.finds.map(fd=>`<tr><td>${fd.id}</td><td>${esc(fd.type)}</td><td class="mono">${crsFmt(s,findPos(s,fd))}</td></tr>`).join('')}</tbody></table>
-      ${missing.length?`<p class="note noprint">Prije predaje dopuniti: ${missing.map(x=>'polje '+x[0]).join(', ')}.</p>`:''}
-      <div class="sig"><div>21. Odgovorna osoba deminerske organizacije</div><div>22. Šef ureda/kancelarije BHMAC-a</div></div>`;
-  }
-  if(k==='p12'){
-    const i=S.incident||S.incidents[S.incidents.length-1];
-    const gk=i?toGK(s,i.lane-0.5,i.dist):null;
-    h=`<h4>INICIJALNI IZVJEŠTAJ O INCIDENTU/NESREĆI OD MINA</h4><div class="dsub">Izvještaj poslati u roku od 6 sati u BHMAC</div>
-      ${!i?'<p class="note">Nema prijavljene nesreće. Obrazac se popunjava automatski kad se na ekranu Hitno pokrene prijava.</p>':''}
-      <table><tr><td class="k">Izvještaj popunio</td><td>${esc(LEADER)}, vođa tima, ${esc(ORG)}</td></tr>
-      <tr><td class="k">Datum incidenta/nesreće</td><td>${i?fmtD(i.day):''}</td></tr>
-      <tr><td class="k">Vrijeme nesreće</td><td>${i?esc(i.start):''}</td></tr>
-      <tr><td class="k">Mjesto / selo; najbliži grad</td><td>${esc(s.msp.naziv)}; ${esc(s.msp.opcina)}</td></tr>
-      <tr><td class="k">Koordinate</td><td>${gk?'<span class="mono">'+crsFmt(s,gk)+'</span>':''} ${box(S.crs==='UTM34')}UTM ${box(S.crs!=='UTM34')}Gaus-Kriger</td></tr>
-      <tr><td class="k">Vrsta ES</td><td>${box(i&&i.cat==='PP')}PP mina ${box(i&&i.cat==='PT')}PT mina ${box(i&&i.cat==='NUS')}NUS ${box(i&&i.cat==='?')}Nepoznato · model: ${i?esc(i.model||'—'):''}</td></tr>
-      <tr><td class="k">Žrtve</td><td>${i?`odrasli ${i.v.ad}, djeca ${i.v.ch} · lakše povrijeđeni ${i.v.lt}, teže ${i.v.hv}, poginuli ${i.v.k}`:''}</td></tr>
-      <tr><td class="k">Namjena zemljišta</td><td>Poljoprivredno (iz dosijea)</td></tr>
-      <tr><td class="k">Da li je zona označena?</td><td>${box(0)}Da, priručnim sredstvima ${box(1)}Da, službenim znacima ${box(0)}Ne</td></tr>
-      <tr><td class="k">Opis</td><td>${i?esc(i.desc||'Nesreća pri radu u radnoj stazi '+i.lane+' na '+num(i.dist,1)+' m od nulte linije.'):''}</td></tr>
-      <tr><td class="k">Policijska stanica, istražitelj, broj predmeta</td><td><span class="miss">dopuniti</span></td></tr></table>
-      <p class="note">Uz obrazac ide skica mjesta nesreće sa oznakom sjevera (prilog e iz P6 može poslužiti kao osnova).</p>`;
-  }
+  if(BHD[k]){bhShow(s,k,v);return;}
   if(k==='exp'){
     h=`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · ${crsName()} i WGS84</div>
       <p>CSV nalaza se otvara u Excelu. GeoJSON se otvara u QGIS-u ili ArcGIS-u i služi za unos u IMSMA kad centar to prihvati.</p>
@@ -892,21 +873,495 @@ function renderDoc(k){
   }
   v.innerHTML=docShell(h,k);if(k==='p11')$('#docEl').classList.add('wide');
 }
-function p6Fields(){const s=site();const done=s.status==='završeno';const fs=s.finds,by={};fs.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);
+/* ================= BiH documents: BHMAC forms (Standard za PMA u BiH, izdanje april 2024, poglavlje 3, prilozi) ================= */
+// Organizacija, tim i oprema live in S.org; MSP data on s.msp, CI/SI data on s.ci and s.bh. All are filled lazily with safe
+// defaults, so state saved before these fields existed still loads. Anything the app cannot know prints as "dopuniti".
+const BA_R=PACKS.BA.rules;
+const DOP='<span class="miss">dopuniti</span>';
+const dv=x=>(x!=null&&x!=='')?esc(x):DOP;
+const BL='<span class="blank"></span>';
+const FN=['Rukovodilac projekta','Operativni oficir','Supervizor','Vođa tima','Deminer (ujedno zamjenik)','Deminer','Kerovođa','Operater mašine','Medicinar','Vozač'];
+const EQK={prsluk:'Prsluk zaštitni',vizir:'Vizir samonosivi',det:'Metal detektor',mas:'Mašina za deminiranje',poek:'POEK (pas)',pip:'Pipalica',ost:'Ostala oprema'};
+let tsN=0;
+function defaultOrg(){
+  const ppl=[{id:'O-01',ime:'D. Demić',fn:'Rukovodilac projekta'},{id:'O-02',ime:'H. Kadić',fn:'Operativni oficir'},{id:'O-03',ime:'I. Jukić',fn:'Supervizor',nap:'interni monitoring'},{id:'L-01',ime:LEADER,fn:'Vođa tima'}]
+    .concat(TEAM.map((t,i)=>({id:t.id,ime:t.n,fn:i===0?'Deminer (ujedno zamjenik)':'Deminer',nap:''})))
+    .concat([{id:'M-01',ime:MEDIC,fn:'Medicinar',nap:''},{id:'V-01',ime:'K. Marić',fn:'Vozač',nap:'sanitetsko vozilo'}]);
+  const det=(tip,sn)=>({kat:'det',tip,sn,kom:1});
+  const eq=[{kat:'prsluk',tip:'klasa NIJ IIIA (primjer)',sn:'',kom:8},{kat:'vizir',tip:'polikarbonat 5 mm (primjer)',sn:'',kom:8},
+    det('VALLON VMH4','V4-21871'),det('VALLON VMH4','V4-21872'),det('VALLON VMH4','V4-21880'),det('VALLON VMH4','V4-21893'),det('EBINGER EBEX 420Si','E420-33015'),det('EBINGER EBEX 420Si','E420-33021'),
+    {kat:'pip',tip:'Pipalica',sn:'',kom:6},{kat:'ost',tip:'Lopatica za otkopavanje',sn:'',kom:6},{kat:'ost',tip:'Komplet alata za sječu vegetacije',sn:'',kom:2},
+    {kat:'ost',tip:'Kliješta za sijecanje žice',sn:'',kom:3},{kat:'ost',tip:'Testera motorna, dužina mača 300 mm',sn:'MT-0457',kom:1}];
+  return {naziv:ORG,podizvodjac:'',tel:'+387 35 000 000 (primjer)',odgovorna:{ime:'D. Demić',poz:'Direktor'},sastavio:{ime:'H. Kadić',poz:'Operativni oficir'},
+    tim:'Tim 1',radnoVrijeme:'07:00–15:00',odmori:'smjena u stazi najviše 30 min; odmor tima 12:00–12:30',ljudi:ppl,oprema:eq};
+}
+function org(){if(!S.org)S.org=defaultOrg();const o=S.org;['ljudi','oprema'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});o.odgovorna=o.odgovorna||{};o.sastavio=o.sastavio||{};return o;}
+function parseKarta(k){k=String(k||'').trim();if(!k||k==='—')return {kartaNaziv:'',kartaList:'',kartaRazmjer:'',kartaGod:''};
+  return {kartaNaziv:k.split(/\s*(?:1\s*:|,)/)[0].trim(),kartaRazmjer:(k.match(/1\s*:\s*[\d.]+/)||[''])[0],kartaList:((k.match(/list\s+([^,]+)/i)||[])[1]||'').trim(),kartaGod:(k.match(/(\d{4})/)||[])[1]||''};}
+function mspX(s){const m=s.msp;if(m.kartaNaziv==null)Object.assign(m,parseKarta(m.karta));
+  ['entitet','kanton','grad','infoPrije','zajednica'].forEach(x=>{if(m[x]==null)m[x]='';});if(m.km2===undefined)m.km2=null;return m;}
+function bh(s){mspX(s);if(s.ci.naziv==null)s.ci.naziv='';if(s.ci.ocekivano==null)s.ci.ocekivano='';
+  if(!s.bh)s.bh={};const b=s.bh,d={vrsta:'ciscenje',redukovano:null,dubina:BA_R.minDepth,monOrg:'',planOd:s.start||'',planDo:s.estEnd||'',planDana:null,kraj:'',tok:''};
+  for(const k in d)if(b[k]===undefined)b[k]=d[k];if(!b.p7)b.p7={datum:'',vlast:''};if(!Array.isArray(b.log))b.log=[];return b;}
+// demo values for the seeded BiH sites (called from seedSite / seedSite2)
+function seedBh(s,o,past){
+  Object.assign(s.msp,{km2:o.km2,entitet:'Federacija BiH',kanton:'Tuzlanski kanton',grad:'Kalesija',kartaNaziv:'Primjer',kartaList:o.list,kartaRazmjer:'1:25.000',kartaGod:'1977',
+    infoPrije:'Analiziran Projekat za provođenje PMA na '+s.msp.id+' i zapisnik o miniranju iz dosijea. Razgovor s mještaninom (primjer) potvrdio PP mine uz poljski put. Nema prijedloga za nove CI/SI ni korekcija granica.',
+    zajednica:'Odgovorna osoba: vođa tima. Prije početka rada sastanak s predstavnikom mjesne zajednice i općinske službe civilne zaštite. Informacije mještana upisuju se u dnevni izvještaj i Obavijest (Prilog 1) i dostavljaju RU BHMAC uz sedmični izvještaj.'});
+  Object.assign(s.ci,{naziv:o.naziv,ocekivano:o.ocekivano});
+  s.bh={vrsta:'ciscenje',redukovano:null,dubina:BA_R.minDepth,monOrg:'Nije vršen',planOd:o.planOd,planDo:o.planDo,planDana:null,kraj:'',tok:'',p7:{datum:'',vlast:''},log:[]};
+  if(!past)return;
+  const L=s.bh.log,add=(d,t,e,k,x)=>L.push(Object.assign({d,t,e},k?{k}:{},x||{}));
+  past.forEach(d=>{const lanes=[...new Set(s.progress.filter(p=>p.day===d).map(p=>p.lane))].sort((a,b)=>a-b),fs=s.finds.filter(f=>f.day===d);
+    add(d,'07:00','Dolazak na radilište');add(d,'07:10','Informisanje i podjela zadataka; brifing završen');
+    add(d,'07:25','Test detektora na UPMAH-3 (10 cm): 6 detektora ispravno','det');
+    add(d,'07:35','Početak rada: dvojci A, B i C u stazama '+lanes.join(', '));add(d,'08:05','Smjene deminera u stazama na svakih 30 min');
+    fs.forEach(f=>add(d,f.time,'Nalaz '+f.id+': '+f.type+', staza '+f.lane+' na '+num(f.dist,1)+' m, dubina '+f.depth+' cm','find'));
+    s.qc.filter(q=>q.day===d).forEach(q=>add(d,'13:15','Interna KK (vođa tima): staza '+(lanes[0]||1)+', detektor, uzorak '+num(q.m2,1)+' m², bez nalaza','qc'));
+    s.monitors.filter(m=>m.day===d).forEach(m=>add(d,'11:00','Interni nadzor: '+m.by,'mon'));
+    if(s.casevac===d)add(d,'13:30','CASEVAC vježba izvedena');
+    add(d,'12:00','Odmor tima 12:00–12:30');
+    const de=fs.filter(f=>f.act===ACTIONS[1]),ue=fs.filter(f=>f.act===ACTIONS[2]);
+    if(de.length)add(d,'14:30','Uništavanje na licu mjesta: '+de.map(f=>f.id).join(', ')+'; utrošeno '+num(0.2*de.length,2)+' kg TNT','dem',{kg:+(0.2*de.length).toFixed(2)});
+    if(ue.length)add(d,'14:45','Predato UES timu: '+ue.map(f=>f.id+' '+f.type).join(', '));
+    add(d,'15:00','Kraj rada; napuštanje radilišta');});
+}
+const mspSites=s=>S.sites.filter(x=>x.pack!=='RS'&&x.msp.id===s.msp.id);
+const person=fn=>org().ljudi.find(p=>p.fn===fn);
+const leader=()=>(person('Vođa tima')||{}).ime||'';
+const deminers=()=>org().ljudi.filter(p=>/^Deminer/.test(p.fn));
+const hasEq=k=>org().oprema.some(q=>q.kat===k&&(+q.kom||0)>0);
+const ruShort=s=>String(s.msp.ru||'').replace(/^RU\s*/,'RU ');
+const fmtG=k=>k?fmtD(k)+' godine':DOP;
+const typeList=fs=>{const by={};fs.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);const e=Object.entries(by);return e.map(([t,n])=>esc(t)+' – '+n+' kom').join(', ');};
+const opt=(on,label)=>`<span class="opt">${box(on)}${label}</span>`;
+const ciName=s=>esc(s.ci.oznaka)+(s.ci.naziv?' – '+esc(s.ci.naziv):'');
+const mspName=s=>esc(s.msp.id)+(s.msp.naziv?' '+esc(s.msp.naziv):'');
+const ptag=t=>`<div class="ptag">${t}</div>`;
+const sgn=(cap,name)=>`<div class="sgl"><span class="sgn">${name?esc(name):''}</span><small>${cap}</small></div>`;
+const dfoot=(name,s,day)=>`<div class="dfoot"><span>${esc(name)}</span><span>${esc(s.msp.id)} · ${esc(s.ci.oznaka)} · ${fmtD(day||TODAY)}</span></div>`;
+const missN=h=>(h.match(/class="miss"/g)||[]).length;
+function wdBetween(a,b){if(!a||!b||b<a)return null;let n=0,d=new Date(a+'T12:00:00');const e=new Date(b+'T12:00:00');while(d<=e){if(d.getDay()%6)n++;d=addDays(d,1);}return n;}
+// coordinates in the CRS chosen for documents (one system per document, as the standard requires)
+function planeXY(s,p){const o=outCrs(s);if(o===s.crs)return [p.Y,p.X];const w=planeToWgs(s,p);if(o==='UTM34'){const u=wgsToUtm34(w.lat,w.lon);return [u.E,u.N];}const g=wgsToGk6(w.lat,w.lon);return [g.Y,g.X];}
+const axes=s=>outCrs(s)==='UTM34'?['E','N']:['Y','X'];
+const xyCells=(s,p)=>{const q=planeXY(s,p);return `<td class="n mono">${gkn(q[0])}</td><td class="n mono">${gkn(q[1])}</td>`;};
+const yx=(s,p)=>{const q=planeXY(s,p);return 'Y= '+gkn(q[0])+'   X= '+gkn(q[1]);};
+
+/* ---------- day records: live log (s.log, stamped with the day) + archived past days (s.bh.log) ---------- */
+function dayLog(s,day){return s.log.filter(l=>(l.d||TODAY)===day).concat(bh(s).log.filter(l=>l.d===day)).sort((a,b)=>a.t.localeCompare(b.t));}
+function workDays(s){const d=new Set();s.progress.forEach(p=>d.add(p.day));s.finds.forEach(f=>d.add(f.day));bh(s).log.forEach(l=>d.add(l.d));s.log.forEach(l=>d.add(l.d||TODAY));return [...d].filter(Boolean).sort();}
+const dayM2=(s,day)=>s.progress.filter(p=>p.day===day).reduce((a,p)=>a+(p.to-p.from)*BA_R.lane,0);
+function destroyedOn(s,day){const ids=new Set(),any=new Set();
+  s.log.concat(bh(s).log).filter(l=>l.k==='dem').forEach(l=>(String(l.e).match(/N-\d+/g)||[]).forEach(i=>{any.add(i);if((l.d||TODAY)===day)ids.add(i);}));
+  return s.finds.filter(f=>ids.has(f.id)||(f.day===day&&f.act===ACTIONS[1]&&!any.has(f.id)));}
+function dayHours(s,day){const L=dayLog(s,day),m=t=>{const p=String(t).split(':');return +p[0]*60+(+p[1]||0);};
+  const st=L.find(l=>/^Početak rada/i.test(l.e)),en=L.slice().reverse().find(l=>/kraj rada|napuštanje radilišta/i.test(l.e));if(!st||!en)return null;
+  let mins=m(en.t)-m(st.t);L.forEach(l=>{const r=String(l.e).match(/odmor[^0-9]*(\d\d?:\d\d)\s*[–-]\s*(\d\d?:\d\d)/i);if(r)mins-=m(r[2])-m(r[1]);});return mins>0?mins/60:null;}
+// a log entry gets its day the moment it is written, so daily reports can be rebuilt for any day
+function stampLogs(){if(!S)return;let ch=false;S.sites.forEach(x=>(x.log||[]).forEach(l=>{if(!l.d){l.d=TODAY;ch=true;}}));if(ch)save();}
+
+/* ---------- true-scale map (prilog e, P12 sketch): north up, coordinates of breaking points and finds ---------- */
+function tsMap(s,o={}){
+  const ink='#111511',id='ts'+(++tsN),P2=(u,v)=>planeXY(s,toGK(s,u,v)),b=bounds(s.poly);
+  const poly=s.poly.map(p=>P2(p[0],p[1])),nt=planeXY(s,s.nt),fin=s.finds.map(f=>{const l=findLocal(f);return {f,p:P2(l[0],l[1])};});
+  const inc=o.inc?P2(o.inc[0],o.inc[1]):null,pts=poly.concat([nt],fin.map(x=>x.p),inc?[inc]:[]);
+  const e0=Math.min(...pts.map(p=>p[0]))-5,e1=Math.max(...pts.map(p=>p[0]))+5,n0=Math.min(...pts.map(p=>p[1]))-5,n1=Math.max(...pts.map(p=>p[1]))+5;
+  const sc=[100,200,250,500,1000,2000,2500,5000,10000].find(k=>(e1-e0)*1000/k<=(o.maxW||148)&&(n1-n0)*1000/k<=(o.maxH||160))||10000;
+  const k=1000/sc,mw=(e1-e0)*k,mh=(n1-n0)*k,PW=180,L=Math.max(20,(PW-mw)/2),T=4,PH=T+mh+16;
+  const X=e=>L+(e-e0)*k,Y=n=>T+(n1-n)*k,pth=a=>'M'+a.map(p=>X(p[0]).toFixed(2)+' '+Y(p[1]).toFixed(2)).join('L')+'Z';
+  const step=[5,10,20,25,50,100,200,500,1000].find(st=>(e1-e0)/st<=6&&(n1-n0)/st<=7)||2000,mono='font-family="IBM Plex Mono,monospace"';
+  let g=`<svg class="tsc" xmlns="http://www.w3.org/2000/svg" width="${PW}mm" height="${PH.toFixed(1)}mm" viewBox="0 0 ${PW} ${PH.toFixed(2)}" role="img" aria-label="Karta ${esc(s.ci.oznaka)}, razmjera 1:${sc}">
+    <defs><clipPath id="${id}c"><path d="${pth(poly)}"/></clipPath><clipPath id="${id}f"><rect x="${L}" y="${T}" width="${mw}" height="${mh}"/></clipPath>
+    <pattern id="${id}h" width="1.4" height="1.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="1.4" stroke="#2B784A" stroke-width="0.3"/></pattern></defs>
+    <rect x="${L}" y="${T}" width="${mw}" height="${mh}" fill="#fff" stroke="${ink}" stroke-width="0.3"/><g clip-path="url(#${id}f)">`;
+  for(let e=Math.ceil(e0/step)*step;e<=e1;e+=step)g+=`<line x1="${X(e)}" y1="${T}" x2="${X(e)}" y2="${T+mh}" stroke="#9fb3a8" stroke-width="0.12"/>`;
+  for(let n=Math.ceil(n0/step)*step;n<=n1;n+=step)g+=`<line x1="${L}" y1="${Y(n)}" x2="${L+mw}" y2="${Y(n)}" stroke="#9fb3a8" stroke-width="0.12"/>`;
+  g+=`<path d="${pth([P2(b.x0-0.5,0),P2(b.x1+0.5,0),P2(b.x1+0.5,-2),P2(b.x0-0.5,-2)])}" fill="#dcefe2"/><g clip-path="url(#${id}c)">`;
+  if(s.mode!=='boxes')for(let i=1;i<=laneCount(s);i++){const d=Math.min(laneDone(s,i),laneLen(s,i));if(d>0)g+=`<path d="${pth([P2(i-1,0),P2(i,0),P2(i,d),P2(i-1,d)])}" fill="url(#${id}h)"/>`;}
+  g+=`</g><path d="${pth(poly)}" fill="none" stroke="${ink}" stroke-width="0.4"/><line x1="${X(P2(b.x0-0.5,0)[0])}" y1="${Y(P2(b.x0-0.5,0)[1])}" x2="${X(P2(b.x1+0.5,0)[0])}" y2="${Y(P2(b.x1+0.5,0)[1])}" stroke="${ink}" stroke-width="0.35" stroke-dasharray="1.2 0.6"/>`;
+  const cx=poly.reduce((a,p)=>a+p[0],0)/poly.length,cy=poly.reduce((a,p)=>a+p[1],0)/poly.length;
+  poly.forEach((p,i)=>{const dx=p[0]-cx,dy=p[1]-cy,dl=Math.hypot(dx,dy)||1;g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="0.55" fill="${ink}"/><text x="${X(p[0])+dx/dl*2.6}" y="${Y(p[1])-dy/dl*2.6+0.7}" font-size="2.1" font-weight="700" text-anchor="middle">T${i+1}</text>`;});
+  fin.forEach((x,i)=>{const px=X(x.p[0]),py=Y(x.p[1]),r=0.95;g+=`<path d="M${px} ${py-r}L${px+r} ${py+r*.8}H${px-r}Z" fill="#BF2A1C"/><text x="${px+1.4}" y="${py+0.6}" font-size="1.7">${i+1} ${esc(x.f.type)}</text>`;});
+  g+=`<circle cx="${X(nt[0])}" cy="${Y(nt[1])}" r="1" fill="${ink}"/><circle cx="${X(nt[0])}" cy="${Y(nt[1])}" r="1.7" fill="none" stroke="${ink}" stroke-width="0.25"/><text x="${X(nt[0])+2.2}" y="${Y(nt[1])+3.2}" font-size="2" font-weight="700">NT</text>`;
+  if(inc)g+=`<path d="M${X(inc[0])-1.6} ${Y(inc[1])-1.6}L${X(inc[0])+1.6} ${Y(inc[1])+1.6}M${X(inc[0])+1.6} ${Y(inc[1])-1.6}L${X(inc[0])-1.6} ${Y(inc[1])+1.6}" stroke="#BF2A1C" stroke-width="0.6"/><text x="${X(inc[0])+2.2}" y="${Y(inc[1])-1.4}" font-size="2" font-weight="700" fill="#BF2A1C">mjesto nesreće</text>`;
+  g+=`</g><g transform="translate(${L+mw-7} ${T+3})"><path d="M0 0L-1.8 5H1.8Z" fill="${ink}"/><line x1="0" y1="4" x2="0" y2="9" stroke="${ink}" stroke-width="0.35"/><text x="2.2" y="3" font-size="2.2" font-weight="700">S</text></g>`;
+  for(let e=Math.ceil(e0/step)*step;e<=e1;e+=step)g+=`<text x="${X(e)}" y="${T+mh+2.6}" font-size="1.7" text-anchor="middle" ${mono}>${gkn(e).split(',')[0]}</text>`;
+  for(let n=Math.ceil(n0/step)*step;n<=n1;n+=step)g+=`<text x="${L-0.8}" y="${Y(n)+0.6}" font-size="1.7" text-anchor="end" ${mono}>${gkn(n).split(',')[0]}</text>`;
+  const bar=[5,10,20,25,50,100,200,500,1000].find(m=>m*k>=18)||1000,by=T+mh+7,bw=bar*k;
+  g+=`<rect x="${L}" y="${by}" width="${bw/2}" height="1.2" fill="${ink}"/><rect x="${L+bw/2}" y="${by}" width="${bw/2}" height="1.2" fill="#fff" stroke="${ink}" stroke-width="0.2"/>
+    <text x="${L}" y="${by+3.6}" font-size="1.9">0</text><text x="${L+bw}" y="${by+3.6}" font-size="1.9" text-anchor="middle">${bar} m</text>
+    <text x="${L+bw+8}" y="${by+1.4}" font-size="2.4" font-weight="700">R 1:${sc}</text><text x="${L+mw}" y="${by+1.4}" font-size="1.8" text-anchor="end">${esc(crsName())} · mreža ${step} m</text></svg>`;
+  return {svg:g,sc};
+}
+function findRows(s){return s.finds.map((f,i)=>`<tr><td>${i+1}.</td><td>${f.id}</td><td>${esc(f.type)}${f.qty>1?' ×'+f.qty:''}</td>${xyCells(s,findPos(s,f))}<td class="n">${f.depth}</td><td>${esc(f.act)}</td></tr>`).join('');}
+const tpRows=s=>s.poly.map((p,i)=>`<tr><td>T${i+1}</td>${xyCells(s,toGK(s,p[0],p[1]))}</tr>`).join('');
+
+/* ---------- Prilog 9: Dnevni izvještaj ---------- */
+function p9Doc(s,day){const o=org(),L=dayLog(s,day),ft=s.finds.filter(f=>f.day===day),dest=destroyedOn(s,day),m2=dayM2(s,day);
+  const kg=L.filter(l=>l.k==='dem').reduce((a,l)=>a+(+l.kg||0),0),info=s.info.filter(i=>i.day===day),cas=s.casevac&&s.casevac<=day?s.casevac:'';
+  const rows=(L.length?L.map(l=>`<tr><td class="mono">${esc(l.t)}</td><td>${esc(l.e)}</td></tr>`).join(''):`<tr><td></td><td>${DOP}: za ovaj dan nema zapisa u aplikaciji</td></tr>`)+'<tr class="hand"><td></td><td></td></tr>'.repeat(2);
+  return ptag('Prilog 9')+`<h4>DNEVNI IZVJEŠTAJ</h4>
+    <div class="dorg">${esc(o.naziv)} · ${esc(leader())}, vođa tima · ${esc(o.tim)}</div><div class="dsmall">(deminerska organizacija, naziv funkcije i oznaka odjeljenja-sekcije, tima)</div>
+    <table><tr><td><b>Datum:</b> ${fmtD(day)}</td><td><b>MSP</b> ${mspName(s)}</td><td><b>Naziv CI ili SI</b> ${ciName(s)}</td></tr></table>
+    <table><thead><tr><th style="width:64px">Vrijeme<br>(a)</th><th>Evidencija trajanja deminerskih aktivnosti i događaja<br>(b)</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="keep"><div class="sec">PODACI O RADU I POSTIGNUTIM EFEKTIMA</div><table>
+    <tr><td class="k">Metode rada:</td><td>${opt(0,'a-detektor')}${opt(0,'b-pipalica')}${opt(m2>0,'c-kombinacija')}${opt(0,'d-prege')}${opt(0,'d-stroj/mašina (prethodni rad)')}</td></tr>
+    <tr><td class="k">Očišćeno:</td><td>${num(m2,1)} m² deminera, ${hasEq('poek')?DOP:'0'} m² prege, ukupno: <b>${num(m2,1)} m²</b></td></tr>
+    <tr><td class="k">Otkriveno mina/ESZR:</td><td>${ft.length?ft.map(f=>esc(f.type)+' – '+f.qty+' kom ('+f.id+', staza '+f.lane+')').join('; '):'nema'}</td></tr>
+    <tr><td class="k">Uništeno mina/ESZR:</td><td>${dest.length?dest.map(f=>esc(f.type)+' – '+f.qty+' kom ('+f.id+')').join('; '):'nema'}</td></tr>
+    <tr><td class="k">Utrošeno ES za uništavanje:</td><td>${kg?num(kg,2)+' kg TNT':(dest.length?DOP:'—')}</td></tr>
+    <tr><td class="k">CASEVAC vježba izvedena:</td><td>${cas?fmtD(cas)+' godine':DOP}</td></tr>
+    <tr><td class="k">Napomena:</td><td>${info.map(i=>'Prikupljena nova informacija o miniranosti tokom TI: '+esc(i.t)).join('<br>')||'—'}</td></tr></table>
+    <div class="sigrow"><b>Vođa tima:</b>${sgn('(ime i prezime, potpis)',leader())}</div></div>`+dfoot('Dnevni izvještaj · Prilog 9',s,day);}
+
+/* ---------- Prilog 11: Sedmični izvještaj (A4 landscape) ---------- */
+function p11Opis(x,w,wf,cum){const b=bh(x);
+  if(!x.start)return 'Rad na '+esc(x.ci.oznaka)+' još nije počeo'+(b.planOd?'; planirani početak '+fmtD(b.planOd):'')+'.';
+  const out=[],pd=b.planDana||wdBetween(b.planOd,b.planDo),el=wdBetween(x.start,w.to);
+  if(pd&&el!=null){const exp=Math.min(1,el/pd)*totalArea(x);out.push(cum>=exp*0.9?'Operacije se odvijaju po izvedbenom planu':'Operacije kasne u odnosu na izvedbeni plan (planirano oko '+num(exp)+' m², realizirano '+num(cum)+' m²)');}
+  else out.push('Da li se operacije odvijaju po planu: '+DOP);
+  const nd=deminers().length;out.push('rad '+(nd?nd+' deminera u dvojcima':'deminera')+' u radnim stazama širine '+BA_R.lane+' m'+(x.pairs.length?' (staze '+x.pairs.map(p=>p.lane).join(', ')+')':''));
+  const types=[...new Set(wf.map(f=>f.type))];
+  if(!types.length)out.push('u sedmici nisu pronađena ES');
+  else if(x.ci.ocekivano){const ex=x.ci.ocekivano.toLowerCase(),un=types.filter(t=>!ex.includes(t.toLowerCase()));out.push(un.length?'pronađena su i neočekivana ES: '+esc(un.join(', ')):'pronađena ES su očekivana prema dosijeu');}
+  else out.push('pronađena ES očekivana ili ne: '+DOP);
+  out.push('tehnička metoda: manuelno, kombinacija detektora i pipalice');const t=out.join('; ')+'.';return t.charAt(0).toUpperCase()+t.slice(1);}
+function p11Doc(s){const o=org(),w=weeklyWindow(),list=mspSites(s);
+  const rows=list.map((x,i)=>{const b=bh(x),st=b.vrsta==='staze',wk=rangeM2(x,w.from,w.to),cum=rangeM2(x,'0000',w.to),wf=x.finds.filter(f=>f.day>=w.from&&f.day<=w.to);
+    const pair=(v,d)=>`<td class="n">${st?num(v,d):'—'}</td><td class="n">${st?'—':num(v,d)}</td>`,f=x.start||b.planOd,g=x.status==='završeno'?b.kraj:(x.estEnd||b.planDo);
+    return `<tr><td>${i+1}.</td><td>${x.ci.tip==='SI'?'SI':'CI'} ${ciName(x)}</td>${pair(totalArea(x),0)}${pair(wk,1)}${pair(cum,1)}<td>${f?fmtD(f):DOP}</td><td>${g?fmtD(g):DOP}</td><td>${typeList(wf)||'nema'}</td></tr>
+      <tr><td></td><td colspan="10"><b>Opis toka aktivnosti:</b> ${p11Opis(x,w,wf,cum)}</td></tr>`;}).join('');
+  const info=list.flatMap(x=>x.info.filter(i=>i.day>=w.from&&i.day<=w.to).map(i=>Object.assign({ci:x.ci.oznaka},i)));
+  return ptag('Prilog 11')+`<h4>SEDMIČNI IZVJEŠTAJ O AKTIVNOSTIMA TEHNIČKOG IZVIĐANJA I ČIŠĆENJA ZA MSP ${esc(mspNo(s))}</h4>
+    <table class="hd"><tr><td style="width:50%"><b>Deminerska organizacija</b> ${esc(o.naziv)}</td><td><b>Za:</b> Ured/Kancelarija BHMAC – ${esc(ruShort(s))}</td></tr>
+    <tr><td><b>Broj</b> ${DOP}</td><td><b>ZA ZAVRŠENU SEDMICU (datum) od</b> ${fmtD(w.from)} <b>do</b> ${fmtD(w.to)} godine</td></tr>
+    <tr><td><b>Od</b> ${fmtD(TODAY)} godine</td><td></td></tr></table>
+    <table class="p11t"><thead><tr><th rowspan="2">Red. broj</th><th rowspan="2">Ciljana ili sistematska istraga</th><th colspan="2">Zadana površina (m²)</th><th colspan="2">Realizirano (m²)</th><th colspan="2">Ukupno realizirano (m²)</th><th rowspan="2">Datum početka</th><th rowspan="2">Procijenjeni datum završetka</th><th rowspan="2">Pronađena ES</th></tr>
+    <tr><th>Radne staze</th><th>Čišćenje</th><th>Radne staze</th><th>Čišćenje</th><th>Radne staze</th><th>Čišćenje</th></tr>
+    <tr class="let"><th>(a)</th><th>(b)</th><th colspan="2">(c)</th><th colspan="2">(d)</th><th colspan="2">(e)</th><th>(f)</th><th>(g)</th><th>(h)</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="sec">NOVE INFORMACIJE O MINIRANOSTI PRIKUPLJENE NETEHNIČKIM METODAMA ZA MSP ${esc(mspNo(s))}</div>
+    <table><thead><tr><th style="width:56px">Red. broj</th><th>Zapisnik o miniranju, informator, broj i raspored mina, itd.</th></tr></thead>
+    <tbody>${info.length?info.map((i,n)=>`<tr><td>${n+1}.</td><td>${esc(i.t)} (${esc(i.ci)}, ${fmtD(i.day)})</td></tr>`).join(''):'<tr><td>1.</td><td>Nema novih informacija.</td></tr>'}</tbody></table>
+    <div class="sigr">${sgn('(odgovorna osoba dem. organizacije)',o.odgovorna.ime)}</div>
+    <p class="note noprint">Objašnjenja za kolone: (b) podaci o CI/SI; (c) zadana (planirana) površina; (d) sedmična realizacija; (e) ukupna realizacija; (f) datum početka ili očekivani početak; (g) procijenjeni datum završetka (ako je završen, tačan datum); (h) vrsta i broj pronađenih mina/ESZR po CI/SI. „Radne staze” ili „Čišćenje” se bira u listu Organizacija, tim i oprema.</p>
+    <p class="note">NAPOMENA: Izvještaj se uručuje BHMAC-u svakog ponedjeljka do 16,00 sati za prethodnu sedmicu (rok: ${longDate(w.deadline)}).</p>`+dfoot('Sedmični izvještaj · Prilog 11',s);}
+
+/* ---------- Prilog 13: Stručni izvještaj o ES ---------- */
+function p13Doc(s){const o=org(),m=mspX(s);
+  const g=c=>{const by={};s.finds.filter(f=>f.cat===c).forEach(f=>{const e=by[f.type]=by[f.type]||{n:0,r:[]};e.n+=f.qty;e.r.push(f.id+' (staza '+f.lane+', '+num(f.dist,1)+' m, '+f.depth+' cm, '+String(f.cond||'').toLowerCase()+')');});return Object.entries(by);};
+  const rows=arr=>{const L='abcdefghij';let h='';for(let i=0;i<Math.max(4,arr.length);i++){const e=arr[i];h+=`<tr><td style="width:30px">(${L[i]})</td><td>${e?esc(e[0]):''}</td><td class="n" style="width:48px">${e?e[1].n:''}</td><td>${e?esc(e[1].r.join('; ')):''}</td></tr>`;}return h;};
+  const sec=(n,t,c)=>`<table><thead><tr><th style="width:30px">${n}.</th><th>${t}</th><th style="width:48px">Kom</th><th>OPIS ILI PRIMJEDBA</th></tr></thead><tbody>${rows(g(c))}</tbody></table>`;
+  const mi=s.finds.filter(f=>f.cat==='MI');
+  return ptag('Prilog 13')+`<h4>STRUČNI IZVJEŠTAJ O ES</h4>
+    <table class="p13"><thead><tr><th style="width:30px">BR</th><th colspan="4">PRVI DIO</th></tr></thead><tbody>
+    <tr><td>1.</td><td class="k2">Ime deminerske ili UES organizacije</td><td>${esc(o.naziv)}</td><td class="k2">Izvjestio (ime i prezime), funkcija</td><td>${dv(leader())}, vođa tima</td></tr>
+    <tr><td>2.</td><td class="k2">MSP</td><td>${mspName(s)}</td><td class="k2">Datum izvještaja</td><td>${fmtD(TODAY)}</td></tr>
+    <tr><td>3.</td><td class="k2">Najbliži grad</td><td>${dv(m.grad)}</td><td class="k2">CI ili SI</td><td>${ciName(s)}</td></tr>
+    <tr><td>4.</td><td class="k2">Naziv karte</td><td>${dv(m.kartaNaziv)}</td><td class="k2">List karte i broj</td><td>${dv(m.kartaList)}</td></tr>
+    <tr><td>5.</td><td class="k2">Razmjera</td><td>${dv(m.kartaRazmjer)}</td><td class="k2">Koordinate zadatka</td><td class="mono">${yx(s,s.nt)}<br><span class="dsmall">${esc(crsName())}, nulta tačka</span></td></tr></tbody></table>
+    <div class="sec">DRUGI DIO</div>${sec(6,'VRSTA UKLONJENIH PP MINA','PP')}${sec(7,'VRSTA UKLONJENIH PT MINA','PT')}${sec(8,'VRSTA UKLONJENOG NUS-a','NUS')}
+    <table><tr><td style="width:30px">9.</td><td>BROJ UKLONJENIH MINA IZNENAĐENJA</td><td class="n" style="width:80px">${mi.reduce((a,f)=>a+f.qty,0)}</td></tr></table>
+    <p class="note">NAPOMENA: Ovaj izvještaj se popunjava i po potrebi prilaže uz Izjavu o čišćenju površine. Fotografije treba koristiti kao dodatni dokaz opisu neidentifikovanih ili neobičnih eksplozivnih sredstava. Sve mine iznenađenja treba detaljno opisati na posebnom listu.</p>
+    ${mi.length?`<div class="sec">POSEBNI LIST: OPIS MINA IZNENAĐENJA</div><table><thead><tr><th>ID</th><th>Položaj</th><th>Dubina</th><th>Opis</th></tr></thead><tbody>${mi.map(f=>`<tr><td>${f.id}</td><td>staza ${f.lane}, ${num(f.dist,1)} m</td><td>${f.depth} cm</td><td>${f.note?esc(f.note)+'; ':''}${DOP}</td></tr>`).join('')}</tbody></table>`:''}`
+    +dfoot('Stručni izvještaj o ES · Prilog 13',s);}
+
+/* ---------- Prilog 6: Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI ---------- */
+function p6Fields(s=site()){const b=bh(s),m=s.msp,o=org(),fs=s.finds,staze=b.vrsta==='staze',cl=clearedM2(s),utm=outCrs(s)==='UTM34';
+  const wire=fs.filter(f=>/žic|upaljač|geler|fragment/i.test(f.note||''));const mons=[...new Set(s.monitors.map(x=>x.by))];
+  const karta=[m.kartaNaziv,m.kartaList&&('list '+m.kartaList),m.kartaRazmjer,m.kartaGod&&('izdanje '+m.kartaGod+'.')].filter(Boolean).join(', ');
+  const end=b.kraj||(s.status==='završeno'?'':null);
   return [
-    [1,'Naziv deminerske organizacije',esc(ORG)],[2,'Izjavu sastavio (operativni oficir ili program-menadžer)',''],[3,'Naziv MSP',esc(s.msp.id+' '+s.msp.naziv)],
-    [4,'Naziv CI/SI',esc(s.ci.oznaka+' ('+(s.ci.tip==='CI'?'ciljana':'sistematska')+' istraga)')],[5,'Karta (naziv-broj, razmjer, godina izdanja)',esc(s.msp.karta)],
-    [6,'Koordinatni sistem',box(S.crs==='UTM34')+'UTM '+box(S.crs!=='UTM34')+'Gaus Kruger'],[7,'Koordinate ulaska u SOPO/POPO','<span class="mono">'+crsFmt(s,s.nt)+'</span>'],
-    [8,'Datum početka / datum završetka radova – zadnji dan uzorkovanja',fmtD(s.start)+' / '+(done?fmtD(TODAY):'')],
-    [9,'Korištene metode rada',box(1)+'Manuelna '+box(0)+'Mašinska '+box(0)+'Pregiranje'],
-    [10,'Očišćena definisana površina manuelno u m²',num(clearedM2(s),1)],[11,'Tretirano površine mašinskom pripremom u m²','0'],
-    [12,'Očišćeno pregama kroz radne staze unutar redukovane površine u m²','0'],[13,'Očišćeno manuelno kroz radne staze unutar redukovane površine u m²','0'],
-    [14,'Redukovana površina u m²',''],[15,'Dubina pretrage u radnim stazama u cm',R.minDepth+' (minimum po standardu)'],
-    [16,'Metode internog monitoringa','Vizuelno, detektor, pipalica'],[17,'Interni monitoring obavio i veličina internog uzorkovanja u m²',esc((s.monitors[0]||{}).by||'')+' · '+num(qcM2(s),1)+' m²'],
-    [18,'Monitorska organizacija koja je obavljala monitoring',''],[19,'Vrste i količine otkrivenih ES',Object.entries(by).map(([t,n])=>esc(t)+' ×'+n).join(', ')],
-    [20,'Vrste i količine aktiviranih ES i ostalih naznaka ES',fs.filter(f=>/žic/i.test(f.note)).length?'Potezna žica ('+fs.filter(f=>/žic/i.test(f.note)).length+'), uz '+fs.filter(f=>/žic/i.test(f.note)).map(f=>esc(f.type)).join(', '):'Nema']
-  ];}
-function p6Annex(s){return [['a','Spisak osoba tima sa funkcijama',true],['b','Pregled radnih dana i sati rada sa postignutim efektima',true],['c','Dnevni izvještaji ('+new Set(s.progress.map(p=>p.day)).size+')',true],['d','Pregled korištene opreme',true],['e','Karta očišćene površine sa lomnim tačkama i nalazima',true],['f','Radna skica napredovanja',true],['g','Interni izvještaji o monitoringu ('+s.monitors.length+')',s.monitors.length>0],['h','Opis toka izvođenja aktivnosti',false],['i','Zapisnik o upoznavanju organa vlasti/krajnjeg korisnika',false],['k','Zapisnik o prikupljenim informacijama tokom TI',true]];}
+    [1,'Naziv deminerske organizacije',esc(o.naziv)],[2,'Izjavu sastavio: (operativni oficir ili program-menadžer)',o.sastavio.ime?esc(o.sastavio.ime+(o.sastavio.poz?', '+o.sastavio.poz.toLowerCase():'')):''],
+    [3,'Naziv MSP (minski sumnjive površine)',mspName(s)],[4,'Naziv CI/SI (lokacija za ciljanu/ sistematsku istragu)',ciName(s)+' ('+(s.ci.tip==='SI'?'sistematska':'ciljana')+' istraga)'],
+    [5,'Karta (naziv-broj plana ili karte, razmjer i godina izdanja)',esc(karta)],[6,'Koordinatni sistem',opt(utm,'UTM')+opt(!utm,'Gaus Kruger')],
+    [7,'Koordinate ulaska u SOPO/POPO','<span class="mono">'+yx(s,s.nt)+'</span>'],
+    [8,'Datum početka/datum završetka radova – zadnji dan uzorkovanja',s.start?fmtD(s.start)+' / '+(end?fmtD(end):DOP):''],
+    [9,'Korištene metode rada',opt(1,'Manuelna')+opt(0,'Mašinska')+opt(0,'Pregiranje')],
+    [10,'Očišćena definisana površina manuelno u m2',staze?'0':num(cl,1)],[11,'Tretirano površine mašinskom pripremom u m2',hasEq('mas')?'':'0'],
+    [12,'Očišćeno pregama kroz radne staze unutar redukovane površine u m2',hasEq('poek')?'':'0'],[13,'Očišćeno manuelno kroz radne staze unutar redukovane površine u m2',staze?num(cl,1):'0'],
+    [14,'Redukovana površina u m2',b.redukovano!=null?num(b.redukovano,1):''],[15,'Dubina pretrage u radnim stazama u cm',b.dubina?String(b.dubina):''],
+    [16,'Metode internog monitoringa','Manuelno (detektor i pipalica)'],
+    [17,'Interni monitoring obavio i veličina izvršenog internog uzorkovanja u m2',mons.length?esc(mons.join(', '))+'; uzorkovano '+num(qcM2(s),1)+' m² ('+num(cl?qcM2(s)/cl*100:0,1)+'% očišćene površine)':''],
+    [18,'Monitorska organizacija koja je obavljala monitoring',esc(b.monOrg)],[19,'Vrste i količine otkrivenih ES',fs.length?typeList(fs):'Nisu otkrivena ES'],
+    [20,'Vrste i količine aktiviranih ES i ostalih naznaka ES',wire.length?wire.map(f=>esc(f.note)+' ('+f.id+', '+esc(f.type)+')').join('; '):'Nema aktiviranih ES ni drugih naznaka']];}
+function p6Prilozi(s){const days=workDays(s);return [
+  ['a','Spisak osoba odjeljenja (tima, sekcija) ili više njih koji su izvodili operacije sa funkcijama.','p6a','Spisak osoba tima sa funkcijama'],
+  ['b','Pregled radnih dana i sati rada sa postignutim efektima po angažovanim odjeljenjima-sekcijama, timovima i grupama (podaci iz dnevnih izvještaja za deminere i prege, kao i poseban prilog za mehaničku pripremu ako je vršena).','p6b','Pregled radnih dana i sati rada sa postignutim efektima'],
+  ['c','Dnevni izvještaji (deminerskih timova, prega, mehaničke pripreme).'+(days.length?' Broj dnevnih izvještaja: '+days.length+'.':''),'p6c','Dnevni izvještaji (Prilog 9), '+days.length],
+  ['d','Pregled korištene opreme u primijenjenim metodama (naziv, vrsta – tip i količina).','p6d','Pregled korištene opreme'],
+  ['e','Grafički prikaz (skica/karta) očišćenih površina za datu CI/SI u razmjeri maksimalne krupnoće 1:1000, sa koordinatama lomnih tačaka i mjestima i koordinatama nađenih mina sa vrstom mine, ovjeren od strane deminerske organizacije i potpisan od strane višeg referenta za kontrolu kvaliteta i stručnog saradnika za kontrolu kvaliteta/inspektora nadležnog RU/K BHMAC-a.','p6e','Grafički prikaz očišćene površine (karta)'],
+  ['f','Radna skica (skica napredovanja) deminerske organizacije.','p6f','Radna skica (skica napredovanja)'],
+  ['g','Fotokopije internih izvještaja o monitoringu (osobe za interni monitoring organizacije).','p6g','Interni izvještaji o monitoringu'],
+  ['h','Opis toka izvođenja aktivnosti (problemi u provođenju plana, greške utvrđene internom kontrolom kvaliteta i kontrolom BHMAC-a i kako su iste riješene, usporedba nađenih mina sa poznatim podacima o miniranosti, odstupanja od izvedbenog plana sa obrazloženjima, nove informacije o miniranosti prikupljene u toku provođenja aktivnosti, sva zapažanja koja mogu koristiti za definisanje statusa tretiranih i susjednih površina, opis aktivnosti koja ukazuju na pouzdanost standardnog kvaliteta čišćenja i dr., te bitne fotografije koje to dokazuju).','p6h','Opis toka izvođenja aktivnosti'],
+  ['i','Zapisnik o upoznavanju organa vlasti/krajnjeg korisnika sa rezultatima CI/SI.','p7','Zapisnik o upoznavanju organa vlasti/krajnjeg korisnika (Prilog 7)'],
+  ['k','Zapisnik o prikupljenim informacijama tokom TI.','p1','Zapisnik o prikupljenim informacijama tokom TI (Prilog 1)']];}
+function p6Doc(s){const f=p6Fields(s),o=org(),draft=s.status!=='završeno';
+  return ptag('Prilog 6'+(draft?' · <b>NACRT</b> (radovi u toku)':''))+`<p class="pre">Na osnovu člana 35. Zakona o deminiranju u Bosni i Hercegovini („Službeni glasnik BiH”, broj 5/02), Centar za uklanjanje mina u Bosni i Hercegovini i izvođač radova (deminerska organizacija) sastavljaju:</p>
+    <h4>Z A P I S N I K</h4><div class="dsub">o izvršenim aktivnostima tehničkog izviđanja i čišćenja CI/SI</div>
+    <div class="sec">I - IZJAVA DEMINERSKE ORGANIZACIJE</div>
+    <table>${f.map(x=>`<tr><td style="width:26px">${x[0]}.</td><td class="k">${esc(x[1])}</td><td>${x[2]||DOP}</td></tr>`).join('')}</table>
+    <div class="sec">II - SLUŽBENE DEKLARACIJE</div>
+    <table class="decl keep"><thead><tr><th>PREDAJA OD STRANE DEMINERSKE ORGANIZACIJE</th><th>PREUZIMANJE OD STRANE CENTRA ZA UKLANJANJE MINA BiH</th></tr></thead><tbody>
+    <tr><td>Izjavljujem da je čišćenje površine opisane ovim dokumentom (završnim izvještajem) izvršeno prema Standardu za protivminske akcije u BiH do navedene dubine.<br>Ocjenjujem da je površina kvalitetno očišćena od ES za sigurno korištenje i kao takvu je predajem BHMAC-u.</td>
+      <td>Ja ${BL}, inspektor za KK BHMAC-a na osnovu vlastitih saznanja i kroz eksterni monitoring zadatka od strane referenta za KK ${BL}, RU ${BL}, PREUZIMAM navedenu očišćenu površinu (u ime BHMAC-a), jer su monitoring i uzorkovanje pokazali da je čišćenje površine izvršeno u skladu sa zahtjevima Standarda za protivminske akcije u BiH.${sgn('(potpis inspektora)','')}</td></tr>
+    <tr><td>21. Ime i položaj odgovorne osobe deminerske organizacije:<br><b>${o.odgovorna.ime?esc(o.odgovorna.ime+(o.odgovorna.poz?', '+o.odgovorna.poz:'')):DOP}</b></td><td>22. Ime šefa ureda/kancelarije BHMAC-a:<br>${BL}</td></tr>
+    <tr><td>23. Potpis i pečat<div class="stamp">M.P.</div></td><td>24. Potpis i pečat<div class="stamp">M.P.</div></td></tr>
+    <tr><td>25. Datum predaje: ${BL}<br>Broj izjave: ${BL}</td><td>26. Datum preuzimanja: ${BL}<br>Broj zapisnika: ${BL}</td></tr></tbody></table>
+    <div class="sec">III - PRILOZI</div><p style="margin:2px 0 4px">Prilozi deminerske organizacije:</p>
+    <table class="plist">${p6Prilozi(s).map(a=>`<tr><td style="width:26px">${a[0]})</td><td>${esc(a[1])}</td></tr>`).join('')}</table>`+dfoot('Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI · Prilog 6',s);}
+
+/* ---------- Prilog 6, prilozi a) – h) ---------- */
+const FN_ORDER=['Vođa tima','Deminer (ujedno zamjenik)','Deminer','Kerovođa','Operater mašine','Supervizor','Medicinar','Vozač'];
+function p6a(s){const o=org(),ppl=o.ljudi.filter(p=>!/Rukovodilac|Operativni/.test(p.fn)).sort((a,b)=>(FN_ORDER.indexOf(a.fn)+99)%99-(FN_ORDER.indexOf(b.fn)+99)%99);
+  return ptag('Prilog 6 – a)')+`<div class="dsub" style="margin-bottom:6px">Spisak osoba tima ili timova sa funkcijama, koji su izvodili MSP ${esc(mspNo(s))} CI/SI ${esc(s.ci.oznaka)} zadatak</div>
+    <h4>S P I S A K</h4><div class="dorg">${esc(o.tim)} · ${esc(o.naziv)}</div><div class="dsmall">(naziv funkcije odjeljenja-tima sekcije, grupe)</div>
+    <table><thead><tr><th style="width:46px">Red. broj</th><th>Ime i prezime</th><th>Funkcija</th><th>Primjedbe (Ime POEK-a i dr.)</th></tr></thead>
+    <tbody>${ppl.length?ppl.map((p,i)=>`<tr><td>${i+1}.</td><td>${dv(p.ime)}</td><td>${esc(p.fn.toLowerCase())}</td><td>${esc(p.nap||'')}</td></tr>`).join(''):`<tr><td></td><td colspan="3">${DOP}</td></tr>`}</tbody></table>
+    <div class="sigrow"><b>Vođa tima:</b>${sgn('(ime i prezime, potpis)',leader())}</div>`+dfoot('Prilog 6 a) Spisak osoba tima',s);}
+function p6b(s){const days=workDays(s),nd=deminers().length;let H=0,M=0,hOk=true;
+  const rows=days.map((d,i)=>{const h=dayHours(s,d),m2=dayM2(s,d),fs=s.finds.filter(f=>f.day===d),act=fs.filter(f=>/žic|upaljač|aktivir/i.test(f.note||''));
+    if(h==null)hOk=false;else H+=h;M+=m2;const dt=new Date(d+'T12:00:00');
+    return `<tr><td>${i+1}.</td><td>${DAYS[dt.getDay()]}, ${fmtD(d)}</td><td class="n">${h!=null?num(h,1):(d===TODAY?'u toku':DOP)}</td><td class="n">${nd||DOP} / ${num(m2,1)}</td><td class="n">— / —</td><td>${typeList(fs)||'—'}${act.length?'; '+act.map(f=>esc(f.note)).join('; '):''}</td></tr>`;}).join('');
+  const mach=hasEq('mas')?`<h4 style="margin-top:18px">P R E G L E D</h4><div class="dsub">Pregled rada po danima i postignutim efektima mašinske pripreme sa mašinom ${esc(org().oprema.filter(q=>q.kat==='mas').map(q=>q.tip).join(', '))}<br><span class="dsmall">(vrsta i tip stroja-eva)</span></div>
+    <table><thead><tr><th>Red. broj</th><th>Dan-datum rada</th><th>Ostvareno efektivnih radnih sati</th><th>Angažirano strojeva/ ostvareno m2</th><th>Procijenjena vrsta i količina aktiviranih mina/NUS</th></tr></thead><tbody><tr><td>1.</td><td colspan="4">${DOP}: aplikacija ne vodi dnevnik mašinske pripreme</td></tr></tbody></table>`
+    :'<p class="note">Mašinska priprema nije vršena; pregled rada mašinske pripreme se ne prilaže.</p>';
+  return ptag('Prilog 6 – b)')+`<h4>P R E G L E D</h4><div class="dsub">rada po danima i postignutim efektima rada deminera i prega · MSP ${esc(mspNo(s))} · ${ciName(s)}</div>
+    <table><thead><tr><th style="width:40px">Red. broj</th><th>Dan-datum rada</th><th>Ostvareno efektivnih radnih sati</th><th>Angažirano deminera/ ostvareno m2</th><th>Angažirano prega /ostvareno m2</th><th>Vrste i količine nađenih, kao i aktiviranih mina/ES (naznačiti ako se radi o aktiviranim minama, poteznoj žici, upaljaču i dr)</th></tr></thead>
+    <tbody>${rows||`<tr><td></td><td colspan="5">Nema radnih dana.</td></tr>`}</tbody>
+    <tfoot><tr><td></td><td><b>Svega:</b></td><td class="n"><b>${num(H,1)}</b>${hOk?'':' *'}</td><td class="n"><b>${num(M,1)}</b></td><td class="n">—</td><td>${typeList(s.finds)||'—'}</td></tr></tfoot></table>
+    ${hOk?'':'<p class="note">* Zbir sati ne uključuje dane bez upisanog početka i kraja rada u dnevniku.</p>'}${mach}`+dfoot('Prilog 6 b) Pregled rada po danima',s);}
+function p6c(s){const d=workDays(s);return d.length?d.map(x=>p9Doc(s,x).replace('<div class="ptag">Prilog 9</div>','<div class="ptag">Prilog 6 – c) · Prilog 9</div>')):[ptag('Prilog 6 – c)')+'<h4>DNEVNI IZVJEŠTAJI</h4><p>Za ovu CI/SI još nema dnevnih izvještaja.</p>'+dfoot('Prilog 6 c) Dnevni izvještaji',s)];}
+function eqRows(){const g={};org().oprema.forEach(q=>{const n=['pip','ost'].includes(q.kat)?q.tip:(EQK[q.kat]||'')+' '+q.tip,k=n.trim();const e=g[k]=g[k]||{n:k,kom:0,sn:[],kat:q.kat};e.kom+=(+q.kom||0);if(q.sn)e.sn.push(q.sn);});return Object.values(g);}
+function p6d(s){const r=eqRows();return ptag('Prilog 6 – d)')+`<h4>P R E G L E D</h4><div class="dsub">korištene opreme u primijenjenim metodama · MSP ${esc(mspNo(s))} · ${ciName(s)}</div>
+    <table><thead><tr><th style="width:40px">Red. broj</th><th>Naziv, vrsta-tip</th><th style="width:48px">Kom</th><th>Primjedba</th></tr></thead>
+    <tbody>${r.length?r.map((e,i)=>`<tr><td>${i+1}.</td><td>${esc(e.n)}</td><td class="n">${e.kom}</td><td>${e.sn.length?'ser. br. '+esc(e.sn.join(', ')):(e.kat==='det'||e.kat==='mas'?DOP+' serijski broj':'')}</td></tr>`).join(''):`<tr><td></td><td colspan="3">${DOP}</td></tr>`}</tbody></table>`+dfoot('Prilog 6 d) Pregled korištene opreme',s);}
+function p6e(s){const m=tsMap(s),[a,b]=axes(s);
+  return ptag('Prilog 6 – e)')+`<h4>GRAFIČKI PRIKAZ OČIŠĆENE POVRŠINE</h4><div class="dsub">${mspName(s)} · ${ciName(s)} · R 1:${m.sc} · ${esc(crsName())} · stanje na dan ${fmtD(TODAY)}</div>
+    ${m.svg}${m.sc>1000?'<p class="note"><span class="miss">Standard traži razmjeru 1:1000 ili krupniju: štampati na većem formatu (A3) ili po listovima.</span></p>':''}
+    <div class="legend paper"><span><i class="lg-h"></i>očišćeno (radne staze)</span><span><i class="lg-s"></i>sigurna staza / nulta linija</span><span><i class="lg-b"></i>granica CI/SI, lomne tačke T1–T${s.poly.length}</span><span><i class="lg-f"></i>nađena ES (broj iz tabele)</span><span>● NT nulta (orijentirna) tačka</span></div>
+    <div class="keep"><div class="sec">Koordinate lomnih tačaka</div><table><thead><tr><th>Tačka</th><th>${a}</th><th>${b}</th></tr></thead><tbody><tr><td>NT</td>${xyCells(s,s.nt)}</tr>${tpRows(s)}</tbody></table></div>
+    <div class="sec">Mjesta i koordinate nađenih mina/ES</div><table><thead><tr><th>Br.</th><th>ID</th><th>Vrsta</th><th>${a}</th><th>${b}</th><th>Dubina cm</th><th>Postupak</th></tr></thead><tbody>${findRows(s)||'<tr><td colspan="7">Nisu nađena ES.</td></tr>'}</tbody></table>
+    <p class="note">Površina iz koordinata lomnih tačaka: ${num(totalArea(s),1)} m²; očišćeno ${num(clearedM2(s),1)} m². Štampati na A4 bez skaliranja („Stvarna veličina” / 100 %) da razmjera bude tačna.</p>
+    <div class="sig sig3 keep"><div>Ovjera deminerske organizacije (M.P.)</div><div>Viši referent za kontrolu kvaliteta</div><div>Stručni saradnik za KK / inspektor RU/K BHMAC-a</div></div>`+dfoot('Prilog 6 e) Grafički prikaz očišćene površine',s);}
+function p6f(s){const b=bounds(s.poly),u=(520-40)/(b.x1-b.x0+2),approx=Math.round(1000/(u*182/520)/50)*50||50,[a,c]=axes(s);
+  const nt=planeXY(s,s.nt),rows=s.poly.map((p,i)=>{const q=planeXY(s,toGK(s,p[0],p[1])),dy=q[0]-nt[0],dx=q[1]-nt[1];const az=(Math.atan2(dy,dx)/D2R+360)%360;
+    return `<tr><td>T${i+1}</td><td class="n mono">${gkn(q[0])}</td><td class="n mono">${gkn(q[1])}</td><td class="n">${num(az,1)}°</td><td class="n">${num(Math.hypot(dx,dy),2)}</td></tr>`;}).join('');
+  return ptag('Prilog 6 – f)')+`<h4>RADNA SKICA (SKICA NAPREDOVANJA)</h4><div class="dsub">${mspName(s)} · ${ciName(s)} · stanje na dan ${fmtD(TODAY)} · približna razmjera 1:${approx}</div>
+    ${mapSVG(s,{paper:true,w:520})}
+    <div class="legend paper"><span><i style="background:#2B784A"></i>očišćeno</span><span><i style="background:#A86F0B"></i>staza u radu</span><span><i style="background:#C8E2D0"></i>sigurna staza</span><span><i class="lg-b"></i>granica, lomne tačke</span><span><i class="lg-f"></i>nađena ES</span><span>S – pravac sjevera</span></div>
+    <table><tr><td class="k">Orijentirna (nulta) tačka NT</td><td class="mono">${yx(s,s.nt)} · ${esc(crsName())}</td></tr><tr><td class="k">Azimut napredovanja</td><td>${s.az}° od NT; staze širine ${BA_R.lane} m od nulte linije</td></tr></table>
+    <div class="keep"><div class="sec">Tabela koordinata lomnih tačaka</div><table><thead><tr><th>Tačka</th><th>${a}</th><th>${c}</th><th>Direkcioni ugao od NT</th><th>Udaljenost od NT (m)</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="sec">Nađena ES po vrstama</div><table><thead><tr><th>Br.</th><th>ID</th><th>Vrsta</th><th>${a}</th><th>${c}</th><th>Dubina cm</th><th>Postupak</th></tr></thead><tbody>${findRows(s)||'<tr><td colspan="7">Nisu nađena ES.</td></tr>'}</tbody></table>
+    <p class="note">Direkcioni uglovi su u ravni projekcije. Ako se na terenu koristi busola, uračunati popravku za zbližavanje meridijana i magnetnu deklinaciju.</p>
+    <div class="sigrow"><b>Skicu izradio:</b>${sgn('(ime i prezime, potpis)',leader())}</div>`+dfoot('Prilog 6 f) Radna skica napredovanja',s);}
+function p6g(s){const ms=s.monitors,L=s.log.concat(bh(s).log),Q=['Sigurnosne udaljenosti na radilištu (Prilog 2)','Obilježavanje radilišta, sigurne staze i radnih staza','Test detektora na UPMAH-3 i evidencija detektora','Rad u radnoj stazi, smjene i odmori deminera','Interna kontrola kvaliteta uzorkovanjem','Medicinska podrška i plan CASEVAC','Dokumentacija na radilištu (dnevni izvještaj, evidencije)'];
+  const one=(m,i)=>{const e=L.find(l=>l.k==='mon'&&(l.d||TODAY)===m.day);return `<div class="keep${i?' pbs':''}"><h4>IZVJEŠTAJ O INTERNOM MONITORINGU br. ${i+1}</h4>
+    <table><tr><td class="k">ID broj zadatka</td><td>${mspName(s)} · ${ciName(s)}</td></tr><tr><td class="k">Lokacija</td><td>${esc(s.msp.naziv)}, ${esc(s.msp.opcina)}</td></tr>
+    <tr><td class="k">Datum i vrijeme kontrole</td><td>${fmtD(m.day)} ${e?'u '+esc(e.t):DOP}</td></tr><tr><td class="k">Kontrolu obavio</td><td>${esc(m.by)}</td></tr></table>
+    <table><thead><tr><th style="width:30px">R.br.</th><th>Kontrolirana pitanja</th><th>Nađeno stanje</th><th>Poduzete mjere</th></tr></thead><tbody>${Q.map((q,j)=>`<tr><td>${j+1}.</td><td>${q}</td><td>${DOP}</td><td></td></tr>`).join('')}</tbody></table>
+    <div class="sigrow"><b>Kontrolu obavio:</b>${sgn('(ime i prezime, potpis)',m.by.replace(/^Supervizor\s*/,''))}</div></div>`;};
+  return ptag('Prilog 6 – g)')+(ms.length?ms.map(one).join(''):'<h4>IZVJEŠTAJI O INTERNOM MONITORINGU</h4><p><span class="miss">Interni monitoring još nije upisan; standard traži najmanje svakih '+BA_R.monitorDays+' radnih dana po CI/SI.</span></p>')
+    +`<div class="sec">Interna kontrola kvaliteta uzorkovanjem (vođa tima)</div><table><thead><tr><th>Datum</th><th>Uzorak m²</th><th>Zapis iz dnevnika</th></tr></thead><tbody>${s.qc.map(q=>{const e=L.find(l=>l.k==='qc'&&(l.d||TODAY)===q.day);return `<tr><td>${fmtD(q.day)}</td><td class="n">${num(q.m2,1)}</td><td>${e?esc(e.t+' '+e.e):''}</td></tr>`;}).join('')||'<tr><td colspan="3">Nema upisa.</td></tr>'}</tbody>
+    <tfoot><tr><td><b>Ukupno</b></td><td class="n"><b>${num(qcM2(s),1)}</b></td><td>${num(clearedM2(s)?qcM2(s)/clearedM2(s)*100:0,1)}% očišćene površine (minimum ${BA_R.qcMin}%)</td></tr></tfoot></table>
+    <p class="note">Oblik izvještaja o internom monitoringu nije propisan prilogom Standarda; sadržaj prema poglavlju 3, tačka 13. stav 11. Uz zapisnik se prilažu fotokopije potpisanih izvještaja.</p>`+dfoot('Prilog 6 g) Interni izvještaji o monitoringu',s);}
+function p6h(s){const b=bh(s),o=org(),cl=clearedM2(s),q=qcM2(s),days=workDays(s),pd=b.planDana||wdBetween(b.planOd,b.planDo),fs=s.finds;
+  const L=s.log.concat(b.log).filter(l=>l.k==='qc'),bad=L.filter(l=>/greška|ponovni tretman/i.test(l.e)),types=[...new Set(fs.map(f=>f.type))];
+  const un=s.ci.ocekivano?types.filter(t=>!s.ci.ocekivano.toLowerCase().includes(t.toLowerCase())):null,area=totalArea(s);
+  const P=(t,x)=>`<div class="sec">${t}</div><p>${x}</p>`;
+  return ptag('Prilog 6 – h)')+`<h4>OPIS TOKA IZVOĐENJA AKTIVNOSTI</h4><div class="dsub">${mspName(s)} · ${ciName(s)}</div>`
+    +P('Tok izvođenja',s.start?`Radovi na ${esc(s.ci.oznaka)} izvođeni su od ${fmtD(s.start)}${b.kraj?' do '+fmtD(b.kraj):' (u toku)'}, ukupno ${days.length} radnih dana${pd?' od planiranih '+pd:''}. Angažovan je ${esc(o.tim)}: vođa tima ${esc(leader())}, ${deminers().length} deminera u dvojcima, medicinar. Rad u radnim stazama širine ${BA_R.lane} m od nulte linije, azimut napredovanja ${s.az}°, dubina pretrage ${b.dubina} cm. Očišćeno ${num(cl,1)} m² od ${num(area,1)} m² definisane površine.`:'Radovi još nisu počeli.')
+    +P('Problemi u provođenju plana i odstupanja od izvedbenog plana',(s.ci.pmin&&s.ci.pmax?`Definisana površina ${num(area)} m² je ${area>=s.ci.pmin&&area<=s.ci.pmax?'unutar':'izvan'} planiranog raspona ${num(s.ci.pmin)}–${num(s.ci.pmax)} m². `:'')+(b.tok?esc(b.tok):DOP))
+    +P('Greške utvrđene internom kontrolom kvaliteta i kontrolom BHMAC-a i kako su riješene',`Internom kontrolom kvaliteta uzorkovano je ${num(q,1)} m² (${num(cl?q/cl*100:0,1)}% očišćene površine) u ${s.qc.length} uzoraka; ${bad.length?'utvrđene greške: '+bad.map(l=>esc(l.e)).join('; '):'greške nisu utvrđene'}. Interni monitoring: ${s.monitors.length} izvještaja. Nalazi kontrole BHMAC-a: ${DOP}.`)
+    +P('Usporedba nađenih mina sa poznatim podacima o miniranosti',fs.length?`Nađeno: ${typeList(fs)}. `+(un==null?'Očekivana ES iz dosijea: '+DOP:(un.length?'Neočekivana u odnosu na dosije ('+esc(s.ci.ocekivano)+'): '+esc(un.join(', '))+'.':'Sva nađena ES odgovaraju podacima iz dosijea ('+esc(s.ci.ocekivano)+').')):'Nisu nađena ES.')
+    +P('Nove informacije o miniranosti prikupljene u toku provođenja aktivnosti',s.info.length?s.info.map(i=>fmtD(i.day)+': '+esc(i.t)).join('<br>'):'Nisu prikupljene nove informacije (Obavijest, Prilog 1, prilaže se prazna).')
+    +P('Zapažanja za definisanje statusa tretiranih i susjednih površina',DOP)
+    +P('Pouzdanost standardnog kvaliteta čišćenja',`Dnevni test detektora na UPMAH-3 upisan u ${days.filter(d=>dayLog(s,d).some(l=>l.k==='det')).length} od ${days.length} radnih dana; smjena u stazi najviše ${BA_R.shiftMax} min; razmak između dvojaca najmanje ${BA_R.pairGap} m. Fotodokumentacija: ${photoCount(s)}.`)
+    +`<div class="sigrow"><b>Opis sastavio:</b>${sgn('(ime i prezime, funkcija, potpis)',o.sastavio.ime)}</div>`+dfoot('Prilog 6 h) Opis toka izvođenja aktivnosti',s);}
+
+/* ---------- Prilog 7: Zapisnik o upoznavanju predstavnika vlasti/krajnjeg korisnika ---------- */
+function p7Doc(s){const b=bh(s),m=s.msp;
+  return ptag('Prilog 7 · Prilog 6 – i)')+`<h4>ZAPISNIK O UPOZNAVANJU PREDSTAVNIKA VLASTI/KRAJNJEG KORISNIKA SA REZULTATIMA CI/SI NA MSP</h4>
+    <table class="p13" style="margin-top:12px"><tr><td class="k2">Naziv MSP-a</td><td>${mspName(s)}</td><td class="k2">Broj i naziv lokacije za CI/SI</td><td>${ciName(s)}</td></tr>
+    <tr><td class="k2">RU/RK BHMAC-a</td><td>${esc(ruShort(s))}</td><td class="k2">Redukovana površina u m2</td><td>${b.redukovano!=null?num(b.redukovano,1):DOP}</td></tr>
+    <tr><td class="k2">Entitet</td><td>${dv(m.entitet)}</td><td class="k2">Očišćena površina u m2</td><td>${num(clearedM2(s),1)}</td></tr>
+    <tr><td class="k2">Kanton/regija</td><td>${dv(m.kanton)}</td><td class="k2">Datum početka</td><td>${s.start?fmtD(s.start):DOP}</td></tr>
+    <tr><td class="k2">Opština</td><td>${esc(m.opcina)}</td><td class="k2">Datum završetka uzorkovanja</td><td>${b.kraj?fmtD(b.kraj):DOP}</td></tr>
+    <tr><td colspan="4"><b>Pronađeni i uklonjeni dokazi miniranosti (vrste i broj)</b><div class="area">${s.finds.length?typeList(s.finds):'Nisu pronađeni dokazi miniranosti.'}</div></td></tr></table>
+    <p style="margin-top:16px">Datum: ${b.p7.datum?fmtD(b.p7.datum):BL}</p>
+    <div class="sig keep"><div>Predstavnik deminerske organizacije${sgn('(ime prezime i potpis)',org().odgovorna.ime||leader())}</div><div>Predstavnik BHMAC-a${sgn('(ime prezime i potpis)','')}</div></div>
+    <div class="sig keep" style="grid-template-columns:1fr"><div style="max-width:50%;margin:0 auto">Predstavnik vlasti/krajnjeg korisnika${sgn('(ime prezime i potpis)',b.p7.vlast)}</div></div>`+dfoot('Zapisnik o upoznavanju · Prilog 7',s);}
+
+/* ---------- Prilog 1: Obavijest o prikupljanju informacija o miniranosti tokom TI ---------- */
+function p1Doc(s){const m=s.msp,inf=s.info;
+  return ptag('Prilog 1 · Prilog 6 – k)')+`<h4>OBAVIJEST O PRIKUPLJANJU INFORMACIJA O MINIRANOSTI TOKOM TI<sup>1</sup></h4>
+    <div class="sec">OPŠTI PODACI ZA MSP</div><table><tr><td class="k">RU BHMAC-a</td><td>${esc(ruShort(s))}</td></tr><tr><td class="k">NAZIV MSP</td><td>${mspName(s)}</td></tr>
+    <tr><td class="k">BROJ I NAZIV CI/SI</td><td>${ciName(s)}</td></tr><tr><td class="k">OPĆINA/KANTON</td><td>${esc(m.opcina)}${m.kanton?' / '+esc(m.kanton):' / '+DOP}</td></tr>
+    <tr><td class="k">ANGAŽOVANA DEMINERSKA ORGANIZACIJA</td><td>${esc(org().naziv)}</td></tr></table>
+    <div class="sec">OPIS OBAVIJESTI</div><div class="gd">– Popunjava predstavnik deminerske organizacije · – Popunjava se ručno ili elektronski · – Navesti sve detalje informacije</div>
+    <table class="lines"><tbody>${inf.length?inf.map(i=>`<tr><td>${fmtD(i.day)}: ${esc(i.t)}</td></tr>`).join(''):'<tr><td>Tokom tehničkog izviđanja nisu prikupljene nove informacije o miniranosti.</td></tr>'}${'<tr class="hand"><td></td></tr>'.repeat(Math.max(2,6-inf.length))}</tbody></table>
+    <p style="margin-top:14px">Datum: ${BL}</p>
+    <div class="sig keep"><div>Obavijest predao:<br>Predstavnik deminerske organizacije${sgn('(ime prezime i potpis)',leader())}</div><div>Obavijest primio:<br>Predstavnik BHMAC-a${sgn('(ime prezime i potpis)','')}</div></div>
+    <p class="fnote"><sup>1</sup> Ova obavijest se mora dostaviti i kada nema prikupljenih informacija (prazna), potpisana od strane deminerske organizacije, kao prilog uz završnu dokumentaciju.</p>`+dfoot('Obavijest o prikupljanju informacija tokom TI · Prilog 1',s);}
+
+/* ---------- Prilog 10: Izvedbeni plan ---------- */
+function p10Doc(s){const o=org(),m=mspX(s),list=mspSites(s);list.forEach(bh);
+  const od=list.map(x=>x.bh.planOd).filter(Boolean).sort()[0]||'',dd=list.map(x=>x.bh.planDo).filter(Boolean).sort().pop()||'';
+  const dana=list.length===1&&list[0].bh.planDana?list[0].bh.planDana:wdBetween(od,dd);
+  const CAT=[['Rukovodeće',p=>/Rukovodilac|Operativni|Supervizor|Vođa/.test(p.fn)],['Deminer',p=>/^Deminer/.test(p.fn)],['Medicinar',p=>p.fn==='Medicinar'],['Kerovođa',p=>p.fn==='Kerovođa'],['Operater',p=>/^Operater/.test(p.fn)]];
+  let tot=0;const ppl=CAT.map((c,i)=>{const ps=o.ljudi.filter(c[1]);tot+=ps.length;return `<tr><td>${i+1}.</td><td>${c[0]}</td><td class="n">${ps.length}</td><td>${ps.map(p=>esc(p.fn.toLowerCase()+' – '+(p.ime||'?'))).join('<br>')||'—'}</td></tr>`;}).join('');
+  const eqc=(kat,label,i)=>{const qs=o.oprema.filter(q=>q.kat===kat),by={};qs.forEach(q=>{const e=by[q.tip]=by[q.tip]||{k:0,sn:[]};e.k+=(+q.kom||0);if(q.sn)e.sn.push(q.sn);});
+    const n=qs.reduce((a,q)=>a+(+q.kom||0),0),need=kat==='det'||kat==='mas';
+    return `<tr><td>${i}.</td><td>${label}</td><td>${Object.entries(by).map(([t,e])=>esc(t)+(need||e.sn.length?' – ser. br. '+(e.sn.length?esc(e.sn.join(', ')):DOP):'')).join('<br>')||'—'}</td><td class="n">${n||'—'}</td></tr>`;};
+  const extra=eqRows().filter(e=>e.kat==='pip'||e.kat==='ost');
+  const ciPlan=x=>{const b=bh(x),pd=b.planDana||wdBetween(b.planOd,b.planDo),nd=deminers().length,dets=o.oprema.filter(q=>q.kat==='det').length,sup=person('Supervizor');
+    return `<div class="keep"><div class="sec">${esc(x.ci.oznaka)} (${esc(x.ci.naziv||'naziv')}):</div><p>Cilj: ${x.ci.tip==='SI'?'sistematska':'ciljana'} istraga, ${b.vrsta==='staze'?'radne staze unutar redukovane površine':'čišćenje definisane površine'} (${x.ci.pmin?num(x.ci.pmin):DOP}–${x.ci.pmax?num(x.ci.pmax):DOP} m²)${x.ci.ocekivano?'; očekivana ES prema dosijeu: '+esc(x.ci.ocekivano):''}. Angažirani kapaciteti: vođa tima, ${nd||DOP} deminera u dvojcima, medicinar sa sanitetskim vozilom, ${dets||DOP} metal detektora. Planirani broj radnih dana: ${pd||DOP} (${b.planOd?fmtD(b.planOd):DOP} – ${b.planDo?fmtD(b.planDo):DOP}). Radno vrijeme: ${dv(o.radnoVrijeme)}; odmori: ${dv(o.odmori)}. Način rada interne kontrole: vođa tima uzorkovanjem najmanje ${BA_R.qcMin}% očišćene površine; interni monitoring${sup?' ('+esc(sup.fn.toLowerCase()+' '+sup.ime)+')':''} najmanje svakih ${BA_R.monitorDays} radnih dana. Mjesto ulaska u sumnjivu površinu: nulta tačka ${yx(x,x.nt)} (${esc(crsName())}), azimut napredovanja ${x.az}°. Raspored i broj istražnih staza: ${laneCount(x)} radnih staza širine ${BA_R.lane} m od nulte linije, razmak između dvojaca najmanje ${BA_R.pairGap} m. Tehničke metode: manuelno, kombinacija detektora i pipalice; dubina pretrage ${b.dubina} cm.</p></div>`;};
+  return ptag('Prilog 10')+`<h4>IZVEDBENI PLAN</h4>
+    <table class="hd"><tr><td class="k">DEMINERSKA ORGANIZACIJA - IZVOĐAČ:</td><td>${esc(o.naziv)}</td></tr><tr><td class="k">DEMINERSKA ORGANIZACIJA - PODIZVOĐAČ:</td><td>${o.podizvodjac?esc(o.podizvodjac):'—'}</td></tr>
+    <tr><td class="k">Broj:</td><td>${DOP}</td></tr><tr><td class="k">Datum:</td><td>${fmtD(TODAY)}</td></tr><tr><td class="k">Za:</td><td>BHMAC – ${esc(ruShort(s))}</td></tr>
+    <tr><td class="k">Predmet:</td><td><b>IZVEDBENI PLAN ZA MSP ${esc(mspNo(s))}</b></td></tr></table>
+    <div class="sec">1. OSNOVNI PODACI O MSP-u</div>
+    <table><tr><td style="width:44px">1.1.</td><td class="k">Naziv MSP:</td><td>${mspName(s)}</td></tr><tr><td>1.2.</td><td class="k">Ukupna površina MSP:</td><td>${m.km2!=null&&m.km2!==''?num(+m.km2,3)+' km²':DOP}</td></tr>
+    <tr><td>1.3.</td><td class="k" colspan="2">Definisane površine za tehničko izviđanje i čišćenje:</td></tr>
+    ${list.map((x,i)=>`<tr><td>1.3.${i+1}.</td><td class="k">${esc(x.ci.oznaka)} – ${esc(x.ci.naziv||'')}</td><td>površina: min. ${x.ci.pmin?num(x.ci.pmin):DOP} m² max. ${x.ci.pmax?num(x.ci.pmax):DOP} m²</td></tr>`).join('')}
+    <tr><td>1.4.</td><td class="k">Vrsta aktivnosti:</td><td>Tehničko izviđanje i čišćenje</td></tr></table>
+    <div class="sec">2. SPISAK ANGAŽOVANOG OSOBLJA ZA MSP</div>
+    <table><thead><tr><th style="width:36px">R.br.</th><th>OSOBLJE</th><th style="width:56px">BROJ</th><th>FUNKCIJA, PREZIME I IME</th></tr></thead><tbody>${ppl}</tbody><tfoot><tr><td></td><td><b>UKUPNO:</b></td><td class="n"><b>${tot}</b></td><td></td></tr></tfoot></table>
+    ${o.ljudi.some(p=>p.fn==='Vozač')?'<p class="note noprint">Vozač nije kategorija osoblja u Prilogu 10; naveden je u spisku tima (Prilog 6 a).</p>':''}
+    <div class="sec">3. SPISAK SREDSTAVA I OPREME</div>
+    <table><thead><tr><th rowspan="2" style="width:36px">R. br.</th><th rowspan="2">NAZIV SREDSTAVA I OPREME</th><th colspan="2">IZVOĐAČ</th></tr><tr><th>Marka i tip</th><th style="width:48px">kom</th></tr></thead>
+    <tbody>${eqc('prsluk','Prsluk zaštitni',1)}${eqc('vizir','Vizir samonosivi',2)}${eqc('det','Metal detektor sa serijskim brojem',3)}${eqc('mas','Mašina za deminiranje sa serijskim brojem',4)}${eqc('poek','POEK',5)}
+    ${extra.map((e,i)=>`<tr><td>${i+6}.</td><td>${esc(e.n)}</td><td>${e.sn.length?'ser. br. '+esc(e.sn.join(', ')):''}</td><td class="n">${e.kom}</td></tr>`).join('')}</tbody></table>
+    <div class="sec">4. PRIKUPLJENE INFORMACIJE PRIJE IZRADE IZVEDBENOG PLANA</div>
+    <p class="note noprint">Analizirati sve dostupne informacije iz Projekta za provođenje PMA na MSP i izlaskom na MSP doći do dodatnih; na osnovu njih predložiti nove CI/SI, korekcije granica ili promjene u načinu realizacije (mjesta ulaska, broj i raspored istražnih staza).</p>
+    <p>${dv(m.infoPrije)}</p>
+    <div class="sec">5. PLANIRANO VRIJEME IZVOĐENJA OPERACIJA</div>
+    <table><tr><td style="width:44px">4.1.</td><td class="k">Planirani početak rada:</td><td>${fmtG(od)}</td></tr><tr><td>4.2.</td><td class="k">Planirani završetak rada:</td><td>${fmtG(dd)}</td></tr><tr><td>4.3.</td><td class="k">Ukupno radnih dana:</td><td>${dana||DOP}</td></tr></table>
+    <p>U prilogu je dat opis planiranih aktivnosti na povezivanju sa lokalnom zajednicom i opis planiranih aktivnosti za svaku pojedinačnu CI ili SI.</p>
+    <div class="sigrow"><b>Potpis ovlaštenog lica:</b>${sgn('',o.odgovorna.ime)}</div><p style="margin:4px 0 0"><b>Pozicija:</b> ${dv(o.odgovorna.poz)}</p>
+    <div class="pb"><div class="sec">Opis planiranih aktivnosti na povezivanju sa lokalnom zajednicom</div><div class="gd">(odgovorna osoba deminerske organizacije, način prikupljanja informacija od predstavnika lokalne zajednice i način informisanja istih o aktivnostima, način dokumentovanja, način izvještavanja BHMAC-u itd)</div>
+    <p>${dv(m.zajednica)}</p>
+    <div class="sec">Opis planiranih aktivnosti za svaku pojedinačnu CI ili SI</div><div class="gd">(cilj CI ili SI, angažirani kapaciteti, planirani broj radnih dana, radno vrijeme, odmori, način rada interne kontrole, početak i kraj CI ili SI, mjesta ulaska u sumnjivu površinu, raspored i broj istražnih staza, tehničke metode itd.)</div>
+    ${list.map(ciPlan).join('')}</div>`+dfoot('Izvedbeni plan · Prilog 10',s);}
+
+/* ---------- Prilog 12: Inicijalni izvještaj o incidentu/nesreći od mina (BS / SR / EN) ---------- */
+const L3=(bs,sr,en)=>`<span class="l3"><b>${bs}</b><span>${sr}</span><i>${en}</i></span>`;
+const o3=(on,bs,sr,en)=>`<span class="opt">${box(on)}${bs} – ${sr} – <i>${en}</i></span>`;
+function p12Doc(s){const i=S.incident||S.incidents[S.incidents.length-1],o=org(),m=mspX(s),v=x=>i?dv(x):'';
+  const gk=i&&i.lane!=null?toGK(s,i.lane-0.5,i.dist||0):null,q=gk?planeXY(s,gk):null,utm=outCrs(s)==='UTM34',w=i?i.v:{},nb=(n)=>i?String(n||0):'';
+  const none=i&&!(w.lt||w.hv||w.k);
+  const inj=[['Bez povreda','Bez povreda','None',none,null],['Odraslih','Odraslih','Adults',null,w.ad],['Djece','Dece','Children',null,w.ch],['Manje ozljede','Manje ozlede','Minor injuries',null,w.lt],['Ozbiljne ozljede','Ozbiljne ozlede','Seriously injured',null,w.hv],['Ubijeno osoba','Ubijeno osoba','Killed person(s)',null,w.k]];
+  const LOC=[['Urbano područje','Urbano područje','Urban area'],['U prirodi','U prirodi','Country side'],['Tvornica','Fabrika','Factory'],['Škola','Škola','School'],['Bolnica','Bolnica','Hospital'],['Kasarna','Kasarna','Barracks'],['Kuća','Kuća','House'],['Ulica','Ulica','Street'],['Put','Put','Road'],['Željeznica','Železnica','Railways'],['Most','Most','Bridge'],['Staza','Staza','Path'],['Rijeka','Reka','River'],['Šuma','Šuma','Forest'],['Poljopriv. zemljište','Poljopriv. zemljište','Agricultural land'],['Močvara','Močvara','Swamp'],['Ravnica','Ravnica','Flat land'],['Kamenito zemljište','Kamenito zemljište','Stony land'],['Brdo','Brdo','Hill'],['Građ. otpad','Građ. otpad','Rubble'],['Visoka trava','Visoka trava','High grass'],['Ostalo','Ostalo','Other']];
+  const why=[['Zbog zemljoradnje','Zbog zemljoradnje','For farming'],['Zbog putovanja','Zbog putovanja','For travelling'],['Zbog sakupljanja drva','Zbog sakupljanja drva','To gather wood'],['Zbog lova/ribolova','Zbog lova/ribolova','For hunting/fishing'],['Zbog igre','Zbog igre','For playing'],['Ostalo','Ostalo','Other']];
+  const cat=i?i.cat:null,ask=i?DOP:'';
+  const sk=tsMap(s,i&&i.lane!=null?{inc:[i.lane-0.5,i.dist||0],maxH:92}:{maxH:92});
+  return ptag('Prilog 12')+`<div class="hdr3"><b>INICIJALNI IZVJEŠTAJ O INCIDENTU/NESREĆI OD MINA</b><b>INICIJALNI IZVEŠTAJ O INCIDENTU/NESREĆI OD MINA</b><b><i>INITIAL REPORT OF A MINE INCIDENT/ACCIDENT</i></b>
+    <span>Izvještaj poslati u roku od 6 sati u BHMAC na faks 033 667 311</span><span>Izveštaj poslati u roku od 6 časova u BHMAC na faks 033 667 311</span><span><i>Send this report – within 6 hours – to BH Mine Action Centre, Sarajevo, Fax. 033 667 311</i></span></div>
+    ${!i?'<p class="note noprint">Nema prijavljene nesreće. Obrazac se popunjava sam kad se na ekranu Hitno pokrene prijava; ovako odštampan služi kao prazan obrazac.</p>':''}
+    <table class="p12"><tbody>
+    <tr><td class="k2">${L3('Izvještaj popunio','Izveštaj popunio','Report made by')}</td><td>${i?esc(leader())+', vođa tima, '+esc(o.naziv):''}</td>
+      <td class="k2">${L3('Da li ljudi i dalje ulaze u ovo područje?','Da li ljudi i dalje ulaze u ovo područje?','Do people continue to go into this area?')}</td><td>${o3(0,'Da','Da','Yes')}${o3(0,'Ne','Ne','No')} ${ask}</td></tr>
+    <tr><td class="k2">${L3('Datum incidenta/nesreće','Datum incidenta/nesreće','Date of incident/accident')}</td><td>${i?fmtD(i.day):''}</td>
+      <td class="k2" rowspan="2">${L3('Ako da, zašto?','Ako da, zašto?','If yes, why?')}</td><td rowspan="2">${why.map(x=>o3(0,...x)).join('<br>')}</td></tr>
+    <tr><td class="k2">${L3('Vrijeme nesreće','Vreme nesreće','Time of accident')}</td><td>${i?esc(i.start):''}</td></tr>
+    <tr><td class="k2">${L3('Tel/faks broj','Tel/faks broj','Phone/Fax number')}</td><td>${i?dv(o.tel):''}</td>
+      <td class="k2">${L3('Da li je zona označena?','Da li je zona označena?','Is the area marked?')}</td><td>${o3(0,'Da, priručnim sredstvima','Da, priručnim sredstvima','Yes, local signs')}<br>${o3(0,'Da, službenim znacima','Da, službenim znacima','Yes, official signs')} ${ask}</td></tr>
+    <tr><td class="k2">${L3('Policijska stanica','Policijska stanica','Police Station')}${L3('Istražitelj','Istražitelj','Investigating Officer')}${L3('Šifra','Šifra','Case No')}</td><td>${ask}</td>
+      <td class="k2">${L3('Da li je do sada bilo incidenata/nesreća u ovoj zoni?','Da li je do sada bilo incidenata/nesreća u ovoj zoni?','Have incident/accidents occurred in this area before?')}</td><td>${o3(0,'Da','Da','Yes')}${o3(0,'Ne','Ne','No')} ${ask}</td></tr>
+    <tr><td class="k2">${L3('Lokacija/Selo','Lokacija/Selo','Location/Village')}</td><td>${i?mspName(s)+', '+esc(s.ci.oznaka)+', '+esc(i.where||''):''}</td>
+      <td class="k2" rowspan="2">${L3('Vrsta eksplozivnih sredstava','Vrsta eksplozivnih sredstava','Type of explosive')}</td><td>${o3(cat==='PP','Protupješad. mina','Protivpešad. mina','Anti-Personnel Mine')}<br>${o3(cat==='PT','Protutenkovska mina','Protivtenkovska mina','Anti-Tank Mine')}<br>${o3(cat==='NUS','NUS','NUS','UXO')}<br>${o3(cat==='?','Nepoznato','Nepoznato','Unknown')}</td></tr>
+    <tr><td class="k2">${L3('Najbliži grad','Najbliži grad','Nearest town')}</td><td>${i?dv(m.grad):''}</td><td>${L3('Ako je poznato, koji tip i količina?','Ako je poznato, koji tip i količina?','If known, what model, number')}${v(i&&i.model)}</td></tr>
+    <tr><td class="k2">${L3('Koordinate','Koordinate','Grid Reference')}</td><td colspan="3">${opt(i&&utm,'UTM')}${opt(i&&!utm,'Gauss Kruger')} &nbsp; I-I-E <span class="mono">Y= ${q?gkn(q[0]):''}</span> &nbsp; S-S-N <span class="mono">X= ${q?gkn(q[1]):''}</span>${q?' <span class="dsmall">('+esc(crsName())+')</span>':''}</td></tr></tbody></table>
+    <table class="p12 keep"><thead><tr><th>${L3('OZLJEDE','OZLEDE','INJURIES')}</th><th>${L3('Broj','Broj','Number of')}</th><th>${L3('Ime(na) ozlijeđenog(ih)','Ime(na) ozleđenog(ih)','Name(s) of victim(s)')}</th><th>${L3('Dob','God.','Age')}</th><th>${L3('Detalji/Opaske','Detalji/Primedbe','Details/Remarks')}</th></tr></thead>
+    <tbody>${inj.map(r=>`<tr><td>${L3(r[0],r[1],r[2])}</td><td class="n">${r[3]!==null?box(r[3]):nb(r[4])}</td><td>${r[4]?DOP:''}</td><td>${r[4]?DOP:''}</td><td></td></tr>`).join('')}</tbody></table>
+    <div class="sec">${L3('LOKACIJA NESREĆE','LOKACIJA NESREĆE','LOCATION OF ACCIDENT')}</div><div class="locg">${LOC.map(x=>o3(0,...x)).join('')}</div>${i?'<p class="note">'+DOP+': označiti lokaciju nesreće.</p>':''}
+    <table class="p12 keep"><tr><td class="k2">${L3('Kratak opis radnji koje su prouzročile incident/nesreću','Kratak opis radnji koje su uzrokovale incident/nesreću','Brief description of activities that cause the incident/accident.')}</td>
+      <td><div class="area">${i?esc(i.desc||('Nesreća pri radu u radnoj stazi '+i.lane+' na '+num(i.dist||0,1)+' m od nulte linije, '+s.msp.id+' '+s.ci.oznaka+'.')):''}</div></td></tr></table>
+    <div class="keep"><div class="sec" style="text-align:center">↓ ↓ ↓ ${L3('Skica lokacije','Skica lokacije','Site Sketch').replace(/<\/?span[^>]*>/g,' ')} ↓ ↓ ↓</div>
+    <div class="dsub">${L3('Sjever','Sever','North').replace(/<\/?span[^>]*>/g,' ')} ↑ · R 1:${sk.sc}</div>${sk.svg}</div>`+dfoot('Inicijalni izvještaj o incidentu/nesreći · Prilog 12',s,i?i.day:TODAY);}
+
+/* ---------- registry, single view, Paket za predaju ---------- */
+const pg=(h,cls)=>({h,cls:cls||''});
+const BHD={p9:s=>[pg(p9Doc(s,TODAY))],p11:s=>[pg(p11Doc(s),'wide p11')],p13:s=>[pg(p13Doc(s))],p6:s=>[pg(p6Doc(s))],p12:s=>[pg(p12Doc(s),'wide')],
+  p10:s=>[pg(p10Doc(s))],p1:s=>[pg(p1Doc(s))],p7:s=>[pg(p7Doc(s))],p6a:s=>[pg(p6a(s))],p6b:s=>[pg(p6b(s))],p6c:s=>p6c(s).map(h=>pg(h)),p6d:s=>[pg(p6d(s))],
+  p6e:s=>[pg(p6e(s))],p6f:s=>[pg(p6f(s))],p6g:s=>[pg(p6g(s))],p6h:s=>[pg(p6h(s))],pak:s=>pakPages(s)};
+function pakParts(s){const P=[['P6','Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI (Prilog 6)',[p6Doc(s)]]];
+  p6Prilozi(s).forEach(a=>{const k=a[2],h=k==='p7'?[p7Doc(s)]:k==='p1'?[p1Doc(s)]:k==='p6c'?p6c(s):[{p6a,p6b,p6d,p6e,p6f,p6g,p6h}[k](s)];
+    P.push([a[0]+')',a[3],h]);});
+  P.push(['P13','Stručni izvještaj o ES (Prilog 13), uz izjavu o čišćenju',[p13Doc(s)]]);
+  P.push(['FOTO','Fotodokumentacija nalaza',[fotoDoc(s)+dfoot('Fotodokumentacija nalaza',s)]]);return P;}
+function pakPages(s){const P=pakParts(s);let n=0;
+  const toc=`<h4>PAKET ZA PREDAJU</h4><div class="dsub">Zapisnik o izvršenim aktivnostima tehničkog izviđanja i čišćenja CI/SI sa prilozima<br>${mspName(s)} · ${ciName(s)} · ${esc(org().naziv)}</div>
+    <table><thead><tr><th style="width:52px">Prilog</th><th>Dokument</th><th style="width:60px">Listova</th><th class="noprint" style="width:110px">Stanje</th></tr></thead><tbody>${P.map(p=>{const m=p[2].reduce((a,h)=>a+missN(h),0);return `<tr><td>${esc(p[0])}</td><td>${esc(p[1])}</td><td class="n">${p[2].length}</td><td class="noprint">${m?'<span class="miss">dopuniti: '+m+'</span>':'<b>spremno</b>'}</td></tr>`;}).join('')}</tbody></table>
+    <p class="note">Redoslijed prema Prilogu 6, dio III – Prilozi. Štampati na A4 bez skaliranja; svaki dokument počinje na novoj strani.</p>`+dfoot('Paket za predaju · sadržaj',s);
+  return [pg(toc)].concat(...P.map(p=>p[2].map(h=>pg(h))));}
+function bhShow(s,k,v){const pages=BHD[k](s),multi=pages.length>1||k==='pak';
+  const nav=k==='p6'?`<div class="card noprint"><div class="card-h"><h3>Prilozi uz zapisnik</h3><span class="sub">III – Prilozi</span></div><div class="pnav">${p6Prilozi(s).map(a=>`<button class="btn sm" type="button" data-act="doc" data-k="${a[2]}">${a[0]})</button>`).join('')}<button class="btn sm primary" type="button" data-act="doc" data-k="pak">Paket za predaju</button></div></div>`:'';
+  const miss=pages.reduce((a,p)=>a+missN(p.h),0),hint=miss?`<p class="fine noprint" style="margin:0">Polja označena „dopuniti” (${miss}) aplikacija ne zna. Unesi ih u Radilišta › Organizacija, tim i oprema ili dopuni rukom.</p>`:'';
+  if(!multi){v.innerHTML=docShell(pages[0].h,k).replace('<pre ',nav+hint+'<pre ');const el=$('#docEl');pages[0].cls.split(' ').filter(Boolean).forEach(c=>el.classList.add(c));}
+  else v.innerHTML=`<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">‹ Svi izvještaji</button>${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">Štampaj / PDF</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">Kopiraj tekst</button></div>${hint}
+    <pre class="out noprint" id="copyOut" hidden></pre><div class="docs" id="docEl">${pages.map(p=>`<article class="doc ${p.cls}">${p.h}</article>`).join('')}</div>`;
+  if(k==='pak')hydratePhotos();}
+
+/* ---------- Organizacija, tim i oprema (sheet from Radilišta) ---------- */
+let orgSec='org';
+function openOrg(sec){if(sec)orgSec=sec;const o=org(),s=site(),ba=s.pack!=='RS',m=ba?mspX(s):null,b=ba?bh(s):null,keep=$('#orgForm')?$('#sheet').scrollTop:0;
+  const f=(id,label,val,x)=>`<label class="field">${label}<input id="${id}" value="${esc(val==null?'':val)}" ${x||''}></label>`;
+  const ta=(id,label,val)=>`<label class="field">${label}<textarea id="${id}" style="font-family:var(--font-body);min-height:70px">${esc(val||'')}</textarea></label>`;
+  const sel=(id,label,val,opts)=>`<label class="field">${label}<select id="${id}">${opts.map(([k2,t])=>`<option value="${k2}" ${k2===val?'selected':''}>${t}</option>`).join('')}</select></label>`;
+  const det=(k2,title,body)=>`<details data-sec="${k2}" ${orgSec===k2?'open':''}><summary>${title}</summary><div class="ofs">${body}</div></details>`;
+  const fns=p=>(FN.includes(p.fn)?FN:FN.concat([p.fn])).map(x=>`<option ${x===p.fn?'selected':''}>${esc(x)}</option>`).join('');
+  const ppl=o.ljudi.map((p,i)=>`<div class="orow"><input data-pi="${i}" data-pk="ime" value="${esc(p.ime)}" placeholder="Ime i prezime" aria-label="Ime i prezime"><select data-pi="${i}" data-pk="fn" aria-label="Funkcija">${fns(p)}</select><button type="button" class="x" data-bh="delP" data-i="${i}" aria-label="Ukloni osobu">×</button><input class="span3" data-pi="${i}" data-pk="nap" value="${esc(p.nap||'')}" placeholder="Primjedba (akreditacija, ime POEK-a…)" aria-label="Primjedba"></div>`).join('');
+  const eq=o.oprema.map((q,i)=>`<div class="orow eq"><select data-ei="${i}" data-ek="kat" aria-label="Vrsta">${Object.entries(EQK).map(([k2,t])=>`<option value="${k2}" ${k2===q.kat?'selected':''}>${t}</option>`).join('')}</select><input data-ei="${i}" data-ek="kom" type="number" min="0" value="${+q.kom||0}" inputmode="numeric" aria-label="Komada"><button type="button" class="x" data-bh="delE" data-i="${i}" aria-label="Ukloni opremu">×</button><input class="span3" data-ei="${i}" data-ek="tip" value="${esc(q.tip||'')}" placeholder="Marka i tip" aria-label="Marka i tip"><input class="span3 mono" data-ei="${i}" data-ek="sn" value="${esc(q.sn||'')}" placeholder="Serijski broj" aria-label="Serijski broj"></div>`).join('');
+  openSheet(`<div class="sheet-h"><div><div class="label">Podaci za obrasce BHMAC</div><h2>Organizacija, tim i oprema</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+    <form id="orgForm" class="orgf" autocomplete="off">
+    ${det('org','Organizacija',`${f('oNaz','Naziv deminerske organizacije',o.naziv)}${f('oPod','Podizvođač (ako postoji)',o.podizvodjac)}${f('oTel','Telefon / faks',o.tel)}
+      <div class="grid2">${f('oOdg','Odgovorna osoba (polje 21)',o.odgovorna.ime)}${f('oOdgP','Položaj',o.odgovorna.poz)}</div>
+      <div class="grid2">${f('oSas','Izjavu sastavio (polje 2)',o.sastavio.ime)}${f('oSasP','Funkcija',o.sastavio.poz)}</div>
+      <div class="grid2">${f('oTim','Oznaka tima',o.tim)}${f('oRv','Radno vrijeme',o.radnoVrijeme)}</div>${f('oOdm','Odmori',o.odmori)}`)}
+    ${det('ppl','Osoblje · '+o.ljudi.length,ppl+'<button class="btn sm" type="button" data-bh="addP">+ Dodaj osobu</button>')}
+    ${det('eq','Sredstva i oprema · '+o.oprema.reduce((a,q)=>a+(+q.kom||0),0)+' kom',eq+'<button class="btn sm" type="button" data-bh="addE">+ Dodaj opremu</button><p class="fine">Detektori i mašine se upisuju pojedinačno sa serijskim brojem.</p>')}
+    ${ba?det('msp','MSP i karta · '+esc(s.msp.id),`<div class="grid2">${f('mKm','Ukupna površina MSP (km²)',m.km2==null?'':String(m.km2).replace('.',','),'inputmode="decimal"')}${f('mGr','Najbliži grad',m.grad)}</div>
+      <div class="grid2">${f('mEnt','Entitet',m.entitet)}${f('mKan','Kanton/regija',m.kanton)}</div>${f('mOpc','Općina',m.opcina)}
+      <div class="grid2">${f('mKN','Naziv karte',m.kartaNaziv)}${f('mKL','List karte i broj',m.kartaList)}</div><div class="grid2">${f('mKR','Razmjer',m.kartaRazmjer)}${f('mKG','Godina izdanja',m.kartaGod,'inputmode="numeric"')}</div>
+      ${ta('mInf','Prikupljene informacije prije izrade izvedbenog plana',m.infoPrije)}${ta('mZaj','Povezivanje sa lokalnom zajednicom (Prilog 10)',m.zajednica)}<p class="fine">Podaci o MSP-u važe za sve CI/SI ovog MSP-a.</p>`)
+     +det('ci','CI/SI · '+esc(s.ci.oznaka),`${f('cNaz','Naziv lokacije CI/SI',s.ci.naziv)}<div class="grid2">${f('cMin','Površina min. (m²)',s.ci.pmin||'','inputmode="numeric"')}${f('cMax','Površina max. (m²)',s.ci.pmax||'','inputmode="numeric"')}</div>
+      ${sel('cVr','Rad na CI/SI',b.vrsta,[['ciscenje','Čišćenje definisane površine'],['staze','Radne staze unutar redukovane površine']])}
+      <div class="grid2">${f('cRed','Redukovana površina (m²)',b.redukovano==null?'':String(b.redukovano).replace('.',','),'inputmode="decimal"')}${f('cDub','Dubina pretrage (cm)',b.dubina,'inputmode="numeric"')}</div>
+      ${f('cOck','Očekivana ES prema dosijeu',s.ci.ocekivano,'placeholder="npr. PMA-2, PROM-1"')}${f('cMon','Monitorska organizacija (polje 18)',b.monOrg,'placeholder="npr. Nije vršen"')}`)
+     +det('plan','Izvedbeni plan i završetak',`<div class="grid2">${f('pOd','Planirani početak',b.planOd,'type="date"')}${f('pDo','Planirani završetak',b.planDo,'type="date"')}</div>
+      <div class="grid2">${f('pDa','Ukupno radnih dana',b.planDana==null?'':b.planDana,'inputmode="numeric" placeholder="računa se"')}${f('pKr','Zadnji dan uzorkovanja',b.kraj,'type="date"')}</div>
+      ${ta('pTok','Problemi i odstupanja od plana (prilog h)',b.tok)}<div class="grid2">${f('p7D','Datum upoznavanja vlasti (P7)',b.p7.datum,'type="date"')}${f('p7V','Predstavnik vlasti/korisnika',b.p7.vlast)}</div>`)
+     :'<p class="fine">MSP, CI/SI i izvedbeni plan se unose za BiH radilišta.</p>'}
+    <button class="btn primary block" type="button" data-bh="orgSave">Sačuvaj</button></form>`);
+  $('#orgForm').addEventListener('submit',e=>{e.preventDefault();orgSave();});
+  if(keep)$('#sheet').scrollTop=keep;}
+const pnum=v=>{const n=parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:null;};
+function collectOrg(){const o=org(),s=site(),g=id=>{const e=$('#'+id);return e?e.value.trim():undefined;},set=(obj,k,id,fn)=>{const v=g(id);if(v!==undefined)obj[k]=fn?fn(v):v;};
+  set(o,'naziv','oNaz');set(o,'podizvodjac','oPod');set(o,'tel','oTel');set(o.odgovorna,'ime','oOdg');set(o.odgovorna,'poz','oOdgP');set(o.sastavio,'ime','oSas');set(o.sastavio,'poz','oSasP');
+  set(o,'tim','oTim');set(o,'radnoVrijeme','oRv');set(o,'odmori','oOdm');
+  document.querySelectorAll('#orgForm [data-pi]').forEach(e=>{const p=o.ljudi[+e.dataset.pi];if(p)p[e.dataset.pk]=e.value.trim();});
+  document.querySelectorAll('#orgForm [data-ei]').forEach(e=>{const q=o.oprema[+e.dataset.ei];if(q)q[e.dataset.ek]=e.dataset.ek==='kom'?Math.max(0,parseInt(e.value,10)||0):e.value.trim();});
+  if(s.pack==='RS'||!$('#mKm'))return;const b=bh(s),pt={};
+  [['km2','mKm',pnum],['grad','mGr'],['entitet','mEnt'],['kanton','mKan'],['opcina','mOpc'],['kartaNaziv','mKN'],['kartaList','mKL'],['kartaRazmjer','mKR'],['kartaGod','mKG'],['infoPrije','mInf'],['zajednica','mZaj']].forEach(([k,id,fn])=>set(pt,k,id,fn));
+  pt.karta=[pt.kartaNaziv,pt.kartaRazmjer,pt.kartaList&&('list '+pt.kartaList),pt.kartaGod&&('izdanje '+pt.kartaGod+'.')].filter(Boolean).join(', ')||'—';
+  mspSites(s).forEach(x=>Object.assign(mspX(x),pt));
+  set(s.ci,'naziv','cNaz');set(s.ci,'ocekivano','cOck');set(s.ci,'pmin','cMin',v=>Math.round(pnum(v)||0));set(s.ci,'pmax','cMax',v=>Math.round(pnum(v)||0));
+  set(b,'vrsta','cVr');set(b,'redukovano','cRed',pnum);set(b,'dubina','cDub',v=>Math.round(pnum(v)||BA_R.minDepth));set(b,'monOrg','cMon');
+  set(b,'planOd','pOd');set(b,'planDo','pDo');set(b,'planDana','pDa',v=>{const n=pnum(v);return n?Math.round(n):null;});set(b,'kraj','pKr');set(b,'tok','pTok');set(b.p7,'datum','p7D');set(b.p7,'vlast','p7V');}
+function orgSave(){collectOrg();save();closeSheet();rerender();toast('Podaci za obrasce sačuvani.');}
+document.addEventListener('click',e=>{setTimeout(stampLogs,0);const el=e.target.closest('[data-bh]');if(!el)return;const a=el.dataset.bh,o=S&&org();if(!o)return;
+  const sec=(el.closest('details')||{dataset:{}}).dataset.sec;if(sec)orgSec=sec;
+  if(a==='org'){openOrg('org');return;}
+  if(a==='orgSave'){orgSave();return;}
+  collectOrg();
+  if(a==='addP')o.ljudi.push({id:'P-'+Date.now().toString(36),ime:'',fn:'Deminer',nap:''});
+  if(a==='delP')o.ljudi.splice(+el.dataset.i,1);
+  if(a==='addE')o.oprema.push({kat:'det',tip:'',sn:'',kom:1});
+  if(a==='delE')o.oprema.splice(+el.dataset.i,1);
+  save();openOrg();});
+document.addEventListener('submit',()=>setTimeout(stampLogs,0),true);
+document.addEventListener('toggle',e=>{const d=e.target;if(d.matches&&d.matches('.orgf details')&&d.open)orgSec=d.dataset.sec;},true);
 function csvText(){const s=site();const q=v=>{v=String(v==null?'':v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};const o=outCrs(s);
   const head=['id','projekat','sektor','datum','vrijeme','kategorija','vrsta','kolicina','lokacija','lokalno_1_m','lokalno_2_m','dubina_cm','stanje','postupak',o==='UTM34'?'utm34_E':'gk6_Y',o==='UTM34'?'utm34_N':'gk6_X','wgs84_lat','wgs84_lon','napomena'];
   return [head.join(',')].concat(s.finds.map(f=>{const g=findPos(s,f),w=planeToWgs(s,g);let a,b;if(o===s.crs){a=g.Y;b=g.X;}else if(o==='UTM34'){const u=wgsToUtm34(w.lat,w.lon);a=u.E;b=u.N;}else{const k2=wgsToGk6(w.lat,w.lon);a=k2.Y;b=k2.X;}
@@ -949,6 +1404,7 @@ function openSites(){
   openSheet(`<div class="sheet-h"><div><div class="label">${esc(ORG)}</div><h2>Radilišta</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
     ${S.sites.map(x=>`<button class="sitecard${x.id===S.active?' on':''}" type="button" data-act="pickSite" data-id="${x.id}"><span class="grow"><b>${esc(x.msp.id)} ${esc(x.msp.naziv)} · ${esc(x.ci.oznaka)}</b><br><span class="sub">${esc(x.msp.ru)} · ${num(clearedM2(x))} / ${num(totalArea(x))} m² · ${esc(x.status)}</span></span><span class="chip ${x.status==='u radu'?'work':''}">${x.id===S.active?'aktivno':'otvori'}</span></button>`).join('')}
     <button class="btn primary" type="button" data-act="newSite">+ Novo radilište iz dosijea</button>
+    <button class="btn" type="button" data-bh="org">Organizacija, tim i oprema</button>
     ${storageCard()}
     <div><div class="label" style="margin-bottom:6px">Paket zemlje</div><div class="packs">
       <div class="packrow"><span><b>Bosna i Hercegovina</b><br><span class="sub">BHMAC · ${esc(P.standard)}</span></span><span class="chip ok">aktivan</span></div>
