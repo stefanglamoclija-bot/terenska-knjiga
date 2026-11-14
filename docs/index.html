@@ -173,10 +173,17 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 .bx-a{stroke:var(--work);stroke-width:2}.bx-s{stroke:var(--ink);stroke-width:2.2}
 .bxp:hover{filter:brightness(.95)}
 .m-rail{fill:none;stroke:#8c9a2e;stroke-width:2.2;pointer-events:none}
+.bx-x{fill:url(#bxX)}.bx-m{stroke:var(--accent);stroke-width:2.6;stroke-dasharray:4 2}
+.m-bid{font-family:var(--font-mono);font-size:7px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:var(--surface-2);stroke-width:2px}
+.m-buf{fill:none;stroke:#8c9a2e;stroke-opacity:.22;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}.m-bufp{fill:#8c9a2e;fill-opacity:.22;pointer-events:none}
+.bxed{border:1px solid var(--line);border-radius:8px;padding:6px 10px}.bxed summary{font-weight:600;font-size:14px;cursor:pointer;min-height:36px;display:flex;align-items:center}
+.bxed-in{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px}
+.nsf select,.nsf input{min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2);font-size:14px}.nsf input{width:70px}
 .doc svg.sk{border:0;margin:0;background:none;width:100%;height:auto}
 .sk text{font-family:var(--font-body);fill:#1d2a33}
 .sk .sk-t{font-family:var(--font-display);font-weight:700;font-size:5.2px;letter-spacing:.35px}
 .sk .sk-s{font-size:2.9px}.sk .sk-l{font-size:2.35px}.sk .sk-c{font-family:var(--font-mono);font-size:1.9px;fill:#4b6474}
+.sk .sk-b{font-family:var(--font-mono);font-size:1.6px;fill:#5d7180}
 .doc.skdoc{padding:6px}
 
 /* sheet */
@@ -512,7 +519,7 @@ function idbEntries(st){return new Promise((res,rej)=>{const out=[],tx=ST.db.tra
   c.onsuccess=()=>{const k=c.result;if(k){out.push([k.key,k.value]);k.continue();}};tx.oncomplete=()=>res(out);tx.onerror=()=>rej(tx.error);});}
 function lsGet(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.sites)return s;}}catch(e){}return null;}
 // v3 kept a 220 px photo inside each find; now that is the thumbnail and the full photo lives in the photos store
-function normalize(s){s.sites.forEach(x=>x.finds.forEach(f=>{if(typeof f.photo==='string'&&!f.thumb)f.thumb=f.photo;delete f.photo;}));return s;}
+function normalize(s){s.sites.forEach(x=>x.finds.forEach(f=>{if(typeof f.photo==='string'&&!f.thumb)f.thumb=f.photo;delete f.photo;}));s.sites.forEach(normRS);return s;}
 async function loadState(){
   try{ST.db=await idbOpen();ST.mode='idb';
     const s=await idbGet('kv',KEY);if(s&&s.sites)return normalize(s);
@@ -536,7 +543,7 @@ function laneDone(s,l){return s.lanes[l]||0;}
 function clearedM2(s){if(s.mode==='boxes')return s.boxes.filter(boxDone).reduce((a,b)=>a+b.area,0);let t=0;for(const l in s.lanes)t+=s.lanes[l]*R.lane;return t;}
 function todayM2(s){return s.progress.filter(p=>p.day===TODAY).reduce((a,p)=>a+(p.to-p.from)*R.lane,0);}
 function rangeM2(s,a,b){return s.progress.filter(p=>p.day>=a&&p.day<=b).reduce((x,p)=>x+(p.to-p.from)*R.lane,0);}
-function totalArea(s){return polyArea(s.poly);}
+function totalArea(s){return polyArea(s.poly)-(s.mode==='boxes'?exclM2(s):0);}
 function qcM2(s){return s.qc.reduce((a,q)=>a+q.m2,0);}
 function workdaysSince(k){let n=0,d=new Date(k+'T12:00:00');const end=new Date(TODAY+'T12:00:00');while(d<end){d=addDays(d,1);if(d.getDay()!==0&&d.getDay()!==6)n++;}return n;}
 function weeklyWindow(){const now=new Date();let d=new Date(now);const dow=d.getDay();let add=(8-dow)%7;if(dow===1&&now.getHours()<16)add=0;if(add===0&&!(dow===1&&now.getHours()<16))add=7;
@@ -914,7 +921,10 @@ function csvText(){const s=site();const q=v=>{v=String(v==null?'':v);return /[",
     return [f.id,s.msp.id,s.ci.oznaka,f.day,f.time,P.cats[f.cat],f.type,f.qty,loc,l1,l2,f.depth,f.cond,f.act,a.toFixed(2),b.toFixed(2),w.lat.toFixed(7),w.lon.toFixed(7),f.note].map(q).join(',');})).join('\n');}
 function geoText(){const s=site();const w=(u,v)=>{const p=planeToWgs(s,toGK(s,u,v));return [+p.lon.toFixed(7),+p.lat.toFixed(7)];};
   const feats=[{type:'Feature',properties:{vrsta:'granica',projekat:s.msp.id,sektor:s.ci.oznaka},geometry:{type:'Polygon',coordinates:[s.poly.concat([s.poly[0]]).map(p=>w(p[0],p[1]))]}}];
-  if(s.mode==='boxes')s.boxes.forEach(b=>feats.push({type:'Feature',properties:{vrsta:'boks',id:b.id,povrsina_m2:b.area,ceia:b.done.CEIA?b.done.CEIA.day:null,schonstedt:b.done.SCH?b.done.SCH.day:null,zavrseno:boxDone(b)},geometry:{type:'Polygon',coordinates:[b.poly.concat([b.poly[0]]).map(p=>w(p[0],p[1]))]}}));
+  const ring=r=>r.concat([r[0]]).map(p=>w(p[0],p[1]));
+  if(s.mode==='boxes'){s.boxes.forEach(b=>{const rs=boxRings(b);feats.push({type:'Feature',properties:{vrsta:'boks',id:b.id,povrsina_m2:b.area,ceia:b.done.CEIA?b.done.CEIA.day:null,schonstedt:b.done.SCH?b.done.SCH.day:null,zavrseno:boxDone(b),
+      stanje:{n:'nije pregledano',p:'delimicno',d:'zavrseno',x:'iskljuceno'}[boxStat(b)],iskljuceno:b.excl?exclTxt(b.excl):null},geometry:rs.length===1?{type:'Polygon',coordinates:[ring(rs[0])]}:{type:'MultiPolygon',coordinates:rs.map(r=>[ring(r)])}});});
+    (s.feats||[]).filter(f=>f.pts.length).forEach(f=>feats.push({type:'Feature',properties:{vrsta:f.kind,naziv:f.name||'',schonstedt_pojas_m:f.buf||0},geometry:f.pts.length===1?{type:'Point',coordinates:w(f.pts[0][0],f.pts[0][1])}:{type:'LineString',coordinates:f.pts.map(q=>w(q[0],q[1]))}}));}
   else for(const l in s.lanes){const d=s.lanes[l];if(d>0)feats.push({type:'Feature',properties:{vrsta:'radna_staza',staza:+l,ocisceno_m:d,sirina_m:1},geometry:{type:'LineString',coordinates:[w(l-0.5,0),w(l-0.5,d)]}});}
   s.finds.forEach(f=>{const L2=findLocal(f);feats.push({type:'Feature',properties:{vrsta:'nalaz',id:f.id,sredstvo:f.type,kategorija:P.cats[f.cat],dubina_cm:f.depth,datum:f.day},geometry:{type:'Point',coordinates:w(L2[0],L2[1])}});});
   return JSON.stringify({type:'FeatureCollection',features:feats},null,1);}
@@ -1016,21 +1026,33 @@ function openNewSite(){
     </div>
     <div id="nsRS" ${pk==='RS'?'':'hidden'}>
       <div class="grid2"><label class="field">Sektor<input id="nsSek" value="Sektor 1"></label><label class="field">Veličina boksa<select id="nsGrid"><option value="10">10 × 10 m</option><option value="20">20 × 20 m</option><option value="25">25 × 25 m</option></select></label></div>
+      <div class="grid2" style="margin-top:12px"><label class="field">Zaokret mreže (°)<input id="nsRot" type="number" step="any" min="-180" max="180" value="0" inputmode="decimal"><small>0 = boksovi prema severu; + u smeru kazaljke</small></label><div class="field"><span>Glavna osa</span><button class="btn sm" type="button" data-rs="nsAxis">Po najdužoj strani granice</button></div></div>
+      <div class="field" style="margin-top:12px"><span>Uvoz iz fajla</span><label class="btn sm" for="nsFile" style="position:relative">Izaberi fajl: CSV, TXT, GeoJSON ili KML<input id="nsFile" type="file" accept=".csv,.txt,.geojson,.json,.kml,text/csv,text/plain,application/json,application/geo+json,application/vnd.google-earth.kml+xml" style="position:absolute;opacity:0;width:1px;height:1px"></label><small>Granica i objekti (pruga, put, reper…). WGS84 iz Google Earth-a pretvara se u UTM 34N. Radi bez mreže.</small></div>
+      <div id="nsImp" class="nsf"></div>
     </div>
     <label class="field"><span id="nsTpL">${pk==='RS'?'Lomne tačke (E N, UTM 34N, jedna po redu)':'Lomne tačke (Y X, jedna po redu)'}</span><textarea id="nsTp">${EX_TP[pk]}</textarea><small>Prepiši iz projekta ili dosijea. Razmaci u broju su dozvoljeni, decimalni zarez ili tačka.</small></label>
     <button class="btn primary block" type="submit">Kreiraj radilište</button>
   </form>`);
-  $('#nsPack').addEventListener('change',e=>{const v=e.target.value;$('#nsBA').hidden=v==='RS';$('#nsRS').hidden=v!=='RS';$('#nsTp').value=EX_TP[v];$('#nsMsp').value=v==='RS'?'ID 0322/26':'MSP 0455';$('#nsTpL').textContent=v==='RS'?'Lomne tačke (E N, UTM 34N, jedna po redu)':'Lomne tačke (Y X, jedna po redu)';});
+  nsFeats=[];nsMsg=null;$('#nsFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';onImportFile(f);});
+  $('#nsImp').addEventListener('change',e=>{const t=e.target,f=nsFeats[+(t.dataset.nsk!=null?t.dataset.nsk:t.dataset.nsb)];if(!f)return;if(t.dataset.nsk!=null){f.kind=t.value;f.buf=FK[t.value].buf;f.guess=false;nsImpRender(nsMsg);}else f.buf=Math.max(0,Math.min(100,parseNum(t.value)||0));});
+  $('#nsPack').addEventListener('change',e=>{const v=e.target.value;nsFeats=[];nsMsg=null;nsImpRender(null);$('#nsBA').hidden=v==='RS';$('#nsRS').hidden=v!=='RS';$('#nsTp').value=EX_TP[v];$('#nsMsp').value=v==='RS'?'ID 0322/26':'MSP 0455';$('#nsTpL').textContent=v==='RS'?'Lomne tačke (E N, UTM 34N, jedna po redu)':'Lomne tačke (Y X, jedna po redu)';});
   $('#siteForm').addEventListener('submit',e=>{e.preventDefault();if($('#nsPack').value==='RS')createSiteRS();else createSite();});
 }
 function parseTPs(txt){return txt.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.replace(/(\d)\s+(?=\d{3}(\D|$))/g,'$1').split(/[\s;\t]+/).filter(Boolean);return [parseNum(m[0]),parseNum(m[1])];});}
 function createSiteRS(){
   const tp=parseTPs($('#nsTp').value);
   if(tp.length<3||tp.some(p=>!isFinite(p[0])||!isFinite(p[1]))){toast('Treba najmanje 3 lomne tačke sa E i N koordinatama.');return;}
-  const size=+$('#nsGrid').value||10,E0=Math.floor(Math.min(...tp.map(p=>p[0]))/10)*10,N0=Math.floor(Math.min(...tp.map(p=>p[1]))/10)*10;
+  const chk=tpCheck(tp);if(chk.err){toast(chk.err,6000);return;}
+  const size=+$('#nsGrid').value||10,az=normAz(parseNum($('#nsRot').value)||0);let nt,poly;
+  // no rotation: origin on round 10 m UTM values; rotated: the grid is anchored at T1 and its lines run along azimuth az
+  if(!az){const E0=Math.floor(Math.min(...tp.map(p=>p[0]))/10)*10,N0=Math.floor(Math.min(...tp.map(p=>p[1]))/10)*10;nt={Y:E0,X:N0};poly=tp.map(p=>[+(p[0]-E0).toFixed(2),+(p[1]-N0).toFixed(2)]);}
+  else{nt={Y:+tp[0][0].toFixed(2),X:+tp[0][1].toFixed(2)};poly=tp.map(p=>toLocal({nt,az},p[0],p[1]).map(v=>+v.toFixed(2)));}
   const s={id:'r'+Date.now(),pack:'RS',crs:'UTM34',mode:'boxes',msp:{id:$('#nsMsp').value.trim()||'ID',naziv:$('#nsName').value.trim()||'Novo',opcina:'Srbija',ru:'CZRS',karta:'—'},ci:{tip:'BAC',oznaka:$('#nsSek').value.trim()||'Sektor 1',pmin:0,pmax:0},
-    nt:{Y:E0,X:N0},az:0,poly:tp.map(p=>[+(p[0]-E0).toFixed(2),+(p[1]-N0).toFixed(2)]),rail:[],boxes:[],assign:[],finds:[],log:[],qc:[],monitors:[],info:[],progress:[],lanes:{},pairs:[],start:null,estEnd:null,status:'planirano'};
-  makeBoxes(s,size);S.sites.push(s);S.active=s.id;addQ('Novo radilište '+s.msp.id);save();closeSheet();go('mapa');toast('Radilište kreirano: '+num(totalArea(s))+' m², '+s.boxes.length+' boksova.');
+    nt,az,poly,rail:[],feats:[],boxes:[],assign:[],finds:[],log:[],qc:[],monitors:[],info:[],progress:[],lanes:{},pairs:[],start:null,estEnd:null,status:'planirano'};
+  s.feats=nsFeats.filter(f=>FK[f.kind]&&f.pts.length).map((f,i)=>({id:'F'+(i+1),kind:f.kind,name:String(f.name||'').slice(0,40),pts:(FK[f.kind].lin?f.pts:f.pts.slice(0,1)).map(p=>toLocal(s,p[0],p[1]).map(v=>+v.toFixed(2))),buf:Math.max(0,+f.buf||0)}));
+  syncRail(s);makeBoxes(s,size);recalcNeed(s);nsFeats=[];nsMsg=null;
+  S.sites.push(s);S.active=s.id;addQ('Novo radilište '+s.msp.id);save();closeSheet();go('mapa');
+  toast('Radilište kreirano: '+num(totalArea(s))+' m², '+s.boxes.length+' boksova'+(az?', mreža '+azTxt(az):'')+(s.feats.length?', objekata: '+s.feats.length:'')+'.',4000);
 }
 function parseNum(str){return parseFloat(String(str).replace(/\s/g,'').replace(',','.'));}
 function toGkFromCrs(crs,a,b){if(crs==='UTM34'){const w=utm34ToWgs(a,b);return wgsToGk6(w.lat,w.lon);}return {Y:a,X:b};}
@@ -1078,35 +1100,148 @@ function lerpX(a,b,x){return [x,a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])];}
 function lerpY(a,b,y){return [a[0]+(b[0]-a[0])*(y-a[1])/(b[1]-a[1]),y];}
 function clipRect(poly,x0,y0,x1,y1){let p=poly;p=clipHalf(p,q=>q[0]>=x0,(a,b)=>lerpX(a,b,x0));if(p.length<3)return [];p=clipHalf(p,q=>q[0]<=x1,(a,b)=>lerpX(a,b,x1));if(p.length<3)return [];p=clipHalf(p,q=>q[1]>=y0,(a,b)=>lerpY(a,b,y0));if(p.length<3)return [];p=clipHalf(p,q=>q[1]<=y1,(a,b)=>lerpY(a,b,y1));return p.length<3?[]:p;}
 function rowName(r){const ROWL='ABCDEFGHIJKLMNOPRSTUVZ';return r<ROWL.length?ROWL[r]:ROWL[Math.floor(r/ROWL.length)-1]+ROWL[r%ROWL.length];}
+
+/* ---------- local grid frame ----------
+   Boxes live in the site's local frame (u,v): v runs along the grid's main axis (azimuth site.az), u along the cross axis (az+90°).
+   Everything drawn is north-up, so drawings go local → E/N offsets from the origin site.nt (toGK minus nt). */
+function enOf(s,q){const a=(s.az||0)*D2R,c=Math.cos(a),k=Math.sin(a);return [q[0]*c+q[1]*k,q[1]*c-q[0]*k];}
+// geographic north on the plane grid (radians, clockwise from grid north): UTM grid north differs by the meridian convergence
+function trueNorth(s){try{const n=s.poly.length,c=s.poly.reduce((a,p)=>[a[0]+p[0]/n,a[1]+p[1]/n],[0,0]),p=toGK(s,c[0],c[1]),w=planeToWgs(s,p);
+  let q;if(s.crs==='UTM34'){const u=wgsToUtm34(w.lat+0.001,w.lon);q={Y:u.E,X:u.N};}else q=wgsToGk6(w.lat+0.001,w.lon);return Math.atan2(q.Y-p.Y,q.X-p.X);}catch(e){return 0;}}
+const normAz=a=>{a=((+a||0)%360+360)%360;if(a>180)a-=360;return +a.toFixed(2);};
+const azTxt=a=>{a=((a%360)+360)%360;return num(a,Math.abs(a-Math.round(a))<0.05?0:1)+'°';};
+function axisTxt(s){const a=s.az||0;return a?{corner:'početnog ugla',Corner:'Početni ugao',u:'duž ose '+azTxt(a+90),v:'duž ose '+azTxt(a),U:'osa '+azTxt(a+90),V:'osa '+azTxt(a)}
+  :{corner:'JZ ugla',Corner:'JZ ugao',u:'istočno',v:'severno',U:'istok',V:'sever'};}
+
+/* ---------- box geometry ----------
+   A box is a union of grid rectangles (rects, local frame) clipped to the site boundary (parts).
+   One rect normally; a split gives smaller rects, a merge gives several. poly = outline ring of the union. */
+function sArea(p){let a=0;for(let i=0,j=p.length-1;i<p.length;j=i++)a+=(p[j][0]+p[i][0])*(p[j][1]-p[i][1]);return -a/2;}
+const r2=q=>[+q[0].toFixed(2),+q[1].toFixed(2)];
+function partsOf(s,rects){return rects.map(r=>clipRect(s.poly,r[0],r[1],r[2],r[3])).filter(p=>p.length&&polyArea(p)>0.01).map(p=>p.map(r2));}
+function bxParts(b){return b.parts&&b.parts.length?b.parts:[b.poly];}
+function inBox(b,pt){return bxParts(b).some(p=>inPoly(pt,p));}
+// outline segments of the union of the parts: seams between merged cells are left out (T-junctions are split first)
+function boxEdges(b){const ps=bxParts(b);if(ps.length===1)return ps[0].map((q,i)=>[q,ps[0][(i+1)%ps[0].length]]);const out=[];
+  ps.forEach((p,i)=>{const ccw=sArea(p)>0;p.forEach((a,k)=>{const c=p[(k+1)%p.length],dx=c[0]-a[0],dy=c[1]-a[1],L=Math.hypot(dx,dy);if(L<1e-6)return;const ts=[0,1];
+    ps.forEach((o,j)=>{if(j!==i)o.forEach(v=>{const t=((v[0]-a[0])*dx+(v[1]-a[1])*dy)/(L*L);if(t>1e-4&&t<1-1e-4&&Math.abs((v[0]-a[0])*dy-(v[1]-a[1])*dx)/L<0.02)ts.push(t);});});
+    ts.sort((x,y)=>x-y);const nx=(ccw?dy:-dy)/L,ny=(ccw?-dx:dx)/L;
+    for(let m=1;m<ts.length;m++){if(ts[m]-ts[m-1]<1e-6)continue;const tm=(ts[m]+ts[m-1])/2,pt=[a[0]+dx*tm+nx*0.05,a[1]+dy*tm+ny*0.05];
+      if(!ps.some((o,j)=>j!==i&&inPoly(pt,o)))out.push([[a[0]+dx*ts[m-1],a[1]+dy*ts[m-1]],[a[0]+dx*ts[m],a[1]+dy*ts[m]]]);}});});
+  return out;}
+function edgeRings(segs){const left=segs.slice(),rings=[],near=(p,q)=>Math.abs(p[0]-q[0])<0.03&&Math.abs(p[1]-q[1])<0.03;
+  while(left.length){const r=[left[0][0],left[0][1]];left.shift();let g=0;
+    while(!near(r[r.length-1],r[0])&&g++<5000){const e=r[r.length-1],k=left.findIndex(x=>near(x[0],e)||near(x[1],e));if(k<0)break;const x=left.splice(k,1)[0];r.push(near(x[0],e)?x[1]:x[0]);}
+    if(near(r[r.length-1],r[0]))r.pop();
+    const c=r.filter((p,i)=>{const a=r[(i-1+r.length)%r.length],b=r[(i+1)%r.length];return Math.abs((p[0]-a[0])*(b[1]-a[1])-(p[1]-a[1])*(b[0]-a[0]))>1e-3;});
+    if(c.length>=3)rings.push(c.map(r2));}
+  return rings.sort((a,b)=>polyArea(b)-polyArea(a));}
+function boxRings(b){const ps=bxParts(b);if(ps.length===1)return [ps[0]];const r=edgeRings(boxEdges(b));return r.length?r:ps;}
+function buildBox(s,o){const parts=partsOf(s,o.rects);if(!parts.length)return null;
+  const area=parts.reduce((a,p)=>a+polyArea(p),0),R4=o.rects,x0=Math.min(...R4.map(r=>r[0])),y0=Math.min(...R4.map(r=>r[1])),x1=Math.max(...R4.map(r=>r[2])),y1=Math.max(...R4.map(r=>r[3]));
+  const b={id:o.id,x0,y0,w:+(x1-x0).toFixed(2),h:+(y1-y0).toFixed(2),rects:R4,parts,poly:parts[0],area:+area.toFixed(1),cx:0,cy:0,need:o.need||['CEIA'],done:o.done||{}};
+  if(o.excl)b.excl=o.excl;if(parts.length>1)b.poly=boxRings(b)[0];
+  const ctr=p=>[p.reduce((a,q)=>a+q[0],0)/p.length,p.reduce((a,q)=>a+q[1],0)/p.length];let c=ctr(parts[0]);
+  if(parts.length>1){c=[0,0];parts.forEach(p=>{const m=ctr(p),w=polyArea(p)/area;c[0]+=m[0]*w;c[1]+=m[1]*w;});if(!inBox(b,c))c=ctr(parts.slice().sort((p,q)=>polyArea(q)-polyArea(p))[0]);}
+  b.cx=+c[0].toFixed(2);b.cy=+c[1].toFixed(2);return b;}
 function makeBoxes(s,size){
   const b=bounds(s.poly),gx=Math.floor(b.x0/size)*size,gy=Math.floor(b.y0/size)*size;s.boxes=[];s.grid=size;
-  for(let r=0;gy+r*size<b.y1;r++)for(let c=0;gx+c*size<b.x1;c++){
-    const x0=gx+c*size,y0=gy+r*size,p=clipRect(s.poly,x0,y0,x0+size,y0+size);if(!p.length)continue;
-    const area=polyArea(p);if(area<4)continue;
-    const cx=p.reduce((a,q)=>a+q[0],0)/p.length,cy=p.reduce((a,q)=>a+q[1],0)/p.length;
-    s.boxes.push({id:rowName(r)+'-'+pad(c+1),x0,y0,poly:p.map(q=>[+q[0].toFixed(2),+q[1].toFixed(2)]),area:+area.toFixed(1),cx:+cx.toFixed(2),cy:+cy.toFixed(2),need:['CEIA'],done:{}});
-  }
+  for(let r=0;gy+r*size<b.y1;r++)for(let c=0;gx+c*size<b.x1;c++){const x0=gx+c*size,y0=gy+r*size,bx=buildBox(s,{id:rowName(r)+'-'+pad(c+1),rects:[[x0,y0,x0+size,y0+size]]});if(bx&&bx.area>=4)s.boxes.push(bx);}
 }
-function distToLine(p,pts){let m=Infinity;for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],dx=b[0]-a[0],dy=b[1]-a[1],t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));m=Math.min(m,Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy));}return m;}
+// saved data from before box editing / features: fill the new fields so old sites keep working
+function normRS(s){if(!s||s.mode!=='boxes')return s;const g=s.grid||10;if(s.az==null)s.az=0;
+  (s.boxes||[]).forEach(b=>{if(!b.rects){b.rects=[[b.x0,b.y0,b.x0+g,b.y0+g]];b.w=g;b.h=g;b.parts=[b.poly];}if(!b.need)b.need=['CEIA'];if(!b.done)b.done={};});
+  if(!Array.isArray(s.feats))s.feats=s.rail&&s.rail.length?[{id:'F1',kind:'pruga',name:'Pruga',pts:s.rail,buf:11}]:[];
+  if(!s.rail)s.rail=[];return s;}
+
+/* ---------- landmarks and obstacles ---------- */
+const FK={pruga:{n:'Pruga',acc:'prugu',lin:1,buf:11},put:{n:'Put',acc:'put',lin:1,buf:0},dalekovod:{n:'Dalekovod',acc:'dalekovod',lin:1,buf:0},kanal:{n:'Kanal',acc:'kanal',lin:1,buf:0},
+  potok:{n:'Potok',acc:'potok',lin:1,buf:0},reper:{n:'Reper',acc:'reper',lin:0,buf:0},stub:{n:'Stub',acc:'stub',lin:0,buf:0}};
+const feats=s=>(s&&s.feats)||[];
+const fkOf=f=>FK[f.kind]||FK.put;
+function syncRail(s){const r=feats(s).find(f=>f.kind==='pruga');s.rail=r?r.pts:[];}
+function segPt(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],L2=dx*dx+dy*dy,t=L2?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L2)):0;return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy);}
+function distToLine(p,pts){if(pts.length===1)return Math.hypot(p[0]-pts[0][0],p[1]-pts[0][1]);let m=Infinity;for(let i=1;i<pts.length;i++)m=Math.min(m,segPt(p,pts[i-1],pts[i]));return m;}
+function segsCross(a,b,c,d){const o=(p,q,r)=>Math.sign((q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]));const A=o(a,b,c),B=o(a,b,d),C=o(c,d,a),D=o(c,d,b);return A*B<0&&C*D<0;}
+// shortest distance between a polygon (area) and a polyline or point; 0 if they touch or overlap
+function polyLineDist(poly,pts){if(pts.some(p=>inPoly(p,poly)))return 0;let m=Infinity;
+  for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];pts.forEach(p=>{m=Math.min(m,segPt(p,a,b));});
+    for(let j=1;j<pts.length;j++){if(segsCross(a,b,pts[j-1],pts[j]))return 0;m=Math.min(m,segPt(a,pts[j-1],pts[j]));}}return m;}
+// rule from the project: a box that comes within buf metres of a feature is also searched with the Schonstedt
+function schFeats(s,b){return feats(s).filter(f=>f.buf>0&&f.pts.length&&bxParts(b).some(p=>polyLineDist(p,f.pts)<f.buf));}
+function recalcNeed(s){let ch=0;(s.boxes||[]).forEach(b=>{const sch=schFeats(s,b).length>0;if(sch!==b.need.includes('SCH')){b.need=sch?['CEIA','SCH']:['CEIA'];ch++;}});return ch;}
+function bufTxt(s){const f=feats(s).filter(x=>x.buf>0);return f.length?f.map(x=>fkOf(x).acc+' ('+num(x.buf,x.buf%1?1:0)+' m)').filter((t,i,a)=>a.indexOf(t)===i).join(', '):'';}
+
+/* ---------- box editing: split, merge, rename, exclude ---------- */
+const EXCL={zgrada:'zgrada / objekat',put:'put',voda:'voda',ostalo:'ostalo'};
+const exclTxt=e=>e?(EXCL[e.why]||e.why)+(e.note?' ('+e.note+')':''):'';
+function boxStat(b){return b.excl?'x':boxDone(b)?'d':(Object.keys(b.done).some(m=>b.need.includes(m))?'p':'n');}
+function rehomeFinds(s,fromIds,boxes){fromIds=new Set(fromIds);s.finds.forEach(f=>{if(!fromIds.has(f.box))return;const pt=[f.u,f.v];
+  const hit=boxes.find(b=>inBox(b,pt))||boxes.slice().sort((a,b)=>Math.hypot(a.cx-pt[0],a.cy-pt[1])-Math.hypot(b.cx-pt[0],b.cy-pt[1]))[0];f.box=hit.id;});}
+function freeId(s,base,suf,skip){let id=base+suf,n=2;while(s.boxes.some(b=>b.id===id&&b.id!==skip))id=base+suf+'.'+(n++);return id;}
+// split in 2 along the cross axis (mode 'u'), along the main axis ('v') or into 4; cuts are metres from the box's start corner
+function splitBox(s,id,mode,cu,cv){const b=boxById(s,id);if(!b)return 'Boks ne postoji.';
+  if(b.rects.length>1)return 'Spojeni boks se ne deli. Podeli boksove pre spajanja.';
+  const [x0,y0,x1,y1]=b.rects[0],w=x1-x0,h=y1-y0;cu=isFinite(cu)?cu:w/2;cv=isFinite(cv)?cv:h/2;
+  if((mode!=='v')&&(cu<0.5||cu>w-0.5))return 'Rez mora biti između 0,5 i '+num(w-0.5,1)+' m od početnog ugla.';
+  if((mode!=='u')&&(cv<0.5||cv>h-0.5))return 'Rez mora biti između 0,5 i '+num(h-0.5,1)+' m od početnog ugla.';
+  const c=+(x0+cu).toFixed(2),d=+(y0+cv).toFixed(2);
+  const rs=mode==='u'?[[x0,y0,c,y1],[c,y0,x1,y1]]:mode==='v'?[[x0,y0,x1,d],[x0,d,x1,y1]]:[[x0,y0,c,d],[c,y0,x1,d],[x0,d,c,y1],[c,d,x1,y1]];
+  const sfx=/\d[a-z]$/.test(id)?['1','2','3','4']:['a','b','c','d'];
+  const kids=rs.map((r,i)=>buildBox(s,{id:freeId(s,id,sfx[i],id),rects:[r],need:b.need.slice(),done:JSON.parse(JSON.stringify(b.done)),excl:b.excl?Object.assign({},b.excl):null})).filter(k=>k&&k.area>=0.5);
+  if(kids.length<2)return 'Ovaj rez ne deli boks: drugi deo je van granice radilišta.';
+  s.boxes.splice(s.boxes.indexOf(b),1,...kids);rehomeFinds(s,[id],kids);
+  s.assign.forEach(a=>{if(a.box!==id)return;const k=kids.find(x=>!x.done[a.m])||kids[0];a.box=k.id;});
+  s.log.push({t:hm(Date.now()),e:'Boks '+id+' podeljen na '+kids.map(k=>k.id).join(', ')});addQ('Podela boksa '+id);return kids;}
+function rectsTouch(a,b){const e=0.01,ov=(p0,p1,q0,q1)=>Math.min(p1,q1)-Math.max(p0,q0)>e;
+  return ((Math.abs(a[2]-b[0])<e||Math.abs(b[2]-a[0])<e)&&ov(a[1],a[3],b[1],b[3]))||((Math.abs(a[3]-b[1])<e||Math.abs(b[3]-a[1])<e)&&ov(a[0],a[2],b[0],b[2]));}
+// merge adjacent boxes into one (union of their grid cells); the first id is kept
+function mergeBoxes(s,ids){const bs=ids.map(id=>boxById(s,id)).filter(Boolean);if(bs.length<2)return 'Izaberi najmanje dva boksa.';
+  const rects=[].concat(...bs.map(b=>b.rects)),seen=new Set([0]),q=[0];while(q.length){const i=q.shift();rects.forEach((r,j)=>{if(!seen.has(j)&&rectsTouch(rects[i],r)){seen.add(j);q.push(j);}});}
+  if(seen.size<rects.length)return 'Boksovi nisu susedni. Spajaju se samo boksovi koji dele stranu.';
+  if(new Set(bs.map(b=>!!b.excl)).size>1)return 'Isključen boks i boks za pretragu ne mogu se spojiti.';
+  const need=['CEIA','SCH'].filter(m=>bs.some(b=>b.need.includes(m))),key=b=>need.map(m=>b.done[m]?P.methods[m]+' ✓':'').filter(Boolean).join(', ')||'nije pregledan';
+  if(new Set(bs.map(key)).size>1)return 'Boksovi nisu u istom stanju ('+bs.map(b=>b.id+': '+key(b)).join('; ')+'). Spoji ih pre pregleda ili kad budu pregledani istim metodama.';
+  const done={};Object.keys(bs[0].done).forEach(m=>{if(!bs.every(b=>b.done[m]))return;const d=bs.map(b=>b.done[m]);
+    done[m]={day:d.map(x=>x.day).sort().pop(),by:[...new Set(d.map(x=>x.by))].join(', ')};});
+  const nb=buildBox(s,{id:bs[0].id,rects:rects.map(r=>r.slice()),need,done,excl:bs[0].excl||null});if(!nb)return 'Spajanje nije uspelo.';
+  const gone=new Set(bs.map(b=>b.id));s.boxes.splice(s.boxes.indexOf(bs[0]),1,nb);s.boxes=s.boxes.filter(b=>b===nb||!gone.has(b.id));
+  s.finds.forEach(f=>{if(gone.has(f.box))f.box=nb.id;});
+  s.assign.forEach(a=>{if(gone.has(a.box))a.box=nb.id;});s.assign=s.assign.filter((a,i,arr)=>arr.findIndex(x=>x.who===a.who)===i);
+  s.log.push({t:hm(Date.now()),e:'Boksovi '+bs.map(b=>b.id).join(', ')+' spojeni u boks '+nb.id+' ('+num(nb.area)+' m²)'});addQ('Spajanje boksova '+nb.id);return nb;}
+function renameBox(s,id,nid){nid=String(nid||'').trim().replace(/\s+/g,' ');const b=boxById(s,id);if(!b)return 'Boks ne postoji.';
+  if(!nid||nid.length>16)return 'Naziv boksa: 1 do 16 znakova.';if(/[<>"&]/.test(nid))return 'Naziv ne sme imati znakove < > " &.';
+  if(nid===id)return 'Naziv je isti.';if(boxById(s,nid))return 'Boks '+nid+' već postoji.';
+  b.id=nid;s.finds.forEach(f=>{if(f.box===id)f.box=nid;});s.assign.forEach(a=>{if(a.box===id)a.box=nid;});
+  s.log.push({t:hm(Date.now()),e:'Boks '+id+' preimenovan u '+nid});addQ('Boks '+id+' → '+nid);return b;}
+function exclBox(s,id,why,note){const b=boxById(s,id);if(!b)return 'Boks ne postoji.';
+  if(why){b.excl={why,note:String(note||'').trim().slice(0,80),day:TODAY};
+    s.assign.filter(a=>a.box===id).forEach(a=>{const n=nextBoxFor(s,a.m,a.who);if(n)a.box=n.id;else s.assign=s.assign.filter(x=>x!==a);});
+    s.log.push({t:hm(Date.now()),e:'Boks '+id+' isključen iz pretrage: '+exclTxt(b.excl)});}
+  else{delete b.excl;s.log.push({t:hm(Date.now()),e:'Boks '+id+' vraćen u pretragu'});}
+  addQ('Boks '+id+(why?' isključen':' vraćen'));return b;}
+
 function boxById(s,id){return s.boxes.find(b=>b.id===id);}
-function boxDone(b){return b.need.every(m=>b.done[m]);}
+function boxDone(b){return !b.excl&&b.need.every(m=>b.done[m]);}
 function nextBoxFor(s,m,who){const taken=new Set(s.assign.filter(a=>a.who!==who).map(a=>a.box+'|'+a.m));
-  return s.boxes.filter(b=>b.need.includes(m)&&!b.done[m]&&(m!=='SCH'||b.done.CEIA)&&!taken.has(b.id+'|'+m)).sort((a,b)=>a.cy-b.cy||a.cx-b.cx)[0];}
-function methodM2(s,m,day){return s.boxes.filter(b=>b.done[m]&&(!day||b.done[m].day===day)).reduce((a,b)=>a+b.area,0);}
+  return s.boxes.filter(b=>!b.excl&&b.need.includes(m)&&!b.done[m]&&(m!=='SCH'||b.done.CEIA)&&!taken.has(b.id+'|'+m)).sort((a,b)=>a.cy-b.cy||a.cx-b.cx)[0];}
+function methodM2(s,m,day){return s.boxes.filter(b=>!b.excl&&b.done[m]&&(!day||b.done[m].day===day)).reduce((a,b)=>a+b.area,0);}
+function exclM2(s){return (s.boxes||[]).filter(b=>b.excl).reduce((a,b)=>a+b.area,0);}
 function perDeminer(s,day){const o={};s.boxes.forEach(b=>Object.keys(b.done).forEach(m=>{const d=b.done[m];if(d.day!==day)return;const r=o[d.by]=o[d.by]||{CEIA:[],SCH:[],m2:{CEIA:0,SCH:0}};r[m].push(b.id);r.m2[m]+=b.area;}));return o;}
 
 function seedRS(){
   const s={id:'r1',pack:'RS',crs:'UTM34',mode:'boxes',msp:{id:'ID 0317/26',naziv:'Primer-Brdo',opcina:'Grad Beograd (primer)',ru:'CZRS',karta:'—'},ci:{tip:'BAC',oznaka:'Sektor 1',pmin:0,pmax:0},
     nt:{Y:456120,X:4953480},az:0,poly:[[52,148],[98,108],[96,80],[74,58],[80,22],[34,0],[6,28],[2,82],[24,112]],
     rail:[[47,154],[66,110],[76,70],[74,30],[66,-3]],boxes:[],assign:[],finds:[],log:[],qc:[],monitors:[],info:[],progress:[],lanes:{},pairs:[],start:null,estEnd:null,status:'u radu'};
-  makeBoxes(s,10);
-  s.boxes.forEach(b=>{if(distToLine([b.cx,b.cy],s.rail)<11)b.need=['CEIA','SCH'];});
+  s.feats=[{id:'F1',kind:'pruga',name:'pruga (primer)',pts:s.rail,buf:11},{id:'F2',kind:'reper',name:'R-1',pts:[[16,5]],buf:0}];
+  makeBoxes(s,10);recalcNeed(s);
   const past=workdaysBack(6);s.start=past[0];s.estEnd=dayKey(addDays(NOW0,25));
+  const hut=s.boxes.find(b=>b.id==='H-03');if(hut)hut.excl={why:'zgrada',note:'pomoćni objekat',day:past[0]};
   const crew=['D-01','D-02','D-03','D-04'];
-  const ce=s.boxes.filter(b=>b.cy<40).sort((a,b)=>a.cy-b.cy||a.cx-b.cx), per=ce.length/past.length;
+  const ce=s.boxes.filter(b=>!b.excl&&b.cy<40).sort((a,b)=>a.cy-b.cy||a.cx-b.cx), per=ce.length/past.length;
   ce.forEach((b,i)=>{b.done.CEIA={day:past[Math.min(past.length-1,Math.floor(i/per))],by:crew[i%4]};});
-  s.boxes.filter(b=>b.need.includes('SCH')&&b.cy<25).forEach((b,i)=>{b.done.SCH={day:past[Math.min(5,2+i)],by:'D-05'};});
-  const nx=s.boxes.filter(b=>!b.done.CEIA).sort((a,b)=>a.cy-b.cy||a.cx-b.cx);
+  s.boxes.filter(b=>b.need.includes('SCH')&&b.done.CEIA&&b.cy<25).forEach((b,i)=>{b.done.SCH={day:past[Math.min(5,2+i)],by:'D-05'};});
+  const nx=s.boxes.filter(b=>!b.excl&&!b.done.CEIA).sort((a,b)=>a.cy-b.cy||a.cx-b.cx);
   nx.slice(0,4).forEach((b,i)=>{b.done.CEIA={day:TODAY,by:crew[i]};});
   const sch=s.boxes.filter(b=>b.need.includes('SCH')&&!b.done.SCH&&b.done.CEIA).sort((a,b)=>a.cy-b.cy);if(sch[0])sch[0].done.SCH={day:TODAY,by:'D-05'};
   crew.forEach(w=>{const b=nextBoxFor(s,'CEIA',w);if(b)s.assign.push({who:w,box:b.id,m:'CEIA'});});
@@ -1146,8 +1281,8 @@ function complianceB(s){const o=[];const det=s.log.some(l=>l.k==='det');
   o.push({st:det?'ok':'bad',t:'Provera detektora na test-poligonu danas',v:det?'urađena':'nije urađena'});
   const pd=perDeminer(s,TODAY);let mx=0,who='';for(const w in pd){if(pd[w].m2.CEIA>mx){mx=pd[w].m2.CEIA;who=w;}}
   o.push({st:mx<=P.rules.normaM2?'ok':'warn',t:'Učinak po demineru do '+P.rules.normaM2+' m² dnevno (CZRS)',v:mx?('najviše '+num(mx)+' m² ('+who+')'):'—'});
-  const need=s.boxes.filter(b=>b.need.includes('SCH')),dn=need.filter(b=>b.done.SCH).length;
-  if(need.length)o.push({st:'ok',t:'Dubinska pretraga Schonstedtom uz prugu',v:dn+' od '+need.length+' boksova'});
+  const need=s.boxes.filter(b=>!b.excl&&b.need.includes('SCH')),dn=need.filter(b=>b.done.SCH).length;
+  if(need.length)o.push({st:'ok',t:'Dubinska pretraga Schonstedtom uz '+(bufTxt(s)||'objekte'),v:dn+' od '+need.length+' boksova'});
   o.push({st:'ok',t:'Dubina pretrage CEIA '+P.rules.minDepth+' cm (projekat)',v:'po projektu'});
   o.push({st:'ok',t:'Dnevna evidencija učinka po demineru',v:'vodi se sama'});return o;}
 function logCard(s){const log=s.log.slice().sort((a,b)=>a.t.localeCompare(b.t));
@@ -1160,54 +1295,103 @@ function briefCard(){const done=S.brief.every(Boolean);const items=site().pack==
     <ul class="checks">${items.map((b,i)=>`<li><label><input type="checkbox" id="brief${i}" data-act="brief" data-i="${i}" ${S.brief[i]?'checked':''} ${S.dayStarted?'disabled':''}><span>${esc(b)}</span></label></li>`).join('')}</ul>
     ${!S.dayStarted?`<button class="btn primary block" type="button" data-act="start" ${done?'':'disabled'}>Započni radni dan</button>`:''}</div>`;}
 
+let showIds=false,mergeSel=null;
+const nm=x=>num(x,Math.abs(x-Math.round(x))<0.005?0:1);
+const tacke=n=>n+' '+(n%10===1&&n%100!==11?'tačka':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'tačke':'tačaka');
+// one landmark/obstacle as SVG; P maps local (u,v) to drawing coords; paper = mm on the sketch, otherwise screen px
+function featSVG(f,P,paper,ink,ctr){const k=f.kind,p=f.pts.map(P),F=n=>(+n).toFixed(2),d='M'+p.map(q=>F(q[0])+' '+F(q[1])).join('L'),bg=paper?'#fbfdfe':'var(--surface-2)';let g='';
+  const ln=(c,w,da)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"${da?` stroke-dasharray="${da}"`:''}/>`;
+  if(!fkOf(f).lin||p.length===1){const x=p[0][0],y=p[0][1];
+    if(k==='stub')g=`<circle cx="${F(x)}" cy="${F(y)}" r="${paper?0.75:3.2}" fill="#6b4fa0" stroke="${bg}" stroke-width="${paper?0.2:1}"/>`;
+    else{const r=paper?1.4:5;g=`<path d="M${F(x)} ${F(y-r)}L${F(x+r*0.9)} ${F(y+r*0.6)}H${F(x-r*0.9)}Z" fill="${bg}" stroke="${ink}" stroke-width="${paper?0.22:1.2}"/><circle cx="${F(x)}" cy="${F(y)}" r="${paper?0.28:1.2}" fill="${ink}"/>`;}}
+  else switch(k){
+    case 'pruga':g=ln(ink,paper?0.9:3.4)+ln(bg,paper?0.42:1.6,paper?'1.8 1.8':'5 5');break;
+    case 'put':g=ln('#8a6a45',paper?1.2:4.4)+ln(bg,paper?0.6:2.2);break;
+    case 'dalekovod':g=ln('#6b4fa0',paper?0.25:1.4,paper?'2 0.8 0.4 0.8':'7 3 2 3');break;
+    case 'kanal':g=ln('#2f74b5',paper?0.6:2.6);break;
+    default:g=ln('#2f74b5',paper?0.3:1.4,paper?'1.2 0.6':'4 2');}
+  if(f.name){let m=p[Math.floor((p.length-1)/2)];
+    // a long line may run far outside the drawing: put the name on the segment midpoint nearest the site centre
+    if(ctr&&p.length>1){let bd=Infinity;for(let i=1;i<p.length;i++){const q=[(p[i-1][0]+p[i][0])/2,(p[i-1][1]+p[i][1])/2],dd=Math.hypot(q[0]-ctr[0],q[1]-ctr[1]);if(dd<bd){bd=dd;m=q;}}}g+=`<text class="${paper?'sk-l':'m-t ink'}" x="${F(m[0]+(paper?1.8:6))}" y="${F(m[1]-(paper?0.9:3))}" style="pointer-events:none">${esc(f.name)}</text>`;}
+  return g;}
+function featSwatch(k){return `<svg width="18" height="10" viewBox="0 0 18 10" aria-hidden="true" style="vertical-align:-1px;margin-right:5px">${featSVG({kind:k,pts:FK[k].lin?[[1,5],[17,5]]:[[9,6]]},q=>q,false,'var(--ink)')}</svg>`;}
+
 function boxMapSVG(s){
-  const b=bounds(s.poly),W=330,padL=8,padR=8,padT=18,padB=16,sc=(W-padL-padR)/(b.x1-b.x0+4),H=Math.round((b.y1-b.y0+4)*sc+padT+padB);
-  const X=u=>padL+(u-b.x0+2)*sc,Y=v=>padT+(b.y1+2-v)*sc,pth=p=>'M'+p.map(q=>X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1)).join('L')+'Z';
-  const asg={};s.assign.forEach(a=>asg[a.box]=a);
-  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Boksovi ${esc(s.ci.oznaka)}">`;
+  const E=q=>enOf(s,q),b=bounds(s.poly.map(E)),W=330,padL=8,padR=8,padT=24,padB=16,sc=(W-padL-padR)/(b.x1-b.x0+4),H=Math.round((b.y1-b.y0+4)*sc+padT+padB);
+  const P=q=>{const e=E(q);return [padL+(e[0]-b.x0+2)*sc,padT+(b.y1+2-e[1])*sc];},f1=n=>n.toFixed(1),pth=p=>'M'+p.map(q=>{const r=P(q);return f1(r[0])+' '+f1(r[1]);}).join('L')+'Z';
+  const asg={};s.assign.forEach(a=>asg[a.box]=a);const msel=mergeSel&&mergeSel.site===s.id?mergeSel.ids:[];
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Boksovi ${esc(s.ci.oznaka)}, sever gore"><defs><pattern id="bxX" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="5" height="5" fill="var(--surface)"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--muted)" stroke-width="1.4"/></pattern>
+    <clipPath id="bxClip"><rect x="0" y="${padT-4}" width="${W}" height="${H-padT+4}"/></clipPath></defs>`;
   g+=`<path class="m-poly" d="${pth(s.poly)}"/>`;
-  s.boxes.forEach(bx=>{const st=boxDone(bx)?'d':(Object.keys(bx.done).length?'p':'n');
-    g+=`<path class="bxp bx-${st}${asg[bx.id]?' bx-a':''}${selBox===bx.id?' bx-s':''}" d="${pth(bx.poly)}" data-act="box" data-id="${bx.id}"><title>Boks ${bx.id}</title></path>`;});
-  if(s.rail&&s.rail.length)g+=`<path class="m-rail" d="M${s.rail.map(q=>X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1)).join('L')}"/>`;
-  s.assign.forEach(a=>{const bx=boxById(s,a.box);if(bx)g+=`<text class="m-t ink" x="${X(bx.cx)}" y="${Y(bx.cy)+3}" text-anchor="middle" style="pointer-events:none">${a.who.slice(2)}</text>`;});
-  s.finds.forEach(f=>{const cx=X(f.u),cy=Y(f.v),r=3.6;g+=`<path class="m-mk" d="M${cx} ${cy-r}L${cx+r} ${cy+r*.8}H${cx-r}Z"/>`;});
-  s.poly.forEach((p,i)=>{g+=`<circle class="m-tp" cx="${X(p[0])}" cy="${Y(p[1])}" r="2.2"/><text class="m-t ink" x="${X(p[0])+4}" y="${Y(p[1])-3}">T${i+1}</text>`;});
-  g+=`<text class="m-t ink" x="${W-14}" y="13" text-anchor="middle">S ↑</text></svg>`;return g;}
+  s.boxes.forEach(bx=>{const st=boxStat(bx);
+    g+=`<path class="bxp bx-${st}${asg[bx.id]?' bx-a':''}${selBox===bx.id?' bx-s':''}${msel.includes(bx.id)?' bx-m':''}" d="${boxRings(bx).map(pth).join('')}" fill-rule="evenodd" data-act="box" data-id="${esc(bx.id)}"><title>Boks ${esc(bx.id)}${bx.excl?' · isključeno: '+esc(exclTxt(bx.excl)):''}</title></path>`;});
+  g+=`<g clip-path="url(#bxClip)">`+feats(s).filter(f=>f.buf>0&&f.pts.length).map(f=>f.pts.length===1?(()=>{const c=P(f.pts[0]);return `<circle class="m-bufp" cx="${f1(c[0])}" cy="${f1(c[1])}" r="${f1(f.buf*sc)}"/>`;})()
+    :`<path class="m-buf" d="M${f.pts.map(q=>{const r=P(q);return f1(r[0])+' '+f1(r[1]);}).join('L')}" stroke-width="${f1(2*f.buf*sc)}"/>`).join('')+'</g>';
+  const ctr=P(s.poly.reduce((a,q)=>[a[0]+q[0]/s.poly.length,a[1]+q[1]/s.poly.length],[0,0]));
+  g+=`<g clip-path="url(#bxClip)">${feats(s).filter(f=>f.pts.length).map(f=>featSVG(f,P,false,'var(--ink)',ctr)).join('')}</g>`;
+  s.assign.forEach(a=>{const bx=boxById(s,a.box);if(bx){const c=P([bx.cx,bx.cy]);g+=`<text class="m-t ink" x="${f1(c[0])}" y="${f1(c[1]+3)}" text-anchor="middle" style="pointer-events:none">${a.who.slice(2)}</text>`;}});
+  if(showIds||msel.length)s.boxes.forEach(bx=>{const c=P([bx.cx,bx.cy]);g+=`<text class="m-bid" x="${f1(c[0])}" y="${f1(c[1]+(asg[bx.id]?-5:2.5))}" text-anchor="middle">${esc(bx.id)}</text>`;});
+  s.finds.forEach(f=>{const c=P([f.u,f.v]),cx=c[0],cy=c[1],r=3.6;g+=`<path class="m-mk" d="M${f1(cx)} ${f1(cy-r)}L${f1(cx+r)} ${f1(cy+r*.8)}H${f1(cx-r)}Z"/>`;});
+  s.poly.forEach((p,i)=>{const c=P(p);g+=`<circle class="m-tp" cx="${f1(c[0])}" cy="${f1(c[1])}" r="2.2"/><text class="m-t ink" x="${f1(c[0]+4)}" y="${f1(c[1]-3)}">T${i+1}</text>`;});
+  const tn=trueNorth(s)/D2R,nx=W-14,ny=13;
+  g+=`<g transform="translate(${nx} ${ny}) rotate(${tn.toFixed(2)})"><path class="m-nf" d="M0 -9L-3.2 -1.5H3.2Z"/><line class="m-n" x1="0" y1="-2" x2="0" y2="8"/></g><text class="m-t ink" x="${nx-6}" y="${ny-2}" text-anchor="end">S</text>`;
+  if(s.az)g+=`<g transform="translate(${nx-30} ${ny}) rotate(${s.az})"><line x1="0" y1="8" x2="0" y2="-5" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M0 -9L-2.4 -4H2.4Z" fill="var(--muted)"/></g><text class="m-t" x="${nx-40}" y="${ny+3}" text-anchor="end">mreža ${azTxt(s.az)}</text>`;
+  return g+'</svg>';}
+function featCard(s){const fs=feats(s);
+  return `<div class="card"><div class="card-h"><h3>Objekti i orijentiri</h3><button class="btn sm" type="button" data-rs="featNew">+ Dodaj</button></div>
+    ${fs.length?`<ul class="rows">${fs.map(f=>`<li><span>${featSwatch(FK[f.kind]?f.kind:'put')}</span><span class="grow"><b>${esc(fkOf(f).n)}</b>${f.name?' · '+esc(f.name):''}<br><span class="sub">${fkOf(f).lin?tacke(f.pts.length):'tačka'} · ${f.buf>0?'Schonstedt do '+nm(f.buf)+' m':'bez pojasa za Schonstedt'}</span></span><button class="btn sm" type="button" data-rs="featEdit" data-id="${esc(f.id)}">Uredi</button></li>`).join('')}</ul>`
+      :'<p class="sub" style="margin:0">Pruga, put, dalekovod, kanal, potok, reper ili stub. Crtaju se na mapi i na skici; uz objekat se može tražiti i Schonstedt.</p>'}</div>`;}
 function renderMapaB(){
-  const s=site(),dn=s.boxes.filter(boxDone).length,pt=s.boxes.filter(b=>!boxDone(b)&&Object.keys(b.done).length).length;
+  const s=site(),st=s.boxes.map(boxStat),dn=st.filter(x=>x==='d').length,pt=st.filter(x=>x==='p').length,xn=st.filter(x=>x==='x').length,ax=axisTxt(s),bt=bufTxt(s);
+  const kinds=[...new Set(feats(s).map(f=>f.kind))].filter(k=>FK[k]),msel=mergeSel&&mergeSel.site===s.id?mergeSel.ids:null;
   $('#v-mapa').innerHTML=`<div><div class="label">${esc(s.msp.id)} · ${esc(s.msp.naziv)} · ${esc(s.ci.oznaka)}</div><h2>Boksovi</h2></div>
-    <div class="legend"><span><i style="background:var(--haz-soft)"></i>Nije pregledano</span><span><i style="background:var(--work-soft)"></i>Delimično (čeka Schonstedt)</span><span><i style="background:var(--cleared)"></i>Završeno</span><span><i style="background:var(--surface-2);outline:2px solid var(--work);outline-offset:-2px"></i>U radu</span><span><i style="background:#8c9a2e;height:3px;vertical-align:3px"></i>Pruga</span></div>
+    <div class="legend"><span><i style="background:var(--haz-soft)"></i>Nije pregledano</span><span><i style="background:var(--work-soft)"></i>Delimično (čeka Schonstedt)</span><span><i style="background:var(--cleared)"></i>Završeno</span><span><i style="background:repeating-linear-gradient(-45deg,var(--muted) 0 1.5px,var(--surface) 1.5px 4px)"></i>Isključeno</span><span><i style="background:var(--surface-2);outline:2px solid var(--work);outline-offset:-2px"></i>U radu</span>${kinds.map(k=>`<span>${featSwatch(k)}${FK[k].n}</span>`).join('')}${bt?'<span><i style="background:rgba(140,154,46,.32)"></i>Pojas za Schonstedt</span>':''}</div>
+    ${msel?`<div class="notice" role="status"><b>Spajanje boksova.</b> Dodirni susedne boksove na mapi. Izabrano: ${msel.map(esc).join(', ')}.<div class="btnrow" style="margin-top:8px"><button class="btn sm primary" type="button" data-rs="mergeOk" ${msel.length<2?'disabled':''}>Spoji izabrane (${msel.length})</button><button class="btn sm" type="button" data-rs="mergeCancel">Odustani</button></div></div>`:''}
     <div class="mapwrap">${boxMapSVG(s)}</div>
-    <div class="sub">Dodirni boks. Boksovi su ${s.grid}×${s.grid} m; uz prugu se traži i Schonstedt.</div>
+    <div class="sub">Dodirni boks za pregled, podelu, spajanje ili isključenje. Mreža ${s.grid}×${s.grid} m${s.az?', zaokrenuta '+azTxt(s.az)+' od severa':''}; mapa je okrenuta ka severu.${bt?' Schonstedt se traži i uz '+bt+'.':''} <button class="linkbtn" type="button" data-rs="ids">${showIds?'Sakrij oznake boksova':'Prikaži oznake boksova'}</button></div>
     <div class="card"><dl class="kv"><dt>Ishodište</dt><dd class="mono">${crsFmt(s,s.nt)}</dd><dt>Koord. sistem</dt><dd>${crsName()}</dd>
-      <dt>Površina</dt><dd>${num(totalArea(s))} m²</dd><dt>Boksovi</dt><dd>${dn} završeno · ${pt} delimično · ${s.boxes.length} ukupno</dd>
+      ${s.az?`<dt>Zaokret mreže</dt><dd>${azTxt(s.az)} (ose ${ax.U} i ${ax.V})</dd>`:''}
+      <dt>Površina</dt><dd>${num(polyArea(s.poly))} m²${xn?' · za pretragu '+num(totalArea(s))+' m²':''}</dd><dt>Boksovi</dt><dd>${dn} završeno · ${pt} delimično${xn?' · '+xn+' isključeno':''} · ${s.boxes.length} ukupno</dd>
       <dt>CEIA ukupno</dt><dd>${num(methodM2(s,'CEIA'))} m²</dd><dt>Schonstedt ukupno</dt><dd>${num(methodM2(s,'SCH'))} m²</dd></dl></div>
+    ${featCard(s)}
     <button class="btn primary" type="button" data-act="doc" data-k="sk">Otvori skicu napredovanja</button>`;
 }
 function openBoxB(id){
-  const s=site(),bx=boxById(s,id);if(!bx)return;selBox=id;renderMapaB();
-  const fs=s.finds.filter(f=>f.box===id),opts=TEAM.map(t=>`<option value="${t.id}">${t.id} · ${esc(t.n)}</option>`).join('');
-  const mrow=m=>{const d=bx.done[m];return `<div class="packrow"><span><b>${esc(P.methods[m])}</b><br><span class="sub">${d?'očišćeno '+fmtD(d.day).slice(0,6)+' · '+d.by:(m==='SCH'&&!bx.done.CEIA?'posle CEIA':'nije pregledano')}</span></span>${d?(d.day===TODAY?`<button class="btn sm" type="button" data-act="unmarkM" data-id="${id}" data-m="${m}">Poništi</button>`:'<span class="chip ok">✓</span>'):`<button class="btn sm primary" type="button" data-act="markM" data-id="${id}" data-m="${m}" ${m==='SCH'&&!bx.done.CEIA?'disabled':''}>Očišćeno</button>`}</div>`;};
-  openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · ${num(bx.area)} m²</div><h2>Boks ${esc(id)}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
-    <dl class="kv"><dt>JZ ugao</dt><dd class="mono">${crsFmt(s,toGK(s,bx.x0,bx.y0))}</dd><dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)).join(', '):'nema'}</dd></dl>
-    <label class="field">Deminer<select id="mWho">${opts}</select></label>
-    <div class="packs">${bx.need.map(mrow).join('')}</div>
-    <button class="btn" type="button" data-act="findBox" data-id="${id}">Dodaj nalaz u boksu ${esc(id)}</button>`);
-  const a=s.assign.find(x=>x.box===id);if(a)$('#mWho').value=a.who;
+  const s=site(),bx=boxById(s,id);if(!bx)return;
+  if(mergeSel&&mergeSel.site===s.id){const i=mergeSel.ids.indexOf(id);if(i<0)mergeSel.ids.push(id);else if(i>0)mergeSel.ids.splice(i,1);renderMapaB();return;}
+  selBox=id;renderMapaB();
+  const fs=s.finds.filter(f=>f.box===id),opts=TEAM.map(t=>`<option value="${t.id}">${t.id} · ${esc(t.n)}</option>`).join(''),ax=axisTxt(s),ex=bx.excl,single=bx.rects.length===1,near=schFeats(s,bx),q=esc(id);
+  const mrow=m=>{const d=bx.done[m];return `<div class="packrow"><span><b>${esc(P.methods[m])}</b><br><span class="sub">${d?'očišćeno '+fmtD(d.day).slice(0,6)+' · '+esc(d.by):(m==='SCH'&&!bx.done.CEIA?'posle CEIA':'nije pregledano')}</span></span>${d?(d.day===TODAY?`<button class="btn sm" type="button" data-act="unmarkM" data-id="${q}" data-m="${m}">Poništi</button>`:'<span class="chip ok">✓</span>'):`<button class="btn sm primary" type="button" data-act="markM" data-id="${q}" data-m="${m}" ${m==='SCH'&&!bx.done.CEIA?'disabled':''}>Očišćeno</button>`}</div>`;};
+  openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · ${num(bx.area)} m²${single?'':' · spojeni boks'}</div><h2>Boks ${q}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+    ${ex?`<div class="notice">Isključeno iz pretrage: <b>${esc(exclTxt(ex))}</b>. Ne računa se u površinu za pretragu.</div>`:''}
+    <dl class="kv"><dt>${ax.Corner}</dt><dd class="mono">${crsFmt(s,toGK(s,bx.x0,bx.y0))}</dd><dt>Veličina</dt><dd>${nm(bx.w)} × ${nm(bx.h)} m${s.az?' ('+ax.U+' × '+ax.V+')':''}</dd>${near.length?`<dt>Schonstedt</dt><dd>uz ${near.map(f=>esc(fkOf(f).acc)).join(', ')}</dd>`:''}<dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)).join(', '):'nema'}</dd></dl>
+    ${ex?'':`<label class="field">Deminer<select id="mWho">${opts}</select></label><div class="packs">${bx.need.map(mrow).join('')}</div>
+    <button class="btn" type="button" data-act="findBox" data-id="${q}">Dodaj nalaz u boksu ${q}</button>`}
+    <details class="bxed"><summary>Uredi boks: podela, spajanje, naziv, isključenje</summary><div class="bxed-in">
+      <div class="label">Podela</div>
+      ${single?`<div class="grid2"><label class="field">Rez ↔ na (m)<input id="cutU" type="number" step="0.5" min="0.5" max="${+(bx.w-0.5).toFixed(2)}" value="${+(bx.w/2).toFixed(2)}" inputmode="decimal"><small>od ${ax.corner}, ${ax.u}</small></label><label class="field">Rez ↕ na (m)<input id="cutV" type="number" step="0.5" min="0.5" max="${+(bx.h-0.5).toFixed(2)}" value="${+(bx.h/2).toFixed(2)}" inputmode="decimal"><small>od ${ax.corner}, ${ax.v}</small></label></div>
+        <div class="btnrow"><button class="btn sm" type="button" data-rs="split" data-mode="u" data-id="${q}">Na 2 ↔</button><button class="btn sm" type="button" data-rs="split" data-mode="v" data-id="${q}">Na 2 ↕</button><button class="btn sm" type="button" data-rs="split" data-mode="4" data-id="${q}">Na 4</button></div>
+        <small class="sub">Delovi dobijaju oznake ${q}${/\d[a-z]$/.test(id)?'1, 2…':'a, b…'}; status pregleda ostaje, a nalazi prelaze u deo u kome leže.</small>`:'<p class="sub" style="margin:0">Spojeni boks se ne deli.</p>'}
+      <div class="label">Spajanje</div><button class="btn sm" type="button" data-rs="mergeStart" data-id="${q}">Spoji sa susednim boksovima…</button>
+      <div class="label">Naziv</div><div class="grid2"><label class="field">Novi naziv<input id="bxName" maxlength="16" value="${q}" autocomplete="off"></label><div class="field" style="justify-content:flex-end"><button class="btn sm" type="button" data-rs="rename" data-id="${q}">Preimenuj</button></div></div>
+      <div class="label">Isključenje</div>${ex?`<button class="btn sm" type="button" data-rs="unexcl" data-id="${q}">Vrati u pretragu</button>`
+        :`<div class="grid2"><label class="field">Razlog<select id="exWhy">${Object.keys(EXCL).map(k=>`<option value="${k}">${EXCL[k]}</option>`).join('')}</select></label><label class="field">Napomena<input id="exNote" maxlength="80" placeholder="npr. kuća, asfalt"></label></div><button class="btn sm" type="button" data-rs="excl" data-id="${q}">Isključi iz pretrage</button>`}
+    </div></details>`);
+  const a=s.assign.find(x=>x.box===id);if(a&&$('#mWho'))$('#mWho').value=a.who;
 }
 function markBox(s,id,m,who){const bx=boxById(s,id);bx.done[m]={day:TODAY,by:who};s.log.push({t:hm(Date.now()),e:'Boks '+id+': '+P.methods[m]+' pregled završen ('+who+')'});addQ('Boks '+id+' · '+m);
   const a=s.assign.find(x=>x.box===id&&x.m===m);if(a){const n=nextBoxFor(s,m,a.who);if(n)a.box=n.id;else s.assign=s.assign.filter(x=>x!==a);}save();}
 
 function renderNalazB(){
-  const s=site(),list=s.boxes.slice().sort((a,b)=>a.id.localeCompare(b.id));
-  const pre=(prefill&&prefill.box)||((s.assign[0]||{}).box)||list[0].id;prefill=null;
+  const s=site(),list=s.boxes.slice().sort((a,b)=>a.id.localeCompare(b.id)),ax=axisTxt(s);
+  const pre=(prefill&&prefill.box)||((s.assign[0]||{}).box)||list[0].id;prefill=null;const pb=boxById(s,pre)||list[0];
   $('#v-nalaz').innerHTML=`<div><div class="label">${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><h2>Novi nalaz</h2></div>
   <form id="findForm" autocomplete="off">
     <fieldset><legend>Kategorija</legend><div class="chips" id="catChips">${Object.keys(P.cats).map((c,i)=>`<label><input type="radio" name="fcat" value="${c}" id="fcat${c}" ${i===0?'checked':''}><span>${P.cats[c]}</span></label>`).join('')}</div></fieldset>
     <fieldset><legend>Vrsta</legend><div class="chips mono" id="typeChips"></div></fieldset>
-    <label class="field">Boks<select id="fBox">${list.map(b=>`<option value="${b.id}" ${b.id===pre?'selected':''}>Boks ${b.id}${s.assign.find(a=>a.box===b.id)?' · '+s.assign.find(a=>a.box===b.id).who:''}</option>`).join('')}</select></label>
-    <div class="grid2"><label class="field">Istočno od JZ ugla (m)<input id="fE" type="number" step="0.1" min="0" max="${s.grid}" value="${(s.grid/2).toFixed(1)}" inputmode="decimal"></label>
-      <label class="field">Severno od JZ ugla (m)<input id="fN" type="number" step="0.1" min="0" max="${s.grid}" value="${(s.grid/2).toFixed(1)}" inputmode="decimal"></label></div>
+    <label class="field">Boks<select id="fBox">${list.map(b=>`<option value="${esc(b.id)}" ${b.id===pre?'selected':''}>Boks ${esc(b.id)}${b.excl?' · isključen':''}${s.assign.find(a=>a.box===b.id)?' · '+s.assign.find(a=>a.box===b.id).who:''}</option>`).join('')}</select></label>
+    <div class="grid2"><label class="field">${s.az?'Od početnog ugla boksa, '+ax.u:'Istočno od JZ ugla'} (m)<input id="fE" type="number" step="0.1" min="0" max="${pb.w}" value="${(pb.w/2).toFixed(1)}" inputmode="decimal"></label>
+      <label class="field">${s.az?'Od početnog ugla boksa, '+ax.v:'Severno od JZ ugla'} (m)<input id="fN" type="number" step="0.1" min="0" max="${pb.h}" value="${(pb.h/2).toFixed(1)}" inputmode="decimal"></label></div>
     <div class="calc" id="fCalc"></div>
     <fieldset><legend>Pronađeno metodom</legend><div class="chips">${Object.keys(P.methods).map((m,i)=>`<label><input type="radio" name="fmet" value="${m}" id="fm${m}" ${i===0?'checked':''}><span>${esc(P.methods[m])}</span></label>`).join('')}</div></fieldset>
     <div class="grid2"><label class="field">Dubina (cm)<input id="fDepth" type="number" min="0" max="300" value="10" inputmode="numeric"></label><label class="field">Količina<input id="fQty" type="number" min="1" max="50" value="1" inputmode="numeric"></label></div>
@@ -1226,49 +1410,58 @@ function renderNalazB(){
       cond:document.querySelector('input[name="fcond"]:checked').value,act:$('#fAct').value,method:document.querySelector('input[name="fmet"]:checked').value,synced:false,note:$('#fNote').value.trim()};
     attachPhoto(s,f);S.next++;s.finds.push(f);s.log.push({t:f.time,e:'Nalaz '+f.id+': '+f.type+', boks '+f.box+', dubina '+f.depth+' cm ('+P.methods[f.method]+')',k:'find'});addQ('Nalaz '+f.id+' · '+f.type);save();photoData=null;go('mapa');toast('Nalaz '+f.id+' sačuvan u boksu '+f.box+'.');});
 }
-function calcPosB(){const s=site(),bx=boxById(s,$('#fBox').value),e=parseFloat($('#fE').value)||0,n=parseFloat($('#fN').value)||0,u=bx.x0+e,v=bx.y0+n;
-  const p=toGK(s,u,v),w=planeToWgs(s,p),inside=inPoly([u,v],bx.poly),c=$('#fCalc');c.classList.toggle('warn',!inside);
-  c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsFmt(s,p)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E</span><span>${inside?'Izračunato iz JZ ugla boksa (meri se metrom od kočića).':'Tačka je van granica boksa '+bx.id+'. Proveri merenje.'}</span>`;}
+function calcPosB(){const s=site(),bx=boxById(s,$('#fBox').value),e=parseFloat($('#fE').value)||0,n=parseFloat($('#fN').value)||0,u=bx.x0+e,v=bx.y0+n,ax=axisTxt(s);
+  $('#fE').max=bx.w;$('#fN').max=bx.h;
+  const p=toGK(s,u,v),w=planeToWgs(s,p),inside=inBox(bx,[u,v]),c=$('#fCalc');c.classList.toggle('warn',!inside);
+  c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsFmt(s,p)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E</span><span>${inside?(s.az?'Mereno metrom od početnog ugla boksa ('+crsFmt(s,toGK(s,bx.x0,bx.y0))+') duž osa mreže: '+ax.U+' i '+ax.V+'.':'Izračunato iz JZ ugla boksa (meri se metrom od kočića).'):'Tačka je van granica boksa '+esc(bx.id)+'. Proveri merenje.'}</span>`;}
 
-/* ---------- skica napredovanja (paper, true scale) ---------- */
-function skScale(s){const b=bounds(s.poly),Wm=b.x1-b.x0,Hm=b.y1-b.y0;return [500,1000,2000,2500,5000,10000].find(k=>Wm*1000/k<=100&&Hm*1000/k<=200)||10000;}
+/* ---------- skica napredovanja (paper, true scale, north-up) ---------- */
+function skBounds(s){return bounds(s.poly.map(q=>enOf(s,q)));}
+function skScale(s){const b=skBounds(s),Wm=b.x1-b.x0,Hm=b.y1-b.y0;return [500,1000,2000,2500,5000,10000].find(k=>Wm*1000/k<=100&&Hm*1000/k<=200)||10000;}
 function skicaSVG(s){
-  const b=bounds(s.poly),sc=skScale(s),k=1000/sc,PW=190,L=21,top=32,mapW=(b.x1-b.x0)*k,mapH=(b.y1-b.y0)*k;
-  const X=u=>L+(u-b.x0)*k,Y=v=>top+(b.y1-v)*k,pth=p=>'M'+p.map(q=>X(q[0]).toFixed(2)+' '+Y(q[1]).toFixed(2)).join('L')+'Z';
-  const lx=L+mapW+7,legendTop=top+mapH+13,PH=legendTop+46,ink='#1d2a33';
+  const b=skBounds(s),sc=skScale(s),k=1000/sc,PW=190,L=21,top=32,mapW=(b.x1-b.x0)*k,mapH=(b.y1-b.y0)*k,f2=n=>n.toFixed(2);
+  const X=e=>L+(e-b.x0)*k,Y=n=>top+(b.y1-n)*k,P=q=>{const e=enOf(s,q);return [X(e[0]),Y(e[1])];},pth=p=>'M'+p.map(q=>{const r=P(q);return f2(r[0])+' '+f2(r[1]);}).join('L')+'Z';
+  const ink='#1d2a33',ex=s.boxes.filter(x=>x.excl),kinds=[...new Set(feats(s).map(f=>f.kind))].filter(x=>FK[x]);
+  const rows=[[`<rect width="5" height="3.2" fill="url(#skC)" stroke="${ink}" stroke-width="0.15"/>`,'očišćeno CEIA detektorom'],[`<rect width="5" height="3.2" fill="url(#skS)" stroke="${ink}" stroke-width="0.15"/>`,'očišćeno Schonstedtom']];
+  if(ex.length)rows.push([`<rect width="5" height="3.2" fill="url(#skX)" stroke="${ink}" stroke-width="0.15"/>`,'isključeno iz pretrage']);
+  rows.push([`<circle cx="2.5" cy="1.6" r="0.75" fill="none" stroke="${ink}" stroke-width="0.22"/><circle cx="2.5" cy="1.6" r="0.25" fill="${ink}"/>`,'pronalasci (NUS)']);
+  kinds.forEach(kd=>rows.push([featSVG({kind:kd,pts:FK[kd].lin?[[0,1.6],[5,1.6]]:[[2.5,1.9]]},q=>q,true,ink),FK[kd].n.toLowerCase()]));
+  rows.push([`<line x1="0" y1="1.6" x2="5" y2="1.6" stroke="${ink}" stroke-width="0.4"/>`,'granica radilišta (T1–T'+s.poly.length+')']);
+  const lx=L+mapW+7,legendTop=top+mapH+13,PH=legendTop+Math.max(46,11+rows.length*5.2),tn=trueNorth(s)/D2R;
   let g=`<svg class="sk" xmlns="http://www.w3.org/2000/svg" width="${PW}mm" height="${PH.toFixed(1)}mm" viewBox="0 0 ${PW} ${PH.toFixed(2)}" role="img" aria-label="Skica napredovanja ${esc(s.msp.id)}, razmera 1:${sc}">
   <defs><pattern id="skMm" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0V1H0" fill="none" stroke="#d3e3ec" stroke-width="0.06"/></pattern>
   <pattern id="skCm" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0V10H0" fill="none" stroke="#a9c6d8" stroke-width="0.16"/></pattern>
   <pattern id="skS" width="1.4" height="1.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="1.4" stroke="${ink}" stroke-width="0.16"/></pattern>
-  <pattern id="skC" width="1.8" height="1.8" patternUnits="userSpaceOnUse"><path d="M1.8 0V1.8H0" fill="none" stroke="${ink}" stroke-width="0.12"/></pattern></defs>
+  <pattern id="skC" width="1.8" height="1.8" patternUnits="userSpaceOnUse"><path d="M1.8 0V1.8H0" fill="none" stroke="${ink}" stroke-width="0.12"/></pattern>
+  <pattern id="skX" width="2.2" height="2.2" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="2.2" height="2.2" fill="#eef1f3"/><line x1="0" y1="0" x2="0" y2="2.2" stroke="#7d8a93" stroke-width="0.55"/></pattern>
+  <clipPath id="skClip"><rect x="${f2(L-1.5)}" y="${f2(top-1.5)}" width="${f2(mapW+3)}" height="${f2(mapH+3)}"/></clipPath></defs>
   <rect width="${PW}" height="${PH}" fill="#fbfdfe"/><rect width="${PW}" height="${PH}" fill="url(#skMm)"/><rect width="${PW}" height="${PH}" fill="url(#skCm)"/>
   <text class="sk-t" x="${PW/2}" y="10" text-anchor="middle">SKICA NAPREDOVANJA</text>
   <text class="sk-s" x="${PW/2}" y="15.5" text-anchor="middle">${esc(s.msp.naziv)}, ${esc(s.msp.opcina)} · ${esc(s.ci.oznaka)}</text>
   <text class="sk-s" x="${PW/2}" y="20.5" text-anchor="middle">R 1:${sc} · ${esc(s.msp.id)} · stanje na dan ${fmtD(TODAY)}</text>
-  <path d="M12 6L10.3 11H13.7Z" fill="${ink}"/><line x1="12" y1="10" x2="12" y2="20" stroke="${ink}" stroke-width="0.35"/><text class="sk-s" x="14.5" y="8" style="font-weight:700">N</text>`;
+  <g transform="translate(12 13) rotate(${f2(tn)})"><path d="M0 -7L-1.7 -2H1.7Z" fill="${ink}"/><line x1="0" y1="-3" x2="0" y2="7" stroke="${ink}" stroke-width="0.35"/></g><text class="sk-s" x="14.5" y="8" style="font-weight:700">N</text>`;
   const step=k>=1?20:(k>=0.5?50:100),E0=s.nt.Y+b.x0,N0=s.nt.X+b.y0;
-  for(let e=Math.ceil(E0/step)*step;e<=s.nt.Y+b.x1;e+=step){const x=X(e-s.nt.Y);g+=`<line x1="${x}" y1="${top+mapH+0.5}" x2="${x}" y2="${top+mapH+2.2}" stroke="${ink}" stroke-width="0.2"/><text class="sk-c" x="${x}" y="${top+mapH+5}" text-anchor="middle">${gkn(e).split(',')[0]}</text>`;}
-  for(let n=Math.ceil(N0/step)*step;n<=s.nt.X+b.y1;n+=step){const y=Y(n-s.nt.X);g+=`<line x1="${L-2.2}" y1="${y}" x2="${L-0.5}" y2="${y}" stroke="${ink}" stroke-width="0.2"/><text class="sk-c" x="${L-2.8}" y="${y+0.7}" text-anchor="end">${gkn(n).split(',')[0]}</text>`;}
-  s.boxes.forEach(bx=>{const d=pth(bx.poly);if(bx.done.SCH)g+=`<path d="${d}" fill="url(#skS)"/>`;if(bx.done.CEIA)g+=`<path d="${d}" fill="url(#skC)"/>`;g+=`<path d="${d}" fill="none" stroke="#4a5b66" stroke-width="0.1"/>`;});
+  for(let e=Math.ceil(E0/step)*step;e<=s.nt.Y+b.x1;e+=step){const x=X(e-s.nt.Y);g+=`<line x1="${f2(x)}" y1="${f2(top+mapH+0.5)}" x2="${f2(x)}" y2="${f2(top+mapH+2.2)}" stroke="${ink}" stroke-width="0.2"/><text class="sk-c" x="${f2(x)}" y="${f2(top+mapH+5)}" text-anchor="middle">${gkn(e).split(',')[0]}</text>`;}
+  for(let n=Math.ceil(N0/step)*step;n<=s.nt.X+b.y1;n+=step){const y=Y(n-s.nt.X);g+=`<line x1="${L-2.2}" y1="${f2(y)}" x2="${L-0.5}" y2="${f2(y)}" stroke="${ink}" stroke-width="0.2"/><text class="sk-c" x="${L-2.8}" y="${f2(y+0.7)}" text-anchor="end">${gkn(n).split(',')[0]}</text>`;}
+  s.boxes.forEach(bx=>{const d=boxRings(bx).map(pth).join('');if(bx.excl)g+=`<path d="${d}" fill="url(#skX)" fill-rule="evenodd"/>`;else{if(bx.done.SCH)g+=`<path d="${d}" fill="url(#skS)" fill-rule="evenodd"/>`;if(bx.done.CEIA)g+=`<path d="${d}" fill="url(#skC)" fill-rule="evenodd"/>`;}
+    g+=`<path d="${d}" fill="none" stroke="#4a5b66" stroke-width="${bx.excl?0.2:0.1}"/>`;});
+  s.boxes.forEach(bx=>{if(bx.w*k<6||bx.h*k<4.5)return;const c=P([bx.cx,bx.cy]);g+=`<text class="sk-b" x="${f2(c[0])}" y="${f2(c[1]+(bx.excl?-0.2:0.55))}" text-anchor="middle">${esc(bx.id)}</text>`;
+    if(bx.excl)g+=`<text class="sk-b" x="${f2(c[0])}" y="${f2(c[1]+1.8)}" text-anchor="middle" style="font-weight:700">${esc((EXCL[bx.excl.why]||bx.excl.why).split(' ')[0])}</text>`;});
   g+=`<path d="${pth(s.poly)}" fill="none" stroke="${ink}" stroke-width="0.4"/>`;
-  if(s.rail&&s.rail.length)g+=`<path d="M${s.rail.map(q=>X(q[0]).toFixed(2)+' '+Y(q[1]).toFixed(2)).join('L')}" fill="none" stroke="#8c9a2e" stroke-width="0.5"/>`;
-  const cx=s.poly.reduce((a,p)=>a+p[0],0)/s.poly.length,cy=s.poly.reduce((a,p)=>a+p[1],0)/s.poly.length;
-  s.poly.forEach((p,i)=>{const dx=p[0]-cx,dy=p[1]-cy,dl=Math.hypot(dx,dy)||1,tx=X(p[0])+dx/dl*3.2,ty=Y(p[1])-dy/dl*3.2+0.8;g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="0.55" fill="${ink}"/><text class="sk-l" x="${tx}" y="${ty}" text-anchor="middle" style="font-weight:700">T${i+1}</text>`;});
-  const fs=s.finds.map(f=>({f,x:X(f.u),y:Y(f.v)})).sort((a,b)=>a.y-b.y);let last=top-4;
+  const cx=s.poly.reduce((a,p)=>a+p[0],0)/s.poly.length,cy=s.poly.reduce((a,p)=>a+p[1],0)/s.poly.length,C=P([cx,cy]);
+  g+=`<g clip-path="url(#skClip)">${feats(s).filter(f=>f.pts.length).map(f=>featSVG(f,P,true,ink,C)).join('')}</g>`;
+  s.poly.forEach((p,i)=>{const q=P(p),dx=q[0]-C[0],dy=q[1]-C[1],dl=Math.hypot(dx,dy)||1,tx=q[0]+dx/dl*3.2,ty=q[1]+dy/dl*3.2+0.8;g+=`<circle cx="${f2(q[0])}" cy="${f2(q[1])}" r="0.55" fill="${ink}"/><text class="sk-l" x="${f2(tx)}" y="${f2(ty)}" text-anchor="middle" style="font-weight:700">T${i+1}</text>`;});
+  const fs=s.finds.map(f=>{const q=P([f.u,f.v]);return {f,x:q[0],y:q[1]};}).sort((a,b)=>a.y-b.y);let last=top-4;
   fs.forEach(o=>{o.ly=Math.max(o.y,last+3.4);last=o.ly;});const over=last-(top+mapH+6);if(over>0)fs.forEach(o=>o.ly-=over);
-  fs.forEach(o=>{g+=`<circle cx="${o.x}" cy="${o.y}" r="0.75" fill="none" stroke="${ink}" stroke-width="0.22"/><circle cx="${o.x}" cy="${o.y}" r="0.25" fill="${ink}"/>
-    <path d="M${o.x+0.8} ${o.y}L${lx-1.5} ${o.ly-0.7}" fill="none" stroke="${ink}" stroke-width="0.12"/><text class="sk-l" x="${lx}" y="${o.ly}">${esc(o.f.type)}${o.f.depth?' · '+o.f.depth+' cm':''}</text>`;});
-  const gx=PW-66,row=(i,sw,label)=>`<g transform="translate(${gx} ${legendTop+7+i*5.2})">${sw}<text class="sk-l" x="7" y="2.4">${label}</text></g>`;
-  g+=`<text class="sk-s" x="${gx}" y="${legendTop+2}" style="font-weight:700">LEGENDA:</text>`+
-    row(0,`<rect width="5" height="3.2" fill="url(#skC)" stroke="${ink}" stroke-width="0.15"/>`,'očišćeno CEIA detektorom')+
-    row(1,`<rect width="5" height="3.2" fill="url(#skS)" stroke="${ink}" stroke-width="0.15"/>`,'očišćeno Schonstedtom')+
-    row(2,`<circle cx="2.5" cy="1.6" r="0.75" fill="none" stroke="${ink}" stroke-width="0.22"/><circle cx="2.5" cy="1.6" r="0.25" fill="${ink}"/>`,'pronalasci (NUS)')+
-    row(3,`<line x1="0" y1="1.6" x2="5" y2="1.6" stroke="#8c9a2e" stroke-width="0.5"/>`,'pruga')+
-    row(4,`<line x1="0" y1="1.6" x2="5" y2="1.6" stroke="${ink}" stroke-width="0.4"/>`,'granica radilišta (T1–T'+s.poly.length+')');
-  const ceM=methodM2(s,'CEIA'),scM=methodM2(s,'SCH');
+  fs.forEach(o=>{g+=`<circle cx="${f2(o.x)}" cy="${f2(o.y)}" r="0.75" fill="none" stroke="${ink}" stroke-width="0.22"/><circle cx="${f2(o.x)}" cy="${f2(o.y)}" r="0.25" fill="${ink}"/>
+    <path d="M${f2(o.x+0.8)} ${f2(o.y)}L${f2(lx-1.5)} ${f2(o.ly-0.7)}" fill="none" stroke="${ink}" stroke-width="0.12"/><text class="sk-l" x="${f2(lx)}" y="${f2(o.ly)}">${esc(o.f.type)}${o.f.depth?' · '+o.f.depth+' cm':''}</text>`;});
+  const gx=PW-66;
+  g+=`<text class="sk-s" x="${gx}" y="${legendTop+2}" style="font-weight:700">LEGENDA:</text>`+rows.map((r,i)=>`<g transform="translate(${gx} ${f2(legendTop+7+i*5.2)})">${r[0]}<text class="sk-l" x="7" y="2.4">${r[1]}</text></g>`).join('');
+  const ceM=methodM2(s,'CEIA'),scM=methodM2(s,'SCH'),why=[...new Set(ex.map(x=>EXCL[x.excl.why]||x.excl.why))].join(', ');
   g+=`<text class="sk-l" x="${L}" y="${legendTop+4}">Pregledano CEIA: ${num(ceM)} m²</text><text class="sk-l" x="${L}" y="${legendTop+8.5}">Pregledano Schonstedtom: ${num(scM)} m²</text>
     <text class="sk-l" x="${L}" y="${legendTop+13}">Završeno: ${num(clearedM2(s))} od ${num(totalArea(s))} m² · nalaza: ${s.finds.length}</text>
-    <text class="sk-l" x="${L}" y="${legendTop+13+9}">Koordinate: SRB_ETRS89 / UTM 34N</text>
+    ${ex.length?`<text class="sk-l" x="${L}" y="${legendTop+17.5}">Isključeno iz pretrage: ${num(exclM2(s))} m² (${esc(why)})</text>`:''}
+    <text class="sk-l" x="${L}" y="${legendTop+22}">Koordinate: SRB_ETRS89 / UTM 34N · boksovi ${s.grid}×${s.grid} m${s.az?', mreža zaokrenuta '+azTxt(s.az):''}</text>
     <text class="sk-s" x="${L}" y="${legendTop+32}">Skicu izradio:</text><line x1="${L+22}" y1="${legendTop+32.6}" x2="${L+80}" y2="${legendTop+32.6}" stroke="${ink}" stroke-width="0.15" stroke-dasharray="0.6 0.6"/>
     <text class="sk-c" x="${L+22}" y="${legendTop+35.5}">ime, prezime, potpis</text>`;
   return g+'</svg>';
@@ -1281,13 +1474,13 @@ const DOCS_RS=[
   {k:'rsn',pn:'NUS',t:'Zapisnik o pronađenim NUS',d:()=>site().finds.length+' nalaza sa koordinatama'},
   {k:'rsp',pn:'PR',t:'Zapisnik o predaji očišćene površine',d:()=>'Nacrt · osnova za uverenje CZRS'},
   {k:'foto',pn:'FOTO',t:'Fotodokumentacija nalaza',d:()=>photoCount(site())},
-  {k:'exp',pn:'GIS',t:'Izvoz podataka: CSV i GeoJSON',d:()=>'SRB_ETRS89 / UTM 34N'}];
+  {k:'rsexp',pn:'GIS',t:'Izvoz podataka: KML, CSV i GeoJSON',d:()=>'Google Earth, Excel, QGIS · SRB_ETRS89 / UTM 34N'}];
 function rsDoc(s,k){
   const head=`<table><tr><td class="k">Izvođač</td><td>${esc(ORG.replace('primjer','primer'))}</td></tr><tr><td class="k">Projekat</td><td>${esc(s.msp.id)} · ${esc(s.msp.naziv)}, ${esc(s.msp.opcina)} · ${esc(s.ci.oznaka)}</td></tr></table>`;
-  if(k==='sk')return {h:`${skicaSVG(s)}<p class="note noprint">Na štampi je skica u tačnoj razmeri 1:${skScale(s)} (A4, bez skaliranja u dijalogu za štampu).</p>`,cls:'skdoc'};
+  if(k==='sk')return {h:`${skicaSVG(s)}<p class="note noprint">Na štampi je skica u tačnoj razmeri 1:${skScale(s)} (A4, bez skaliranja u dijalogu za štampu). Sever je gore${s.az?'; mreža boksova je zaokrenuta '+azTxt(s.az):''}.</p>`,cls:'skdoc'};
   if(k==='rsd'){const pd=perDeminer(s,TODAY),log=s.log.slice().sort((a,b)=>a.t.localeCompare(b.t)),ft=s.finds.filter(f=>f.day===TODAY);let rows='',tot={CEIA:0,SCH:0};
     Object.keys(pd).sort().forEach(w=>['CEIA','SCH'].forEach(m=>{if(!pd[w][m].length)return;tot[m]+=pd[w].m2[m];const over=m==='CEIA'&&pd[w].m2[m]>P.rules.normaM2;
-      rows+=`<tr><td>${w} · ${esc((TEAM.find(t=>t.id===w)||{}).n||'')}</td><td>${P.methods[m]}</td><td>${pd[w][m].join(', ')}</td><td class="n">${num(pd[w].m2[m])}</td><td>${over?'<span class="miss">iznad norme '+P.rules.normaM2+' m²</span>':''}</td></tr>`;}));
+      rows+=`<tr><td>${esc(w)} · ${esc((TEAM.find(t=>t.id===w)||{}).n||'')}</td><td>${P.methods[m]}</td><td>${esc(pd[w][m].join(', '))}</td><td class="n">${num(pd[w].m2[m])}</td><td>${over?'<span class="miss">iznad norme '+P.rules.normaM2+' m²</span>':''}</td></tr>`;}));
     return {h:`<h4>DNEVNA EVIDENCIJA UČINKA I NAPRETKA</h4><div class="dsub">${fmtD(TODAY)}</div>${head}
       <table><thead><tr><th>Deminer</th><th>Metoda</th><th>Boksovi</th><th>m²</th><th>Napomena</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nema unetog učinka.</td></tr>'}</tbody>
       <tfoot><tr><td colspan="3">Ukupno CEIA / Schonstedt</td><td class="n">${num(tot.CEIA)} / ${num(tot.SCH)}</td><td></td></tr></tfoot></table>
@@ -1301,9 +1494,11 @@ function rsDoc(s,k){
       <p class="note">Uklanjanje i uništavanje NUS obavlja MUP (Zakon o smanjenju rizika od katastrofa, čl. 73); zapisnik o uništavanju dostavlja se CZRS-u i MUP-u (Uredba, čl. 17).</p>
       <div class="sig"><div>Rukovodilac radilišta</div><div>Predstavnik MUP-a</div></div>`};}
   if(k==='rsp'){const by={};s.finds.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);const pts=s.poly.map((p,i)=>{const q=toGK(s,p[0],p[1]);return `<tr><td>T${i+1}</td><td class="n mono">${gkn(q.Y)}</td><td class="n mono">${gkn(q.X)}</td></tr>`;}).join('');
+    const ex=s.boxes.filter(b=>b.excl),bt=bufTxt(s);
     const F=[['Projekat (broj CZRS)',esc(s.msp.id)],['Lokacija',esc(s.msp.naziv+', '+s.msp.opcina)],['Izvođač',esc(ORG.replace('primjer','primer'))],['Period radova',fmtD(s.start)+' – '],
-      ['Površina projekta',num(totalArea(s))+' m²'],['Pregledano CEIA detektorom',num(methodM2(s,'CEIA'))+' m²'],['Pregledano Schonstedtom',num(methodM2(s,'SCH'))+' m²'],
-      ['Dubina pretrage',P.rules.minDepth+' cm (CEIA, po projektu); dubinska pretraga Schonstedtom uz prugu'],['Koordinatni sistem','SRB_ETRS89 / UTM 34N'],
+      ['Površina projekta',num(polyArea(s.poly))+' m²'],['Isključeno iz pretrage',ex.length?num(exclM2(s))+' m² · '+ex.map(b=>esc(b.id+': '+exclTxt(b.excl))).join('; '):'nema'],['Površina za pretragu',num(totalArea(s))+' m²'],
+      ['Pregledano CEIA detektorom',num(methodM2(s,'CEIA'))+' m²'],['Pregledano Schonstedtom',num(methodM2(s,'SCH'))+' m²'],
+      ['Dubina pretrage',P.rules.minDepth+' cm (CEIA, po projektu)'+(bt?'; dubinska pretraga Schonstedtom uz '+esc(bt):'')],['Koordinatni sistem','SRB_ETRS89 / UTM 34N'],
       ['Pronađena NUS',Object.entries(by).map(([t,n])=>esc(t)+' ×'+n).join(', ')||'nema'],['Budući korisnik zemljišta',''],['Broj uverenja o očišćenosti','']];
     return {h:`<h4>ZAPISNIK O PREDAJI OČIŠĆENE POVRŠINE</h4><div class="dsub">nacrt · osnova za uverenje o očišćenosti (Uredba 70/2013, čl. 22)</div>
       <table>${F.map((x,i)=>`<tr><td style="width:24px">${i+1}.</td><td class="k">${x[0]}</td><td>${x[1]||'<span class="miss">nedostaje</span>'}</td></tr>`).join('')}</table>
@@ -1311,8 +1506,211 @@ function rsDoc(s,k){
       <div class="sec">Prilozi</div><table><tr><td>a)</td><td>Skica napredovanja R 1:${skScale(s)}</td><td><b>spremno</b></td></tr><tr><td>b)</td><td>Zapisnik o pronađenim NUS (${s.finds.length})</td><td><b>spremno</b></td></tr>
       <tr><td>c)</td><td>Dnevne evidencije učinka</td><td><b>spremno</b></td></tr><tr><td>d)</td><td>Zapisnik sa budućim korisnicima o granicama</td><td><span class="miss">nedostaje</span></td></tr></table>
       <div class="sig" style="grid-template-columns:1fr 1fr 1fr"><div>Izvođač</div><div>CZRS</div><div>Budući korisnik</div></div>`};}
+  if(k==='rsexp'){const xn=s.boxes.filter(b=>b.excl).length,canFile=!inFrame||(matchMedia('(pointer:coarse)').matches&&!!navigator.canShare);
+    return {h:`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · SRB_ETRS89 / UTM 34N i WGS84</div>
+      <p>KML se otvara u Google Earth-u: granica, boksovi obojeni po stanju (nije pregledano, delimično, završeno, isključeno), objekti i nalazi sa vrstom, dubinom, metodom i datumom. CSV nalaza se otvara u Excelu, GeoJSON u QGIS-u.</p>
+      <table><tr><td class="k">Nalaza</td><td>${s.finds.length}</td></tr><tr><td class="k">Boksova</td><td>${s.boxes.length}${xn?' (isključeno '+xn+')':''}</td></tr><tr><td class="k">Objekata</td><td>${feats(s).length}</td></tr><tr><td class="k">Lomnih tačaka</td><td>${s.poly.length}</td></tr></table>
+      ${canFile?`<div class="btnrow noprint"><button class="btn primary" type="button" data-rs="dl" data-k="kml">Preuzmi KML</button><button class="btn" type="button" data-rs="dl" data-k="csv">Preuzmi CSV</button><button class="btn" type="button" data-rs="dl" data-k="geo">Preuzmi GeoJSON</button></div>`
+        :'<p class="note noprint">U ovom prikazu fajl se ne može preuzeti. Kopiraj tekst i sačuvaj ga kao .kml, ili otvori aplikaciju preko linka.</p>'}
+      <div class="btnrow noprint" style="margin-top:8px"><button class="btn" type="button" data-rs="copyKml">Kopiraj KML</button><button class="btn" type="button" data-act="copyCsv">Kopiraj CSV nalaza</button><button class="btn" type="button" data-act="copyGeo">Kopiraj GeoJSON</button></div>`};}
   return null;
 }
+
+/* ---------- landmark editor ---------- */
+function openFeat(id){const s=site(),f=id?feats(s).find(x=>x.id===id):null,k=f&&FK[f.kind]?f.kind:'pruga';
+  const txt=f?f.pts.map(q=>{const p=toGK(s,q[0],q[1]);return p.Y.toFixed(2)+' '+p.X.toFixed(2);}).join('\n'):'';
+  openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · ${crsName()}</div><h2>${f?'Uredi objekat':'Novi objekat'}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+    <div class="grid2"><label class="field">Vrsta<select id="ftKind">${Object.keys(FK).map(x=>`<option value="${x}" ${x===k?'selected':''}>${FK[x].n}${FK[x].lin?'':' (tačka)'}</option>`).join('')}</select></label><label class="field">Naziv<input id="ftName" maxlength="40" value="${esc(f?f.name:'')}" placeholder="npr. pruga Beograd–Niš"></label></div>
+    <label class="field">Koordinate (E N, UTM 34N)<textarea id="ftPts" placeholder="457 010 4 955 020">${txt}</textarea><small>Jedna tačka po redu. Linija: najmanje 2 tačke; reper i stub: 1 tačka.</small></label>
+    <label class="field">Schonstedt i u pojasu do (m)<input id="ftBuf" type="number" min="0" max="100" step="0.5" value="${f?f.buf:FK[k].buf}" inputmode="decimal"><small>0 = isključeno. Svaki boks koji ulazi u pojas traži i Schonstedt.</small></label>
+    <div class="btnrow"><button class="btn primary" type="button" data-rs="featSave" data-id="${f?esc(f.id):''}">Sačuvaj</button>${f?`<button class="btn" type="button" data-rs="featDel" data-id="${esc(f.id)}">Obriši</button>`:''}</div>`);
+  let touched=!!f;$('#ftBuf').addEventListener('input',()=>{touched=true;});$('#ftKind').addEventListener('change',e=>{if(!touched)$('#ftBuf').value=FK[e.target.value].buf;});}
+function saveFeat(id){const s=site(),kind=$('#ftKind').value,pts=parseTPs($('#ftPts').value);
+  if(!pts.length||pts.some(p=>!isFinite(p[0])||!isFinite(p[1]))){toast('Upiši koordinate: E N, jedna tačka po redu.');return;}
+  if(FK[kind].lin&&pts.length<2){toast('Linija traži najmanje 2 tačke.');return;}
+  const bad=pts.findIndex(p=>!looksUtm(p[0],p[1]));if(bad>=0){toast((bad+1)+'. tačka nije u UTM 34N. Proveri redosled E N.',4000);return;}
+  const loc=(FK[kind].lin?pts:pts.slice(0,1)).map(p=>toLocal(s,p[0],p[1]).map(v=>+v.toFixed(2)));
+  const buf=Math.max(0,Math.min(100,parseNum($('#ftBuf').value)||0)),name=$('#ftName').value.trim().slice(0,40);
+  if(!s.feats)s.feats=[];let f=id?s.feats.find(x=>x.id===id):null;
+  if(f)Object.assign(f,{kind,name,pts:loc,buf});else{f={id:'F'+(Math.max(0,...s.feats.map(x=>+String(x.id).slice(1)||0))+1),kind,name,pts:loc,buf};s.feats.push(f);}
+  syncRail(s);const n=recalcNeed(s);s.log.push({t:hm(Date.now()),e:(id?'Izmenjen':'Unet')+' objekat: '+FK[kind].n.toLowerCase()+(name?' '+name:'')+(buf?', Schonstedt do '+nm(buf)+' m':'')});addQ('Objekat · '+FK[kind].n);save();closeSheet();renderMapaB();
+  toast('Objekat sačuvan.'+(n?' Zahtev za Schonstedt promenjen u '+n+' boksova.':''),4000);}
+
+/* ---------- import: CSV/TXT, GeoJSON, KML → turning points (E N, UTM 34N) and features ---------- */
+function looksUtm(e,n){return e>=1e5&&e<=1e6&&n>=4e6&&n<=6e6;}
+// x,y as GeoJSON/KML write them: lon,lat (WGS84) or E,N (already projected)
+function impXY(x,y){if(!isFinite(x)||!isFinite(y))return null;if(Math.abs(x)<=180&&Math.abs(y)<=90){const u=wgsToUtm34(y,x);return [u.E,u.N];}if(looksUtm(x,y))return [x,y];if(looksUtm(y,x))return [y,x];return null;}
+function impKind(t){t=String(t||'').toLowerCase();if(!t)return '';
+  return /prug|rail|želez|zelez/.test(t)?'pruga':/dalekov|power ?line|\bkv\b/.test(t)?'dalekovod':/kanal|canal|ditch/.test(t)?'kanal':/potok|stream|creek|reka|river/.test(t)?'potok':
+    /reper|benchmark|poligonsk/.test(t)?'reper':/\bstub|\bpole\b|bandera/.test(t)?'stub':/\bput\b|\bputa\b|road|cesta|ulica/.test(t)?'put':'';}
+const numTok=t=>/^[-+]?\d+(?:[.,]\d+)?$/.test(t);
+function splitCoordLine(l){let t;
+  if(/[;\t]/.test(l))t=l.split(/[;\t]/);
+  else if(l.includes(',')){const ws=l.split(/\s+/);t=ws.length>=2&&ws.filter(x=>/^[-+]?\d+(,\d+)?$/.test(x)).length>=2&&!/,\s/.test(l)?ws:l.split(',');}
+  else t=l.split(/\s+/);
+  return t.map(x=>{x=x.trim().replace(/^["']|["']$/g,'').trim();return /^[-+]?\d{1,3}(\s\d{3})+([.,]\d+)?$/.test(x)?x.replace(/\s/g,''):x;});}
+function pairOf(nums){
+  for(let i=0;i+1<nums.length;i++){const a=nums[i],b=nums[i+1];if(looksUtm(a,b))return [a,b];if(looksUtm(b,a))return [b,a];}
+  for(let i=0;i+1<nums.length;i++){const a=nums[i],b=nums[i+1];
+    if(a>=35&&a<=60&&b>=10&&b<35){const u=wgsToUtm34(a,b);return [u.E,u.N];}
+    if(b>=35&&b<=60&&a>=10&&a<35){const u=wgsToUtm34(b,a);return [u.E,u.N];}}
+  return null;}
+function parseCSV(txt){const out={tp:[],feats:[],warn:[],fmt:'CSV/TXT'};
+  const lines=txt.replace(/^﻿/,'').split(/\r?\n/).map(l=>l.trim()).filter(l=>l&&!/^(#|\/\/)/.test(l));
+  if(!lines.length)throw new Error('Fajl je prazan.');
+  let cols=null;const h0=splitCoordLine(lines[0]);
+  if(h0.filter(numTok).length<2){const lc=h0.map(x=>x.toLowerCase()),f=re=>lc.findIndex(x=>re.test(x));
+    cols={lat:f(/^(lat|latitude|širina|sirina)/),lon:f(/^(lon|lng|long|longitude|dužina|duzina)/),e:f(/^(e|east|easting|istok|y|utm_?e|utm34_?e|e_?utm)$/),n:f(/^(n|north|northing|sever|x|utm_?n|utm34_?n|n_?utm)$/),
+      name:f(/^(name|naziv|id|tačka|tacka|oznaka|br|broj|pt|point|ime)$/),kind:f(/^(vrsta|tip|type|kind|objekat)$/)};lines.shift();}
+  let bad=0;
+  lines.forEach(l=>{const t=splitCoordLine(l);let pt=null,name='',kind='';
+    if(cols){const g=j=>j>=0&&t[j]!=null?parseNum(t[j]):NaN;
+      if(cols.lat>=0&&cols.lon>=0){const la=g(cols.lat),lo=g(cols.lon);if(isFinite(la)&&isFinite(lo)&&Math.abs(la)<=90&&Math.abs(lo)<=180){const u=wgsToUtm34(la,lo);pt=[u.E,u.N];}}
+      else if(cols.e>=0&&cols.n>=0){const a=g(cols.e),b=g(cols.n);pt=looksUtm(a,b)?[a,b]:looksUtm(b,a)?[b,a]:null;}
+      if(cols.name>=0)name=t[cols.name]||'';if(cols.kind>=0)kind=t[cols.kind]||'';}
+    if(!pt){pt=pairOf(t.filter(numTok).map(parseNum));
+      if(!pt&&!/[;\t,]/.test(l))pt=pairOf(l.replace(/(\d)\s+(?=\d{3}(\D|$))/g,'$1').split(/\s+/).filter(numTok).map(parseNum));
+      if(!name)name=t.find(x=>x&&!numTok(x))||'';}
+    if(!pt){bad++;return;}
+    const k=impKind(kind)||impKind(name);
+    if(k&&!FK[k].lin)out.feats.push({kind:k,name,pts:[pt]});else out.tp.push(pt);});
+  if(bad)out.warn.push(bad+' red(ova) bez ispravnih koordinata je preskočeno.');
+  return out;}
+function parseGeoJSON(txt){let o;try{o=JSON.parse(txt);}catch(e){throw new Error('GeoJSON nije ispravan JSON.');}
+  if(!o||typeof o!=='object'||!o.type)throw new Error('Ovo nije GeoJSON (nema polja "type").');
+  const prims=[],walk=(g,pr)=>{if(!g||typeof g!=='object')return;const t=g.type,c=g.coordinates;
+    if(t==='FeatureCollection')(g.features||[]).forEach(f=>walk(f));else if(t==='Feature')walk(g.geometry,g.properties||{});
+    else if(t==='GeometryCollection')(g.geometries||[]).forEach(x=>walk(x,pr));
+    else if(t==='Polygon')prims.push({t:'poly',c:(c||[])[0],pr});else if(t==='MultiPolygon')(c||[]).forEach(p=>prims.push({t:'poly',c:(p||[])[0],pr}));
+    else if(t==='LineString')prims.push({t:'line',c,pr});else if(t==='MultiLineString')(c||[]).forEach(x=>prims.push({t:'line',c:x,pr}));
+    else if(t==='Point')prims.push({t:'pt',c:[c],pr});else if(t==='MultiPoint')(c||[]).forEach(x=>prims.push({t:'pt',c:[x],pr}));};
+  walk(o);if(!prims.length)throw new Error('GeoJSON nema poligon, liniju ni tačku.');
+  return classifyGeo(prims,'GeoJSON');}
+function parseKML(txt){const d=new DOMParser().parseFromString(txt,'application/xml');
+  if(!d||!d.documentElement||d.getElementsByTagName('parsererror').length)throw new Error('KML nije ispravan XML.');
+  const by=(el,n)=>Array.from(el.getElementsByTagName('*')).filter(e=>e.localName===n);
+  const crd=el=>{const c=by(el,'coordinates')[0];return c?c.textContent.trim().split(/\s+/).filter(Boolean).map(t=>t.split(',').map(Number)):[];};
+  const pms=by(d,'Placemark');if(!pms.length)throw new Error('U KML fajlu nema nijednog Placemark-a (granice, linije ili tačke).');
+  const prims=[];
+  pms.forEach(pm=>{const nmEl=Array.from(pm.children).find(e=>e.localName==='name'),pr={name:nmEl?nmEl.textContent.trim():''};
+    by(pm,'Data').forEach(x=>{const v=by(x,'value')[0];if(v&&x.getAttribute('name'))pr[x.getAttribute('name')]=v.textContent.trim();});
+    by(pm,'SimpleData').forEach(x=>{if(x.getAttribute('name'))pr[x.getAttribute('name')]=x.textContent.trim();});
+    by(pm,'Polygon').forEach(g=>prims.push({t:'poly',c:crd(by(g,'outerBoundaryIs')[0]||g),pr}));
+    by(pm,'LineString').forEach(g=>prims.push({t:'line',c:crd(g),pr}));
+    by(pm,'Point').forEach(g=>prims.push({t:'pt',c:crd(g).slice(0,1),pr}));});
+  if(!prims.length)throw new Error('KML nema poligon, liniju ni tačku sa koordinatama.');
+  return classifyGeo(prims,'KML');}
+// sort geometries into the boundary (first polygon, or one marked "granica"), linear features and point features
+function classifyGeo(prims,fmt){const out={tp:[],feats:[],warn:[],fmt};let bad=0;
+  const conv=c=>(Array.isArray(c)?c:[]).map(q=>Array.isArray(q)?impXY(+q[0],+q[1]):null);
+  const pv=pr=>String((pr||{}).vrsta||(pr||{}).kind||(pr||{}).type||(pr||{}).tip||'').toLowerCase(),pn=pr=>String((pr||{}).name||(pr||{}).naziv||(pr||{}).Name||(pr||{}).id||'').trim();
+  const skip=pr=>/^(boks|nalaz|radna_staza)$/.test(pv(pr));
+  const polys=prims.filter(p=>p.t==='poly'&&!skip(p.pr)),main=polys.find(p=>/granica/.test(pv(p.pr)))||polys[0];
+  if(main){const r=conv(main.c);if(r.length<3||r.some(x=>!x))bad++;else{out.tp=r;if(polys.length>1)out.warn.push('U fajlu je '+polys.length+' poligona; za granicu je uzet „'+(pn(main.pr)||'prvi')+'”.');}}
+  const tpPts=[];
+  prims.forEach(p=>{if(p.t==='poly'||skip(p.pr))return;const c=conv(p.c);if(!c.length||c.some(x=>!x)){bad++;return;}const name=pn(p.pr),k=impKind(pv(p.pr))||impKind(name);
+    if(p.t==='line'){if(c.length<2){bad++;return;}const ok=k&&FK[k].lin;out.feats.push({kind:ok?k:'put',name,pts:c,guess:!ok});return;}
+    const m=name.match(/^T\s*(\d+)$/i),ok=k&&!FK[k].lin;
+    if((m||/lomn/.test(pv(p.pr)))&&!ok)tpPts.push({n:m?+m[1]:tpPts.length+1,pt:c[0]});else out.feats.push({kind:ok?k:'reper',name,pts:[c[0]],guess:!ok});});
+  if(!out.tp.length&&tpPts.length>=3)out.tp=tpPts.sort((a,b)=>a.n-b.n).map(x=>x.pt);
+  else if(!out.tp.length&&out.feats.length>=3&&out.feats.every(f=>f.guess&&f.pts.length===1)){out.tp=out.feats.map(f=>f.pts[0]);out.feats=[];out.warn.push('Fajl ima samo tačke; uzete su kao lomne tačke redom kojim su u fajlu.');}
+  if(bad)out.warn.push(bad+' geometrija bez ispravnih koordinata je preskočeno.');
+  return out;}
+function tpCheck(tp){const warn=[],n=tp.length;
+  if(tp.some(p=>!isFinite(p[0])||!isFinite(p[1])))return {err:'Neke lomne tačke nemaju brojeve za E i N.',warn};
+  const i=tp.findIndex(p=>!looksUtm(p[0],p[1]));if(i>=0)return {err:'Tačka T'+(i+1)+' nije u UTM 34N (E oko 300 000–700 000, N oko 4 600 000–5 150 000). Proveri redosled E N.',warn};
+  if(n>400)return {err:'Granica ima '+n+' tačaka; najviše 400.',warn};
+  for(let a=0;a<n;a++)for(let b=a+2;b<n;b++){if(a===0&&b===n-1)continue;if(segsCross(tp[a],tp[(a+1)%n],tp[b],tp[(b+1)%n]))return {err:'Granica se seče sama sa sobom (stranice T'+(a+1)+'–T'+((a+1)%n+1)+' i T'+(b+1)+'–T'+((b+1)%n+1)+'). Proveri redosled tačaka.',warn};}
+  const A=polyArea(tp);if(A<1)return {err:'Površina granice je skoro nula. Proveri tačke.',warn};
+  if(A>2e6)warn.push('Površina je '+num(A/1e4,1)+' ha. Proveri da li je to granica jednog radilišta.');
+  if(tp.some(p=>{const l=utm34ToWgs(p[0],p[1]).lon;return l<18||l>24;}))warn.push('Deo tačaka je van zone UTM 34 (18°–24° E). Proveri koordinate.');
+  return {err:null,warn};}
+function parseImport(name,txt){const n=String(name||'').toLowerCase(),t=String(txt||'').replace(/^﻿/,'').trim();
+  if(/\.kmz$/.test(n))throw new Error('KMZ je zapakovan fajl. U Google Earth-u sačuvaj mesto kao .kml i uvezi taj fajl.');
+  if(/\.(shp|dxf|dwg|xlsx?|pdf|zip)$/.test(n))throw new Error('Ovaj format se ne uvozi. Podržani su CSV, TXT, GeoJSON i KML.');
+  if(!t)throw new Error('Fajl je prazan.');
+  const r=/\.kml$/.test(n)||t.startsWith('<')?parseKML(t):/\.(geo)?json$/.test(n)||t.startsWith('{')?parseGeoJSON(t):parseCSV(t);
+  r.tp=r.tp.filter((p,i,a)=>i===0||Math.hypot(p[0]-a[i-1][0],p[1]-a[i-1][1])>0.005);
+  if(r.tp.length>1&&Math.hypot(r.tp[0][0]-r.tp[r.tp.length-1][0],r.tp[0][1]-r.tp[r.tp.length-1][1])<0.005)r.tp.pop();
+  r.feats.forEach(f=>{f.buf=FK[f.kind].buf;});
+  if(r.tp.length&&r.tp.length<3)throw new Error('Granica ima samo '+r.tp.length+' tačke; treba najmanje 3.');
+  if(!r.tp.length&&!r.feats.length)throw new Error('U fajlu nisu pronađene koordinate. Očekuje se E N po redu (UTM 34N), WGS84 širina i dužina, GeoJSON ili KML.');
+  if(r.tp.length){const c=tpCheck(r.tp);if(c.err)throw new Error(c.err);r.warn.push(...c.warn);}
+  return r;}
+let nsFeats=[],nsMsg=null;
+function nsImpRender(m){const el=$('#nsImp');if(!el)return;
+  el.innerHTML=(m&&m.err?`<div class="notice haz" role="alert">${esc(m.err)}</div>`:'')+(m&&m.ok?`<div class="notice" style="background:var(--clr-soft)" role="status">${esc(m.ok)}</div>`:'')+(m&&m.warn&&m.warn.length?`<div class="notice">${m.warn.map(esc).join('<br>')}</div>`:'')+
+    (nsFeats.length?`<div class="label" style="margin:4px 0">Objekti iz fajla</div><ul class="rows">${nsFeats.map((f,i)=>`<li><span class="grow"><select data-nsk="${i}" aria-label="Vrsta objekta">${Object.keys(FK).filter(k=>!!FK[k].lin===(f.pts.length>1)).map(k=>`<option value="${k}" ${k===f.kind?'selected':''}>${FK[k].n}</option>`).join('')}</select> ${esc(f.name||'')}${f.guess?' <span class="sub">(proveri vrstu)</span>':''}<br><span class="sub">${f.pts.length>1?tacke(f.pts.length):'tačka'} · Schonstedt do <input data-nsb="${i}" type="number" min="0" max="100" step="any" value="${f.buf}" inputmode="decimal" aria-label="Pojas za Schonstedt u metrima"> m</span></span><button class="btn sm" type="button" data-rs="nsFeatDel" data-i="${i}" aria-label="Ukloni objekat">×</button></li>`).join('')}</ul>`:'');}
+function onImportFile(file){if(!file)return;
+  if(file.size>5e6){nsMsg={err:'Fajl je veći od 5 MB. Za granicu radilišta treba samo nekoliko tačaka.'};nsImpRender(nsMsg);return;}
+  const rd=new FileReader();rd.onerror=()=>{nsMsg={err:'Fajl nije pročitan.'};nsImpRender(nsMsg);};
+  rd.onload=()=>{try{const r=parseImport(file.name,String(rd.result));
+      if(r.tp.length)$('#nsTp').value=r.tp.map(p=>p[0].toFixed(2)+' '+p[1].toFixed(2)).join('\n');
+      nsFeats=r.feats.map(f=>({kind:f.kind,name:f.name,pts:f.pts,buf:f.buf,guess:f.guess}));
+      nsMsg={ok:'Uvezeno iz '+r.fmt+' ('+file.name+'): '+(r.tp.length?'lomnih tačaka '+r.tp.length:'bez granice')+(r.feats.length?', objekata: '+r.feats.length:'')+'.',warn:(r.tp.length?[]:['Granica nije u fajlu; upiši lomne tačke ručno.']).concat(r.warn)};}
+    catch(e){nsMsg={err:(e&&e.message)||'Fajl nije prepoznat.'};}
+    nsImpRender(nsMsg);};
+  rd.readAsText(file);}
+
+/* ---------- export: KML for Google Earth, file download ---------- */
+function kmlText(s){s=s||site();const w=q=>{const p=planeToWgs(s,toGK(s,q[0],q[1]));return p.lon.toFixed(7)+','+p.lat.toFixed(7)+',0';};
+  const ring=r=>'<LinearRing><coordinates>'+r.concat([r[0]]).map(w).join(' ')+'</coordinates></LinearRing>';
+  const geom=rs=>{const outer=rs.filter((r,i)=>!rs.some((o,j)=>j!==i&&polyArea(o)>polyArea(r)&&inPoly(r[0],o))),
+      pg=o=>'<Polygon><outerBoundaryIs>'+ring(o)+'</outerBoundaryIs>'+rs.filter(r=>r!==o&&!outer.includes(r)&&inPoly(r[0],o)).map(r=>'<innerBoundaryIs>'+ring(r)+'</innerBoundaryIs>').join('')+'</Polygon>';
+    return outer.length===1?pg(outer[0]):'<MultiGeometry>'+outer.map(pg).join('')+'</MultiGeometry>';};
+  const ed=o=>'<ExtendedData>'+Object.entries(o).map(([k,v])=>`<Data name="${k}"><value>${esc(v==null?'':v)}</value></Data>`).join('')+'</ExtendedData>';
+  const desc=a=>'<description><![CDATA['+a.filter(Boolean).map(esc).join('<br>')+']]></description>';
+  const STAT={n:['nije pregledano','80475ae0'],p:['delimično (čeka Schonstedt)','8042b1e7'],d:['završeno','a04a782b'],x:['isključeno','b0998f8a']};
+  const LC={pruga:['ff332a1d',4],put:['ff456a8a',4],dalekovod:['ffa04f6b',2],kanal:['ffb5742f',3],potok:['ffb5742f',2]};
+  const tpE=(q,i)=>{const p=toGK(s,q[0],q[1]);return 'T'+(i+1)+': E '+p.Y.toFixed(2)+', N '+p.X.toFixed(2);};
+  let k=`<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${esc(s.msp.id+' · '+s.msp.naziv+' · '+s.ci.oznaka)}</name>`+
+    desc(['Terenska knjiga · stanje na dan '+fmtD(TODAY),'Koordinate: WGS84 (iz SRB_ETRS89 / UTM 34N)','Površina za pretragu '+num(totalArea(s))+' m², završeno '+num(clearedM2(s))+' m²'])+
+    '<Style id="granica"><LineStyle><color>ff1c2abf</color><width>3</width></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>'+
+    Object.keys(STAT).map(c=>`<Style id="bx-${c}"><LineStyle><color>ccffffff</color><width>1</width></LineStyle><PolyStyle><color>${STAT[c][1]}</color></PolyStyle></Style>`).join('')+
+    Object.keys(LC).map(c=>`<Style id="f-${c}"><LineStyle><color>${LC[c][0]}</color><width>${LC[c][1]}</width></LineStyle></Style>`).join('')+
+    '<Style id="f-tacka"><IconStyle><color>ffa04f6b</color><scale>0.8</scale></IconStyle></Style><Style id="tp"><IconStyle><color>ff1c2abf</color><scale>0.6</scale></IconStyle></Style><Style id="nalaz"><IconStyle><color>ff0000ff</color><scale>1.1</scale></IconStyle></Style>';
+  k+=`<Placemark><name>Granica radilišta</name><styleUrl>#granica</styleUrl>${desc(s.poly.map(tpE))}${ed({vrsta:'granica',povrsina_m2:num(polyArea(s.poly))})}${geom([s.poly])}</Placemark>`;
+  k+='<Folder><name>Lomne tačke</name>'+s.poly.map((q,i)=>`<Placemark><name>T${i+1}</name><styleUrl>#tp</styleUrl>${desc([tpE(q,i)])}${ed({vrsta:'lomna_tacka'})}<Point><coordinates>${w(q)}</coordinates></Point></Placemark>`).join('')+'</Folder>';
+  k+=`<Folder><name>Boksovi (${s.boxes.length})</name>`+s.boxes.map(b=>{const st=boxStat(b),ce=b.done.CEIA,sh=b.done.SCH;
+    return `<Placemark><name>${esc(b.id)}</name><styleUrl>#bx-${st}</styleUrl>${desc(['Stanje: '+STAT[st][0]+(b.excl?': '+exclTxt(b.excl):''),'Površina: '+num(b.area)+' m²','CEIA: '+(ce?fmtD(ce.day)+' · '+ce.by:(b.need.includes('CEIA')?'nije pregledano':'—')),b.need.includes('SCH')?'Schonstedt: '+(sh?fmtD(sh.day)+' · '+sh.by:'nije pregledano'):''])}${ed({vrsta:'boks',id:b.id,stanje:STAT[st][0],povrsina_m2:b.area,ceia:ce?ce.day:'',schonstedt:sh?sh.day:'',iskljuceno:b.excl?exclTxt(b.excl):''})}${geom(boxRings(b))}</Placemark>`;}).join('')+'</Folder>';
+  if(feats(s).length)k+='<Folder><name>Objekti</name>'+feats(s).filter(f=>f.pts.length).map(f=>{const one=!fkOf(f).lin||f.pts.length===1;
+    return `<Placemark><name>${esc(fkOf(f).n+(f.name?' · '+f.name:''))}</name><styleUrl>#f-${one?'tacka':(LC[f.kind]?f.kind:'put')}</styleUrl>${desc([f.buf>0?'Schonstedt u pojasu do '+nm(f.buf)+' m':''])}${ed({vrsta:f.kind,naziv:f.name||'',schonstedt_pojas_m:f.buf||0})}${one?`<Point><coordinates>${w(f.pts[0])}</coordinates></Point>`:`<LineString><tessellate>1</tessellate><coordinates>${f.pts.map(w).join(' ')}</coordinates></LineString>`}</Placemark>`;}).join('')+'</Folder>';
+  k+=`<Folder><name>Nalazi (${s.finds.length})</name>`+s.finds.map(f=>{const p=findPos(s,f);
+    return `<Placemark><name>${esc(f.id+' · '+f.type)}</name><TimeStamp><when>${esc(f.day)}</when></TimeStamp><styleUrl>#nalaz</styleUrl>${desc(['Vrsta: '+f.type+(f.qty>1?' ×'+f.qty:''),'Kategorija: '+(P.cats[f.cat]||f.cat),'Dubina: '+f.depth+' cm','Metoda: '+(PACKS.RS.methods[f.method]||f.method||'—'),'Datum: '+fmtD(f.day)+' u '+f.time,'Boks: '+(f.box||'—'),'Postupak: '+f.act,'E '+p.Y.toFixed(2)+', N '+p.X.toFixed(2)+' (UTM 34N)',f.note?'Napomena: '+f.note:''])}${ed({vrsta:'nalaz',id:f.id,sredstvo:f.type,dubina_cm:f.depth,metoda:PACKS.RS.methods[f.method]||'',datum:f.day,boks:f.box||'',postupak:f.act})}<Point><coordinates>${w([f.u,f.v])}</coordinates></Point></Placemark>`;}).join('')+'</Folder>';
+  return k+'</Document></kml>\n';}
+const fileBase=s=>(s.msp.id+'-'+s.ci.oznaka+'-'+TODAY).replace(/[^\w.-]+/g,'_');
+// same approach as the backup file: share sheet on phones, otherwise a normal download; inside an embedded viewer neither works
+async function saveFile(name,text,mime){const blob=new Blob([text],{type:mime});
+  if(matchMedia('(pointer:coarse)').matches&&navigator.canShare){const file=new File([blob],name,{type:mime});
+    if(navigator.canShare({files:[file]}))try{await navigator.share({files:[file],title:name});return true;}catch(e){if(e.name==='AbortError')return false;}}
+  if(inFrame){toast('Preuzimanje fajla nije dozvoljeno u ovom prikazu. Koristi „Kopiraj” ili otvori aplikaciju preko linka.',5000);return false;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);return true;}
+
+/* ---------- Serbia actions (own listener so the shared switch stays untouched) ---------- */
+document.addEventListener('click',e=>{const el=e.target.closest('[data-rs]');if(!el||!S||el.disabled)return;const s=site(),a=el.dataset.rs,id=el.dataset.id;
+  const fin=m=>{save();rerender();if(m)toast(m,4000);};
+  switch(a){
+    case 'split':{const r=splitBox(s,id,el.dataset.mode,parseNum(($('#cutU')||{}).value),parseNum(($('#cutV')||{}).value));if(typeof r==='string'){toast(r,4500);break;}closeSheet();fin('Boks '+id+' podeljen: '+r.map(b=>b.id).join(', ')+'.');break;}
+    case 'mergeStart':closeSheet();mergeSel={site:s.id,ids:[id]};renderMapaB();toast('Dodirni susedne boksove koje spajaš sa '+id+'.',3500);break;
+    case 'mergeOk':{if(!mergeSel)break;const r=mergeBoxes(s,mergeSel.ids);if(typeof r==='string'){toast(r,6500);break;}mergeSel=null;fin('Spojeno u boks '+r.id+' ('+num(r.area)+' m²).');break;}
+    case 'mergeCancel':mergeSel=null;renderMapaB();break;
+    case 'rename':{const r=renameBox(s,id,$('#bxName').value);if(typeof r==='string'){toast(r);break;}closeSheet();fin('Boks '+id+' je sada '+r.id+'.');break;}
+    case 'excl':exclBox(s,id,$('#exWhy').value,$('#exNote').value);closeSheet();fin('Boks '+id+' isključen iz pretrage.');break;
+    case 'unexcl':exclBox(s,id,null);closeSheet();fin('Boks '+id+' vraćen u pretragu.');break;
+    case 'ids':showIds=!showIds;renderMapaB();break;
+    case 'featNew':openFeat(null);break;
+    case 'featEdit':openFeat(id);break;
+    case 'featSave':saveFeat(id);break;
+    case 'featDel':{if(el.dataset.sure!=='1'){el.dataset.sure='1';el.textContent='Dodirni ponovo za brisanje';break;}const f=feats(s).find(x=>x.id===id);if(!f)break;
+      s.feats=s.feats.filter(x=>x!==f);syncRail(s);const n=recalcNeed(s);s.log.push({t:hm(Date.now()),e:'Obrisan objekat: '+fkOf(f).n.toLowerCase()+(f.name?' '+f.name:'')});addQ('Objekat obrisan');closeSheet();fin('Objekat obrisan.'+(n?' Zahtev za Schonstedt promenjen u '+n+' boksova.':''));break;}
+    case 'copyKml':copy(kmlText(s),'KML');break;
+    case 'dl':{const m={kml:[()=>kmlText(s),'application/vnd.google-earth.kml+xml','.kml'],csv:[()=>'﻿'+csvText(),'text/csv','-nalazi.csv'],geo:[()=>geoText(),'application/geo+json','.geojson']}[el.dataset.k];if(!m)break;
+      const name=fileBase(s)+m[2];saveFile(name,m[0](),m[1]).then(ok=>{if(ok)toast('Fajl '+name+' je spreman.');}).catch(()=>toast('Fajl nije napravljen. Koristi „Kopiraj”.'));break;}
+    case 'nsAxis':{const tp=parseTPs($('#nsTp').value).filter(p=>isFinite(p[0])&&isFinite(p[1]));if(tp.length<2){toast('Prvo upiši ili uvezi lomne tačke.');break;}let best=null;
+      tp.forEach((p,i)=>{const q=tp[(i+1)%tp.length],L=Math.hypot(q[0]-p[0],q[1]-p[1]);if(!best||L>best.L)best={i,L,az:Math.atan2(q[0]-p[0],q[1]-p[1])/D2R};});
+      let az=((best.az%90)+90)%90;if(az>45)az-=90;az=+az.toFixed(1);$('#nsRot').value=az;toast('Zaokret '+num(az,1)+'°: mreža prati stranu T'+(best.i+1)+'–T'+((best.i+1)%tp.length+1)+' ('+num(best.L,1)+' m).',4500);break;}
+    case 'nsFeatDel':nsFeats.splice(+el.dataset.i,1);nsImpRender(nsMsg);break;
+  }});
 
 /* ================= timers ================= */
 function tick(){
