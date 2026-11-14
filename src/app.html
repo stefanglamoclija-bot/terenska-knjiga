@@ -9,6 +9,7 @@
   --hazard:#BF2A1C; --on-hazard:#FFFFFF; --haz-soft:#F1D5CE;
   --cleared:#2B784A; --clr-soft:#C8E2D0;
   --work:#A86F0B; --work-soft:#F4DFAF;
+  --ok-ink:#1D5A36; --work-ink:#6B4404; --haz-ink:#8E1F14;
   --paper:#FFFFFF; --paper-ink:#111511;
   /* no web fonts are fetched at runtime: brand fonts are used if self-hosted (build.sh, docs/fonts) or installed, else the system's */
   --font-display:"Barlow Condensed","Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif-condensed,system-ui,sans-serif;
@@ -22,6 +23,7 @@
     --hazard:#EC5B45; --on-hazard:#1B0805; --haz-soft:#3A1C17;
     --cleared:#5CBF85; --clr-soft:#1B3223;
     --work:#E7B142; --work-soft:#3A2E12;
+    --ok-ink:#5CBF85; --work-ink:#E7B142; --haz-ink:#F07A66;
     --paper:#F4F3EE; --paper-ink:#111511;
     color-scheme:dark;
   }
@@ -32,6 +34,7 @@
   --hazard:#EC5B45; --on-hazard:#1B0805; --haz-soft:#3A1C17;
   --cleared:#5CBF85; --clr-soft:#1B3223;
   --work:#E7B142; --work-soft:#3A2E12;
+  --ok-ink:#5CBF85; --work-ink:#E7B142; --haz-ink:#F07A66;
   --paper:#F4F3EE; --paper-ink:#111511;
   color-scheme:dark;
 }
@@ -56,7 +59,7 @@ button{cursor:pointer}
 .site-code svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.2}
 .site-meta{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .pack{font-family:var(--font-mono);font-size:10.5px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--muted);font-weight:500;letter-spacing:0}
-.sync{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:500;white-space:nowrap;flex:none}
+.sync{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;min-height:44px;font-size:12px;font-weight:500;white-space:nowrap;flex:none}
 .sync #syncLabel{line-height:1.2;text-align:left;font-size:11.5px}
 .sync .dot{width:9px;height:9px;border-radius:50%;background:var(--work);flex:none}
 .sync.ok .dot{background:var(--cleared)}
@@ -83,10 +86,10 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 .btn.danger{background:var(--hazard);color:var(--on-hazard);border-color:var(--hazard)}
 .btn.block{width:100%}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
-.btn.sm{min-height:38px;padding:6px 12px;font-size:13.5px}
+.btn.sm{min-height:44px;padding:6px 12px;font-size:13.5px}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap}
 .btnrow .btn{flex:1 1 130px}
-.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:12.5px;padding:6px}
+.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:13px;padding:6px 8px;min-height:44px;display:inline-flex;align-items:center}
 
 .rows{list-style:none;margin:0;padding:0}
 .rows li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
@@ -112,10 +115,10 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 .chk li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line)}
 .chk li:first-child{border-top:0}
 .chk .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;margin-top:1px}
-.chk .ok .ic,.chk li.ok .ic{background:var(--clr-soft);color:var(--cleared)}
-.chk li.warn .ic{background:var(--work-soft);color:var(--work)}
+.chk .ok .ic,.chk li.ok .ic{background:var(--clr-soft);color:var(--ok-ink)}
+.chk li.warn .ic{background:var(--work-soft);color:var(--work-ink)}
 .chk li.info .ic{background:var(--bg);color:var(--muted)}
-.chk li.bad .ic{background:var(--haz-soft);color:var(--hazard)}
+.chk li.bad .ic{background:var(--haz-soft);color:var(--haz-ink)}
 .chk .v{font-family:var(--font-mono);font-size:12.5px;text-align:right;white-space:nowrap}
 
 /* log */
@@ -125,7 +128,7 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 .log .tm{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);padding-top:1px}
 .log li.find .ev{color:var(--hazard);font-weight:500}
 .quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
-.quick .btn{min-height:42px;padding:6px 8px;font-size:13px;font-weight:500}
+.quick .btn{min-height:44px;padding:6px 8px;font-size:13px;font-weight:500}
 
 .checks{list-style:none;margin:0;padding:0}
 .checks li{border-top:1px solid var(--line)}
@@ -140,6 +143,9 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 .legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .mapwrap{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px;overflow:hidden}
 .mapwrap svg{display:block;width:100%;height:auto}
+.mapwrap.zoom{overflow:auto;max-height:62vh;overscroll-behavior:contain}.mapwrap.zoom svg{width:auto;max-width:none}
+.maptools{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.maptools .field{flex:1 1 140px}
+.m-hit:focus-visible,.bxp:focus-visible{outline:none;stroke:var(--accent);stroke-width:3}
 .m-poly{fill:var(--haz-soft);stroke:var(--hazard);stroke-width:1.4;stroke-dasharray:5 3}
 .m-safe{fill:var(--clr-soft)}
 .m-zero{stroke:var(--ink);stroke-width:2}
@@ -164,9 +170,9 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 .bx-x{fill:url(#bxX)}.bx-m{stroke:var(--accent);stroke-width:2.6;stroke-dasharray:4 2}
 .m-bid{font-family:var(--font-mono);font-size:7px;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:var(--surface-2);stroke-width:2px}
 .m-buf{fill:none;stroke:#8c9a2e;stroke-opacity:.22;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}.m-bufp{fill:#8c9a2e;fill-opacity:.22;pointer-events:none}
-.bxed{border:1px solid var(--line);border-radius:8px;padding:6px 10px}.bxed summary{font-weight:600;font-size:14px;cursor:pointer;min-height:36px;display:flex;align-items:center}
+.bxed{border:1px solid var(--line);border-radius:8px;padding:6px 10px}.bxed summary{font-weight:600;font-size:14px;cursor:pointer;min-height:44px;display:flex;align-items:center}
 .bxed-in{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px}
-.nsf select,.nsf input{min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2);font-size:14px}.nsf input{width:70px}
+.nsf select,.nsf input{min-height:44px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2);font-size:14px}.nsf input{width:70px}
 .doc svg.sk{border:0;margin:0;background:none;width:100%;height:auto}
 .sk text{font-family:var(--font-body);fill:#1d2a33}
 .sk .sk-t{font-family:var(--font-display);font-weight:700;font-size:5.2px;letter-spacing:.35px}
@@ -184,10 +190,11 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 .scrim{position:absolute;inset:0;background:rgba(10,14,10,.4);display:flex;align-items:flex-end;z-index:5}
 .sheet{width:100%;background:var(--surface-2);border-top-left-radius:16px;border-top-right-radius:16px;padding:16px 16px 20px;border-top:1px solid var(--line);max-height:88%;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
 .sheet-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1;flex:none}
+.x{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1;flex:none}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.kv dd.mono{overflow-wrap:normal}
 .sitecard{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px}
 .sitecard.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .packs{display:grid;gap:6px}
@@ -199,7 +206,7 @@ fieldset{border:0;margin:0;padding:0;min-width:0}
 legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;display:block}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips input{position:absolute;opacity:0;pointer-events:none}
-.chips label span{display:inline-flex;align-items:center;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:13.5px;cursor:pointer}
+.chips label span{display:inline-flex;align-items:center;min-height:44px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:13.5px;cursor:pointer}
 .chips.mono label span{font-family:var(--font-mono);font-size:13px}
 .chips input:checked + span{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .chips input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
@@ -246,6 +253,8 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
 .doc svg{display:block;width:100%;height:auto;border:1px solid #111511;margin:6px 0;background:#fff}
 .tbl{overflow-x:auto}
 .doc.wide{min-width:640px}
+.doc.z2,.docs.z2{min-width:720px}.doc.z3,.docs.z3{min-width:1080px}
+.scrollhint{margin:0}
 /* BiH forms (BHMAC prilozi): paper in both themes */
 .doc .ptag{text-align:right;font-size:10px;color:#4c544c;margin:-6px 0 4px}
 .doc .pre{font-size:11px;margin:0 0 6px}
@@ -281,11 +290,11 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
 .docs{display:flex;flex-direction:column;gap:14px}
 .pnav{display:flex;flex-wrap:wrap;gap:6px}.pnav .btn{flex:0 0 auto;min-width:44px}
 .orgf details{border:1px solid var(--line);border-radius:10px;padding:4px 12px;background:var(--surface)}
-.orgf summary{font-weight:600;cursor:pointer;min-height:42px;display:flex;align-items:center}
+.orgf summary{font-weight:600;cursor:pointer;min-height:44px;display:flex;align-items:center}
 .orgf .ofs{display:flex;flex-direction:column;gap:10px;padding:2px 0 12px}
-.orow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 40px;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
-.orow.eq{grid-template-columns:minmax(0,1fr) 76px 40px}
-.orow input,.orow select{min-height:42px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:14px;width:100%;min-width:0}
+.orow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 44px;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
+.orow.eq{grid-template-columns:minmax(0,1fr) 76px 44px}
+.orow input,.orow select{min-height:44px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:14px;width:100%;min-width:0}
 .orow .span3{grid-column:1/-1}
 .missing{font-size:13px}
 .missing li{margin:3px 0}
@@ -337,7 +346,7 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
   .view{display:block}
   .tbl{overflow:visible}
   .doc{border:0;box-shadow:none;padding:0;font-size:10.5pt;border-radius:0}
-  .doc.wide{min-width:0}
+  .doc.wide,.doc.z2,.doc.z3,.docs.z2,.docs.z3{min-width:0}
   .doc.p11{page:land}
   .docs{display:block}
   .docs>.doc{break-before:page;page-break-before:always}
@@ -390,7 +399,7 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
     <button class="tab sos-t" type="button" data-act="tab" data-tab="hitno"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M7.5 12h9"/></svg>Hitno</button>
   </nav>
 
-  <div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+  <div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Detalji"></div></div>
   <div class="toast" id="toast" role="status" hidden></div>
 </div>
 
@@ -785,8 +794,12 @@ function addQ(t){S.queue.push({t,at:hm(Date.now())});}
 /* ================= UI basics ================= */
 let tab='danas', docView=null, selLane=null, selBox=null, photoData=null, prefill=null;
 let toastT;function toast(m,ms){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,ms||2800);}
-function openSheet(html){$('#sheet').innerHTML=html;$('#scrim').hidden=false;const f=$('#sheet .x');if(f)f.focus();}
-function closeSheet(){$('#scrim').hidden=true;if(!S)return;if(selBox){selBox=null;if(tab==='mapa')renderMapa();}if(selLane!=null){selLane=null;if(tab==='mapa')renderMapa();}}
+let lastFocus=null;
+function openSheet(html){const sh=$('#sheet');if($('#scrim').hidden)lastFocus=document.activeElement;sh.innerHTML=html;$('#scrim').hidden=false;
+  const h=sh.querySelector&&sh.querySelector('h2');if(h){h.id='sheetT';sh.removeAttribute('aria-label');sh.setAttribute('aria-labelledby','sheetT');}else{sh.removeAttribute('aria-labelledby');sh.setAttribute('aria-label','Detalji');}
+  const f=$('#sheet .x');if(f)f.focus();}
+// focus goes back to what opened the sheet
+function closeSheet(){const back=lastFocus;lastFocus=null;$('#scrim').hidden=true;if(back&&back.focus&&document.contains&&document.contains(back))try{back.focus();}catch(e){}if(!S)return;if(selBox){selBox=null;if(tab==='mapa')renderMapa();}if(selLane!=null){selLane=null;if(tab==='mapa')renderMapa();}}
 const inFrame=(()=>{try{return window.self!==window.top;}catch(e){return true;}})();
 
 function renderHeader(){
@@ -861,19 +874,21 @@ function renderDanas(){
 }
 
 /* ================= MAPA (staze) ================= */
+let mapZoom=false;const LANE_PX=48;
 function mapSVG(s,opts={}){
-  const b=bounds(s.poly), W=opts.w||330, padL=26, padR=14, padT=22, padB=opts.paper?44:56;
+  const b=bounds(s.poly),zoom=!opts.paper&&opts.zoom, padL=26, padR=14, padT=22, padB=opts.paper?44:56;
+  const W=zoom?Math.round(padL+padR+(b.x1-b.x0+2)*LANE_PX):(opts.w||330);
   const sc=(W-padL-padR)/(b.x1-b.x0+2);
   const H=Math.round((b.y1+2.5)*sc+padT+padB);
   const X=u=>padL+(u-b.x0+1)*sc, Y=v=>padT+(b.y1+0.5-v)*sc;
   const lc=laneCount(s);
-  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Skica ${esc(s.ci.oznaka)}: radne staze od nulte linije">`;
+  let g=`<svg viewBox="0 0 ${W} ${H}" ${zoom?`width="${W}" height="${H}"`:''} role="group" aria-label="Skica ${esc(s.ci.oznaka)}: radne staze od nulte linije">`;
   g+=`<rect class="m-safe" x="${X(b.x0-0.5)}" y="${Y(0)}" width="${(b.x1-b.x0+1)*sc}" height="${2*sc}"/>`;
   g+=`<path class="m-poly" d="M${s.poly.map(p=>X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('L')}Z"/>`;
   const active={};s.pairs.forEach(p=>active[p.lane]=p.id);
   for(let i=1;i<=lc;i++){const L=laneLen(s,i);if(L<=0)continue;const d=Math.min(laneDone(s,i),L);
     if(d>0)g+=`<rect class="${active[i]?'m-lane-p':'m-lane'}" x="${X(i-1)+.3}" y="${Y(d)}" width="${Math.max(.6,sc-.6)}" height="${d*sc}"/>`;
-    if(!opts.paper)g+=`<rect class="m-hit" x="${X(i-1)}" y="${Y(L)}" width="${sc}" height="${L*sc}" data-act="lane" data-l="${i}"><title>Staza ${i}</title></rect>`;
+    if(!opts.paper)g+=`<rect class="m-hit" x="${X(i-1)}" y="${Y(L)}" width="${sc}" height="${L*sc}" data-act="lane" data-l="${i}" role="button" tabindex="0" aria-label="Staza ${i}"><title>Staza ${i}</title></rect>`;
     if(selLane===i&&!opts.paper)g+=`<rect class="m-sel" x="${X(i-1)}" y="${Y(L)}" width="${sc}" height="${L*sc}"/>`;}
   g+=`<line class="m-zero" x1="${X(b.x0-0.5)}" x2="${X(b.x1+0.5)}" y1="${Y(0)}" y2="${Y(0)}"/>`;
   s.finds.forEach(f=>{const cx=X(f.lane-0.5+(f.off||0)),cy=Y(f.dist),r=opts.paper?3.2:4;g+=`<path class="m-mk" d="M${cx} ${cy-r}L${cx+r} ${cy+r*.8}H${cx-r}Z"/>`;});
@@ -895,10 +910,12 @@ function renderMapa(){
   $('#v-mapa').innerHTML=`
     <div><div class="label">${esc(s.msp.id)} ${esc(s.msp.naziv)} · ${esc(s.ci.tip==='CI'?'ciljana istraga':'sistematska istraga')} ${esc(s.ci.oznaka)}</div><h2>Radne staze</h2></div>
     <div class="legend"><span><i style="background:var(--haz-soft);outline:1.5px dashed var(--hazard);outline-offset:-1.5px"></i>POPO</span><span><i style="background:var(--cleared)"></i>Očišćeno</span><span><i style="background:var(--work)"></i>Staza u radu</span><span><i style="background:var(--clr-soft)"></i>Sigurna staza</span><span>${TRI.replace('class="tri"','class="tri" style="width:12px;height:11px;vertical-align:-1px;margin-right:5px"')}Nalaz</span></div>
-    <div class="mapwrap">${mapSVG(s)}</div>
-    <div class="sub">Dodirni stazu. Staza je široka ${R.lane} m; dužina se mjeri od nulte linije u smjeru azimuta ${s.az}°.</div>
+    <div class="mapwrap${mapZoom?' zoom':''}" id="mapWrap">${mapSVG(s,{zoom:mapZoom})}</div>
+    <div class="maptools"><button class="btn sm" type="button" data-act="mapZoom" aria-pressed="${mapZoom}">${mapZoom?'Cijela mapa':'Uvećaj (staza 48 px)'}</button>
+      <label class="field">Otvori stazu<select id="lanePick" aria-label="Izaberi radnu stazu"><option value="">— staza —</option>${(()=>{const o=[];for(let i=1;i<=lc;i++)if(laneLen(s,i)>0){const p=s.pairs.find(x=>x.lane===i);o.push(`<option value="${i}">Staza ${i}${p?' · dvojac '+esc(p.id):''}${laneDone(s,i)>=laneLen(s,i)-0.01?' · očišćena':''}</option>`);}return o.join('');})()}</select></label></div>
+    <div class="sub">${mapZoom?'Pomjeraj mapu prstom; dodirni stazu.':'Dodirni stazu ili je izaberi s liste; „Uvećaj” daje stazu širine 48 px.'} Staza je široka ${R.lane} m; dužina se mjeri od nulte linije u smjeru azimuta ${s.az}°.</div>
     <div class="card"><dl class="kv">
-      <dt>Nulta tačka</dt><dd class="mono">${crsFmt(s,s.nt)}</dd>
+      <dt>Nulta tačka</dt><dd class="mono">${crsHtml(s,s.nt)}</dd>
       <dt>Koord. sistem</dt><dd>${crsName()}</dd>
       <dt>Površina</dt><dd>${num(totalArea(s))} m²${s.ci.pmin&&s.ci.pmax?' (plan '+num(s.ci.pmin)+'–'+num(s.ci.pmax)+' m²)':''}</dd>
       <dt>Staze</dt><dd>${full} završeno · ${done} u radu · ${lc} ukupno</dd>
@@ -912,7 +929,7 @@ function openLane(i){
   const head=toGK(s,i-0.5,d);
   openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · širina ${R.lane} m</div><h2>Radna staza ${i}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
     <dl class="kv"><dt>Očišćeno</dt><dd>${num(d,2)} m od ${num(L,2)} m · ${num(segM2(s,i,0,d),1)} m²</dd>
-      <dt>Čelo staze</dt><dd class="mono">${crsFmt(s,head)}</dd>
+      <dt>Čelo staze</dt><dd class="mono">${crsHtml(s,head)}</dd>
       ${p?`<dt>Dvojac</dt><dd>${esc(p.id)}: ${esc(pairState(p).inLane)} u stazi, ${esc(pairState(p).support)} podrška</dd>`:''}
       <dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)+' na '+num(f.dist,1)+' m').join(', '):'nema'}</dd></dl>
     ${d<L?`<div class="grid3">
@@ -966,7 +983,7 @@ function calcPos(){
   const s=site(), l=+$('#fLane').value, d=parseFloat($('#fDist').value)||0, o=Math.max(-0.5,Math.min(0.5,parseFloat($('#fOff').value)||0));
   const gk=toGK(s,l-0.5+o,d), w=planeToWgs(s,gk), done=laneDone(s,l), ahead=d>done+1.0;
   const c=$('#fCalc'); c.classList.toggle('warn',ahead);
-  c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsFmt(s,gk)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E <span class="sub">(demo transformacija)</span></span>
+  c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsHtml(s,gk)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E <span class="sub">(demo transformacija)</span></span>
     <span>${ahead?'Udaljenost je ispred očišćenog dijela staze ('+num(done,1)+' m). Provjeri mjerenje.':'Izračunato iz nulte tačke i azimuta.'}</span>${gpsBtn()}`;gpsPos=w;
 }
 // "Uporedi sa GPS-om": the phone's real position against the computed one, with the accuracy the phone reports
@@ -1036,9 +1053,12 @@ function fotoDoc(s){
 let phURLs=[];
 function hydratePhotos(){phURLs.forEach(u=>URL.revokeObjectURL(u));phURLs=[];if(!ST.db)return;
   document.querySelectorAll('img[data-ph]').forEach(img=>idbGet('photos',img.dataset.ph).then(b=>{if(!b)return;const u=URL.createObjectURL(b);phURLs.push(u);img.src=u;}).catch(()=>{}));}
+let docZ=1;
+const zoomBtn=()=>`<button class="btn sm" type="button" data-act="docZoom" aria-label="Uvećaj dokument na ekranu">Uvećaj ${docZ<3?'×'+(docZ+1):'×1'}</button>`;
+const wideHint='<p class="fine noprint scrollhint">Dokument je širi od ekrana: pomjeri ga ←→ prstom.</p>';
 function docShell(inner,k){
-  return `<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">‹ Svi izvještaji</button>${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">Štampaj / PDF</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">Kopiraj tekst</button></div>
-    <pre class="out noprint" id="copyOut" hidden></pre><div class="tbl"><article class="doc" id="docEl">${inner}</article></div>`;
+  return `<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">‹ Svi izvještaji</button>${zoomBtn()}${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">Štampaj / PDF</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">Kopiraj tekst</button></div>
+    <pre class="out noprint" id="copyOut" hidden></pre><div class="tbl"><article class="doc${docZ>1?' z'+docZ:''}" id="docEl">${inner}</article></div>`;
 }
 const mspNo=s=>s.msp.id.replace(/^MSP\s*/i,'');
 const box=on=>`<span class="box">${on?'×':''}</span>`;
@@ -1047,7 +1067,7 @@ function renderDoc(k){
   const s=site(), v=$('#v-izvjestaji'); let h='';
   if(!docKeys(s).includes(k)){docView=null;renderIzvjestaji();return;}
   if(k==='foto'){v.innerHTML=docShell(fotoDoc(s),k);hydratePhotos();return;}
-  if(s.pack==='RS'&&k!=='exp'){const d=rsDoc(s,k);if(d){v.innerHTML=docShell(d.h,k).replace('<pre ',(d.pre||'')+'<pre ');if(d.cls)$('#docEl').classList.add(d.cls);return;}}
+  if(s.pack==='RS'&&k!=='exp'){const d=rsDoc(s,k);if(d){v.innerHTML=docShell(d.h,k).replace('<pre ',(d.pre||'')+(d.cls==='wide'||docZ>1?wideHint:'')+'<pre ');if(d.cls)$('#docEl').classList.add(d.cls);return;}}
   if(BHD[k]){bhShow(s,k,v);return;}
   if(k==='exp'){
     h=`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · ${crsName()} i WGS84</div>
@@ -1055,7 +1075,7 @@ function renderDoc(k){
       <table><tr><td class="k">Nalaza</td><td>${s.finds.length}</td></tr><tr><td class="k">${s.mode==='boxes'?'Boksova':'Radnih staza sa napretkom'}</td><td>${s.mode==='boxes'?s.boxes.length:Object.keys(s.lanes).length}</td></tr><tr><td class="k">Lomnih tačaka</td><td>${s.poly.length}</td></tr></table>
       <div class="btnrow noprint"><button class="btn" type="button" data-act="copyCsv">Kopiraj CSV nalaza</button><button class="btn" type="button" data-act="copyGeo">Kopiraj GeoJSON</button></div>`;
   }
-  v.innerHTML=docShell(h,k);if(k==='p11')$('#docEl').classList.add('wide');
+  v.innerHTML=docShell(h,k);
 }
 /* ================= BiH documents: BHMAC forms (Standard za PMA u BiH, izdanje april 2024, poglavlje 3, prilozi) ================= */
 // Organizacija, tim i oprema live in S.org; MSP data on s.msp, CI/SI data on s.ci and s.bh. All are filled lazily with safe
@@ -1517,9 +1537,9 @@ function pakPages(s){const P=pakParts(s);let n=0;
 function bhShow(s,k,v){const pages=BHD[k](s),multi=pages.length>1||k==='pak';
   const nav=(k==='p9'?dayPick(s):'')+(k==='p11'?weekPick():'')+(k==='p6'?`<div class="card noprint"><div class="card-h"><h3>Prilozi uz zapisnik</h3><span class="sub">III – Prilozi</span></div><div class="pnav">${p6Prilozi(s).map(a=>`<button class="btn sm" type="button" data-act="doc" data-k="${a[2]}">${a[0]})</button>`).join('')}<button class="btn sm primary" type="button" data-act="doc" data-k="pak">Paket za predaju</button></div></div>`:'');
   const miss=pages.reduce((a,p)=>a+missN(p.h),0),hint=miss?`<p class="fine noprint" style="margin:0">Polja označena „dopuniti” (${miss}) aplikacija ne zna. Unesi ih u Radilišta › Organizacija, tim i oprema ili dopuni rukom.</p>`:'';
-  if(!multi){v.innerHTML=docShell(pages[0].h,k).replace('<pre ',nav+hint+'<pre ');const el=$('#docEl');pages[0].cls.split(' ').filter(Boolean).forEach(c=>el.classList.add(c));}
-  else v.innerHTML=`<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">‹ Svi izvještaji</button>${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">Štampaj / PDF</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">Kopiraj tekst</button></div>${hint}
-    <pre class="out noprint" id="copyOut" hidden></pre><div class="docs" id="docEl">${pages.map(p=>`<article class="doc ${p.cls}">${p.h}</article>`).join('')}</div>`;
+  if(!multi){v.innerHTML=docShell(pages[0].h,k).replace('<pre ',nav+hint+(/wide/.test(pages[0].cls)||docZ>1?wideHint:'')+'<pre ');const el=$('#docEl');pages[0].cls.split(' ').filter(Boolean).forEach(c=>el.classList.add(c));}
+  else v.innerHTML=`<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">‹ Svi izvještaji</button>${zoomBtn()}${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">Štampaj / PDF</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">Kopiraj tekst</button></div>${hint}
+    <pre class="out noprint" id="copyOut" hidden></pre>${pages.some(p=>/wide/.test(p.cls))||docZ>1?wideHint:''}<div class="tbl"><div class="docs${docZ>1?' z'+docZ:''}" id="docEl">${pages.map(p=>`<article class="doc ${p.cls}">${p.h}</article>`).join('')}</div></div>`;
   if(k==='pak')hydratePhotos();}
 
 /* ---------- Organizacija, tim i oprema (sheet from Radilišta) ---------- */
@@ -2087,15 +2107,17 @@ function featSVG(f,P,paper,ink,ctr){const k=f.kind,p=f.pts.map(P),F=n=>(+n).toFi
   return g;}
 function featSwatch(k){return `<svg width="18" height="10" viewBox="0 0 18 10" aria-hidden="true" style="vertical-align:-1px;margin-right:5px">${featSVG({kind:k,pts:FK[k].lin?[[1,5],[17,5]]:[[9,6]]},q=>q,false,'var(--ink)')}</svg>`;}
 
+let lastMap=null;
 function boxMapSVG(s){
-  const E=q=>enOf(s,q),b=bounds(s.poly.map(E)),W=330,padL=8,padR=8,padT=24,padB=16,sc=(W-padL-padR)/(b.x1-b.x0+4),H=Math.round((b.y1-b.y0+4)*sc+padT+padB);
+  const E=q=>enOf(s,q),b=bounds(s.poly.map(E)),padL=8,padR=8,padT=24,padB=16,sc0=(330-padL-padR)/(b.x1-b.x0+4),zoom=mapZoom&&sc0*(s.grid||10)<52;
+  const sc=zoom?52/(s.grid||10):sc0,W=Math.round(padL+padR+(b.x1-b.x0+4)*sc),H=Math.round((b.y1-b.y0+4)*sc+padT+padB);lastMap={sc,zoom,W};
   const P=q=>{const e=E(q);return [padL+(e[0]-b.x0+2)*sc,padT+(b.y1+2-e[1])*sc];},f1=n=>n.toFixed(1),pth=p=>'M'+p.map(q=>{const r=P(q);return f1(r[0])+' '+f1(r[1]);}).join('L')+'Z';
   const asg={};s.assign.forEach(a=>asg[a.box]=a);const msel=mergeSel&&mergeSel.site===s.id?mergeSel.ids:[];
-  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Boksovi ${esc(s.ci.oznaka)}, sever gore"><defs><pattern id="bxX" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="5" height="5" fill="var(--surface)"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--muted)" stroke-width="1.4"/></pattern>
+  let g=`<svg viewBox="0 0 ${W} ${H}" ${zoom?`width="${W}" height="${H}"`:''} role="group" aria-label="Boksovi ${esc(s.ci.oznaka)}, sever gore"><defs><pattern id="bxX" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="5" height="5" fill="var(--surface)"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--muted)" stroke-width="1.4"/></pattern>
     <clipPath id="bxClip"><rect x="0" y="${padT-4}" width="${W}" height="${H-padT+4}"/></clipPath></defs>`;
   g+=`<path class="m-poly" d="${pth(s.poly)}"/>`;
   s.boxes.forEach(bx=>{const st=boxStat(bx);
-    g+=`<path class="bxp bx-${st}${asg[bx.id]?' bx-a':''}${selBox===bx.id?' bx-s':''}${msel.includes(bx.id)?' bx-m':''}" d="${boxRings(bx).map(pth).join('')}" fill-rule="evenodd" data-act="box" data-id="${esc(bx.id)}"><title>Boks ${esc(bx.id)}${bx.excl?' · isključeno: '+esc(exclTxt(bx.excl)):''}</title></path>`;});
+    g+=`<path class="bxp bx-${st}${asg[bx.id]?' bx-a':''}${selBox===bx.id?' bx-s':''}${msel.includes(bx.id)?' bx-m':''}" d="${boxRings(bx).map(pth).join('')}" fill-rule="evenodd" data-act="box" data-id="${esc(bx.id)}" role="button" tabindex="0" aria-label="Boks ${esc(bx.id)}"><title>Boks ${esc(bx.id)}${bx.excl?' · isključeno: '+esc(exclTxt(bx.excl)):''}</title></path>`;});
   g+=`<g clip-path="url(#bxClip)">`+feats(s).filter(f=>f.buf>0&&f.pts.length).map(f=>f.pts.length===1?(()=>{const c=P(f.pts[0]);return `<circle class="m-bufp" cx="${f1(c[0])}" cy="${f1(c[1])}" r="${f1(f.buf*sc)}"/>`;})()
     :`<path class="m-buf" d="M${f.pts.map(q=>{const r=P(q);return f1(r[0])+' '+f1(r[1]);}).join('L')}" stroke-width="${f1(2*f.buf*sc)}"/>`).join('')+'</g>';
   const ctr=P(s.poly.reduce((a,q)=>[a[0]+q[0]/s.poly.length,a[1]+q[1]/s.poly.length],[0,0]));
@@ -2118,9 +2140,11 @@ function renderMapaB(){
   $('#v-mapa').innerHTML=`<div><div class="label">${esc(s.msp.id)} · ${esc(s.msp.naziv)} · ${esc(s.ci.oznaka)}</div><h2>Boksovi</h2></div>
     <div class="legend"><span><i style="background:var(--haz-soft)"></i>Nije pregledano</span><span><i style="background:var(--work-soft)"></i>Delimično (čeka Schonstedt)</span><span><i style="background:var(--cleared)"></i>Završeno</span><span><i style="background:repeating-linear-gradient(-45deg,var(--muted) 0 1.5px,var(--surface) 1.5px 4px)"></i>Isključeno</span><span><i style="background:var(--surface-2);outline:2px solid var(--work);outline-offset:-2px"></i>U radu</span>${kinds.map(k=>`<span>${featSwatch(k)}${FK[k].n}</span>`).join('')}${bt?'<span><i style="background:rgba(140,154,46,.32)"></i>Pojas za Schonstedt</span>':''}</div>
     ${msel?`<div class="notice" role="status"><b>Spajanje boksova.</b> Dodirni susedne boksove na mapi. Izabrano: ${msel.map(esc).join(', ')}.<div class="btnrow" style="margin-top:8px"><button class="btn sm primary" type="button" data-rs="mergeOk" ${msel.length<2?'disabled':''}>Spoji izabrane (${msel.length})</button><button class="btn sm" type="button" data-rs="mergeCancel">Odustani</button></div></div>`:''}
-    <div class="mapwrap">${boxMapSVG(s)}</div>
+    <div class="mapwrap${mapZoom?' zoom':''}" id="mapWrap">${boxMapSVG(s)}</div>
+    <div class="maptools"><button class="btn sm" type="button" data-act="mapZoom" aria-pressed="${mapZoom}">${mapZoom?'Cijela mapa':'Uvećaj (boks ≥ 52 px)'}</button>
+      <label class="field">Otvori boks<select id="boxPick" aria-label="Izaberi boks"><option value="">— boks —</option>${s.boxes.slice().sort((a,b)=>a.id.localeCompare(b.id)).map(b=>`<option value="${esc(b.id)}">Boks ${esc(b.id)}${b.excl?' · isključen':boxDone(b)?' · završen':''}</option>`).join('')}</select></label></div>
     <div class="sub">Dodirni boks za pregled, podelu, spajanje ili isključenje. Mreža ${s.grid}×${s.grid} m${s.az?', zaokrenuta '+azTxt(s.az)+' od severa':''}; mapa je okrenuta ka severu.${bt?' Schonstedt se traži i uz '+bt+'.':''} <button class="linkbtn" type="button" data-rs="ids">${showIds?'Sakrij oznake boksova':'Prikaži oznake boksova'}</button></div>
-    <div class="card"><dl class="kv"><dt>Ishodište</dt><dd class="mono">${crsFmt(s,s.nt)}</dd><dt>Koord. sistem</dt><dd>${crsName()}</dd>
+    <div class="card"><dl class="kv"><dt>Ishodište</dt><dd class="mono">${crsHtml(s,s.nt)}</dd><dt>Koord. sistem</dt><dd>${crsName()}</dd>
       ${s.az?`<dt>Zaokret mreže</dt><dd>${azTxt(s.az)} (ose ${ax.U} i ${ax.V})</dd>`:''}
       <dt>Površina</dt><dd>${num(polyArea(s.poly))} m²${xn?' · za pretragu '+num(totalArea(s))+' m²':''}</dd><dt>Boksovi</dt><dd>${dn} završeno · ${pt} delimično${xn?' · '+xn+' isključeno':''} · ${s.boxes.length} ukupno</dd>
       <dt>CEIA ukupno</dt><dd>${num(methodM2(s,'CEIA'))} m²</dd><dt>Schonstedt ukupno</dt><dd>${num(methodM2(s,'SCH'))} m²</dd></dl></div>
@@ -2135,7 +2159,7 @@ function openBoxB(id){
   const mrow=m=>{const d=bx.done[m];return `<div class="packrow"><span><b>${esc(P.methods[m])}</b><br><span class="sub">${d?'očišćeno '+fmtD(d.day).slice(0,6)+' · '+esc(d.by):(m==='SCH'&&!bx.done.CEIA?'posle CEIA':'nije pregledano')}</span></span>${d?(d.day===today()?`<button class="btn sm" type="button" data-act="unmarkM" data-id="${q}" data-m="${m}">Poništi</button>`:'<span class="chip ok">✓</span>'):`<button class="btn sm primary" type="button" data-act="markM" data-id="${q}" data-m="${m}" ${m==='SCH'&&!bx.done.CEIA?'disabled':''}>Očišćeno</button>`}</div>`;};
   openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · ${num(bx.area)} m²${single?'':' · spojeni boks'}</div><h2>Boks ${q}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
     ${ex?`<div class="notice">Isključeno iz pretrage: <b>${esc(exclTxt(ex))}</b>. Ne računa se u površinu za pretragu.</div>`:''}
-    <dl class="kv"><dt>${ax.Corner}</dt><dd class="mono">${crsFmt(s,toGK(s,bx.x0,bx.y0))}</dd><dt>Veličina</dt><dd>${nm(bx.w)} × ${nm(bx.h)} m${s.az?' ('+ax.U+' × '+ax.V+')':''}</dd>${near.length?`<dt>Schonstedt</dt><dd>uz ${near.map(f=>esc(fkOf(f).acc)).join(', ')}</dd>`:''}<dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)).join(', '):'nema'}</dd></dl>
+    <dl class="kv"><dt>${ax.Corner}</dt><dd class="mono">${crsHtml(s,toGK(s,bx.x0,bx.y0))}</dd><dt>Veličina</dt><dd>${nm(bx.w)} × ${nm(bx.h)} m${s.az?' ('+ax.U+' × '+ax.V+')':''}</dd>${near.length?`<dt>Schonstedt</dt><dd>uz ${near.map(f=>esc(fkOf(f).acc)).join(', ')}</dd>`:''}<dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)).join(', '):'nema'}</dd></dl>
     ${ex?'':`<label class="field">Deminer<select id="mWho">${opts}</select></label><div class="packs">${bx.need.map(mrow).join('')}</div>
     <button class="btn" type="button" data-act="findBox" data-id="${q}">Dodaj nalaz u boksu ${q}</button>`}
     <details class="bxed"><summary>Uredi boks: podela, spajanje, naziv, isključenje</summary><div class="bxed-in">
@@ -2184,7 +2208,7 @@ function renderNalazB(){
 function calcPosB(){const s=site(),bx=boxById(s,$('#fBox').value),e=parseFloat($('#fE').value)||0,n=parseFloat($('#fN').value)||0,u=bx.x0+e,v=bx.y0+n,ax=axisTxt(s);
   $('#fE').max=bx.w;$('#fN').max=bx.h;
   const p=toGK(s,u,v),w=planeToWgs(s,p),inside=inBox(bx,[u,v]),c=$('#fCalc');c.classList.toggle('warn',!inside);gpsPos=w;
-  c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsFmt(s,p)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E</span><span>${inside?(s.az?'Mereno metrom od početnog ugla boksa ('+crsFmt(s,toGK(s,bx.x0,bx.y0))+') duž osa mreže: '+ax.U+' i '+ax.V+'.':'Izračunato iz JZ ugla boksa (meri se metrom od kočića).'):'Tačka je van granica boksa '+esc(bx.id)+'. Proveri merenje.'}</span>${gpsBtn()}`;}
+  c.innerHTML=`<span class="label" style="color:inherit">Položaj (${crsName()})</span><span class="mono">${crsHtml(s,p)}</span><span class="mono" style="font-weight:400">WGS84 ${w.lat.toFixed(6)}° N, ${w.lon.toFixed(6)}° E</span><span>${inside?(s.az?'Mereno metrom od početnog ugla boksa ('+crsFmt(s,toGK(s,bx.x0,bx.y0))+') duž osa mreže: '+ax.U+' i '+ax.V+'.':'Izračunato iz JZ ugla boksa (meri se metrom od kočića).'):'Tačka je van granica boksa '+esc(bx.id)+'. Proveri merenje.'}</span>${gpsBtn()}`;}
 
 /* ---------- skica napredovanja (paper, true scale, north-up) ---------- */
 function skBounds(s){return bounds(s.poly.map(q=>enOf(s,q)));}
@@ -2518,6 +2542,7 @@ document.addEventListener('click',e=>{
     case 'newSite':openNewSite();break;
     case 'openSite':openSiteWork();break;
     case 'lane':openLane(+el.dataset.l);break;
+    case 'mapZoom':mapZoom=!mapZoom;renderMapa();{const w=$('#mapWrap'),sel=s.mode==='boxes'?null:(selLane||(s.pairs[0]||{}).lane);if(mapZoom&&w&&sel&&w.scrollTo)try{const r=w.querySelector(`[data-l="${sel}"]`);if(r&&r.getBBox){const bb=r.getBBox();w.scrollLeft=Math.max(0,bb.x-w.clientWidth/2);w.scrollTop=Math.max(0,bb.y+bb.height-w.clientHeight+60);}}catch(err){}}break;
     case 'box':openBoxB(el.dataset.id);break;
     case 'markM':{const who=$('#mWho').value;markBox(s,el.dataset.id,el.dataset.m,who);openBoxB(el.dataset.id);renderHeader();toast('Boks '+el.dataset.id+': '+P.methods[el.dataset.m]+' završen ('+who+').');break;}
     case 'unmarkM':{const bx=boxById(s,el.dataset.id);delete bx.done[el.dataset.m];logAdd(s,{t:hm(Date.now()),e:'Boks '+bx.id+': poništen pregled '+P.methods[el.dataset.m]});save();openBoxB(bx.id);break;}
@@ -2538,8 +2563,9 @@ document.addEventListener('click',e=>{
     case 'start':{const di=dayInfo(s);if(!briefItems(s).every((x,i)=>di.brief[i]))break;di.started=true;logAdd(s,{e:'Brifing završen; početak rada'});save();renderDanas();break;}
     case 'crs':S.crs=el.value;save();break;
     case 'p11w':p11Cur=el.value==='1';renderDoc(docView);break;
-    case 'doc':if(docView!==el.dataset.k)docDay=null;docView=el.dataset.k;if(tab!=='izvjestaji'){tab='izvjestaji';document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-izvjestaji');document.querySelectorAll('.tab').forEach(b=>{if(b.dataset.tab==='izvjestaji')b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});}renderDoc(docView);$('#main').scrollTop=0;break;
-    case 'docBack':docView=null;renderIzvjestaji();break;
+    case 'doc':if(docView!==el.dataset.k){docDay=null;docZ=1;}docView=el.dataset.k;if(tab!=='izvjestaji'){tab='izvjestaji';document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-izvjestaji');document.querySelectorAll('.tab').forEach(b=>{if(b.dataset.tab==='izvjestaji')b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});}renderDoc(docView);$('#main').scrollTop=0;break;
+    case 'docBack':docView=null;docZ=1;renderIzvjestaji();break;
+    case 'docZoom':docZ=docZ%3+1;renderDoc(docView);break;
     case 'print':try{window.print();}catch(err){}break;
     case 'copyDoc':copy($('#docEl').innerText,'Izvještaj');break;
     case 'copyCsv':copy(csvText(),'CSV');break;
@@ -2564,8 +2590,13 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('input',e=>{const t=e.target;if(!S||!S.incident)return;if(t.dataset.v){S.incident.v[t.dataset.v]=Math.max(0,+t.value||0);save();}if(t.dataset.ic){S.incident[t.dataset.ic]=t.value;save();}});
-document.addEventListener('change',e=>{const t=e.target;if(t.id==='rsFile'&&t.files&&t.files[0]){onRestoreFile(t.files[0]);t.value='';return;}if(!S)return;if(t.id==='docDay'){docDay=t.value===today()?null:t.value;if(docView)renderDoc(docView);return;}if(S.incident&&t.dataset.ic==='cat'){S.incident.cat=t.value;save();}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#scrim').hidden)closeSheet();});
+document.addEventListener('change',e=>{const t=e.target;if(S&&t.id==='lanePick'&&t.value){openLane(+t.value);return;}if(S&&t.id==='boxPick'&&t.value){openBoxB(t.value);return;}if(t.id==='rsFile'&&t.files&&t.files[0]){onRestoreFile(t.files[0]);t.value='';return;}if(!S)return;if(t.id==='docDay'){docDay=t.value===today()?null:t.value;if(docView)renderDoc(docView);return;}if(S.incident&&t.dataset.ic==='cat'){S.incident.cat=t.value;save();}});
+document.addEventListener('keydown',e=>{const open=!$('#scrim').hidden;if(e.key==='Escape'&&open){closeSheet();return;}
+  // Tab stays inside an open sheet
+  if(e.key==='Tab'&&open){const f=[...$('#sheet').querySelectorAll('button,input,select,textarea,summary,[tabindex="0"]')].filter(x=>!x.disabled&&x.offsetParent!==null);if(f.length){const a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}return;}
+  // lanes and boxes on the maps are buttons for the keyboard too
+  const t=e.target;if((e.key==='Enter'||e.key===' ')&&t&&t.getAttribute&&t.getAttribute('role')==='button'&&t.dataset&&t.dataset.act){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
 
 let start='danas';try{const t=localStorage.getItem(KEY+'-tab');if(t&&RENDER[t])start=t;}catch(e){}
 const hash=(location.hash||'').slice(1);if(RENDER[hash])start=hash;

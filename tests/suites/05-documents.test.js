@@ -82,7 +82,9 @@ test('freshly created BiH site from a UTM dosije renders and keeps the nulta ta�
   a.run('S.crs="UTM34"');
   const out = renderAll(a);
   assertClean(out, 'new BA/UTM');
-  assert.ok(/E 396 000,00\s+N 4 922 000,00/.test(out['tab:mapa']), 'nulta tačka printed back as entered: ' + (out['tab:mapa'].match(/E [\d ]+,\d\d\s+N [\d ]+,\d\d/) || [''])[0]);
+  const txt = out['tab:mapa'].replace(/<[^>]+>/g, '');
+  assert.ok(/E 396 000,00\s+N 4 922 000,00/.test(txt), 'nulta tačka printed back as entered: ' + (txt.match(/E [\d ]+,\d\d\s+N [\d ]+,\d\d/) || [''])[0]);
+  assert.ok(/<span class="nw">E 396 000,00<\/span>/.test(out['tab:mapa']), 'a coordinate never wraps inside the number');
 });
 
 test('freshly created BiH site after it is opened (pairs, no finds yet): all documents render', async () => {

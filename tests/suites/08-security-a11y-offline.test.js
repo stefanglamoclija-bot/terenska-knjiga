@@ -118,29 +118,45 @@ test('contrast: text tokens meet WCAG AA 4.5:1 in light and dark themes', () => 
   assert.deepStrictEqual(bad, []);
 });
 
-test('contrast: compliance status glyphs (✓ / !) on their tinted circles reach 4.5:1', () => {
+test('contrast: compliance status glyphs (✓ / !) on their tinted circles reach 4.5:1 (light and dark)', () => {
+  const css = APP.match(/<style>([\s\S]*?)<\/style>/)[1];
+  const glyph = cls => (css.match(new RegExp('\\.chk li\\.' + cls + ' \\.ic\\{background:var\\(--([\\w-]+)\\);color:var\\(--([\\w-]+)\\)')) || []).slice(1);
   const bad = [];
-  for (const [f, b] of [['cleared', 'clr-soft'], ['work', 'work-soft'], ['hazard', 'haz-soft']]) { const c = contrast(LIGHT[f], LIGHT[b]); if (c < 4.5) bad.push(`${f}/${b} ${c.toFixed(2)}`); }
-  assert.ok(!bad.length, 'light theme: ' + bad.join(', '));
-}, { xfail: 'F-24' });
+  for (const cls of ['ok', 'warn', 'bad', 'info']) {
+    const [b, f] = glyph(cls); assert.ok(b && f, 'rule for .chk li.' + cls);
+    for (const [n, t] of [['light', LIGHT], ['dark', DARK]]) { const c = contrast(t[f], t[b]); if (c < 4.5) bad.push(`${n} ${cls}: ${f}/${b} ${c.toFixed(2)}`); }
+  }
+  assert.ok(!bad.length, bad.join(', '));
+});
 
 // rendered width of the lane map on a 375 px phone: 375 − 2×14 main padding − 2×6 map padding − 2 border
 const MAP_PX = 375 - 28 - 12 - 2;
-test('tap targets: lanes on the Staze map are at least 44 px wide on a 375 px phone', async () => {
+// The overview map shows the whole site (a 1 m lane is ~5 px there); lanes are then opened from the list next to the map,
+// or the map is enlarged ("Uvećaj") so each lane is 48 px wide at 1:1 and the map pans inside its frame.
+test('tap targets: in "Uvećaj" a lane on the Staze map is at least 44 px wide (map drawn 1:1 in px), and a lane list is always there', async () => {
   const a = await fresh();
-  a.run('S.active="s1";syncPack();go("mapa")');
+  a.run('S.active="s1";syncPack();mapZoom=false;go("mapa")');
+  assert.ok(/<select id="lanePick"/.test(a.html('#v-mapa')) && /<option value="56">Staza 56 · dvojac C/.test(a.html('#v-mapa')), 'lane list');
+  a.click('mapZoom');
   const h = a.html('#v-mapa');
-  const vb = +h.match(/<svg viewBox="0 0 (\d+) \d+" role="img" aria-label="Skica/)[1];
+  const m = h.match(/<svg viewBox="0 0 (\d+) (\d+)" width="(\d+)" height="\d+"/);
+  assert.ok(m && m[1] === m[3], 'zoomed map is drawn at 1:1 (width = viewBox width)');
   const w = +h.match(/class="m-hit" x="[\d.]+" y="[\d.]+" width="([\d.]+)"/)[1];
-  assert.ok(w * MAP_PX / vb >= 44, 'lane tap target ' + (w * MAP_PX / vb).toFixed(1) + ' px wide');
-}, { xfail: 'F-16' });
+  assert.ok(w >= 44, 'lane tap target ' + w.toFixed(1) + ' px wide');
+  assert.ok(/class="mapwrap zoom"/.test(h), 'zoomed map scrolls in its frame');
+  a.run('mapZoom=false');
+});
 
-test('tap targets: 10 m boxes on the Boksovi map are at least 44 px on a 375 px phone', async () => {
+test('tap targets: in "Uvećaj" a 10 m box on the Boksovi map is at least 44 px, and a box list is always there', async () => {
   const a = await fresh();
-  a.run('S.active="r1";syncPack()');
-  const r = a.json('(()=>{const b=bounds(site().poly);return {sc:(330-16)/(b.x1-b.x0+4),g:site().grid}})()');
-  assert.ok(r.sc * r.g * MAP_PX / 330 >= 44, 'box tap target ' + (r.sc * r.g * MAP_PX / 330).toFixed(1) + ' px');
-}, { xfail: 'F-16' });
+  a.run('S.active="r1";syncPack();mapZoom=false;go("mapa")');
+  assert.ok(/<select id="boxPick"/.test(a.html('#v-mapa')));
+  a.click('mapZoom');
+  const r = a.json('lastMap');
+  assert.ok(r.zoom && r.sc * a.run('site().grid') >= 44, 'box tap target ' + (r.sc * a.run('site().grid')).toFixed(1) + ' px');
+  assert.ok(new RegExp('<svg viewBox="0 0 ' + r.W + ' \\d+" width="' + r.W + '"').test(a.html('#v-mapa')), 'drawn 1:1');
+  a.run('mapZoom=false');
+});
 
 test('tap targets: CSS min-heights of interactive controls are >= 44 px', () => {
   const css = APP.match(/<style>([\s\S]*?)<\/style>/)[1];
@@ -148,19 +164,19 @@ test('tap targets: CSS min-heights of interactive controls are >= 44 px', () => 
   const bad = Object.entries(rules).map(([n, re]) => [n, +(css.match(re) || [0, 0])[1]]).filter(([, v]) => v < 44).map(([n, v]) => n + ' ' + v + 'px');
   if (!/\.linkbtn\{[^}]*min-height:(4[4-9]|[5-9]\d)px/.test(css)) bad.push('.linkbtn (reset demo data) ~27px');
   assert.ok(!bad.length, bad.join(', '));
-}, { xfail: 'F-16' });
+});
 
 test('bottom sheet dialog has an accessible name (aria-labelledby/aria-label) and focus returns on close', async () => {
   const sheetTag = APP.match(/<div class="sheet"[^>]*>/)[0];
   assert.ok(/aria-label/.test(sheetTag) || /setAttribute\('aria-label/.test(APP), sheetTag);
   assert.ok(/lastFocus|returnFocus|\.focus\(\)[^;]*closeSheet|opener/.test(APP.match(/function closeSheet\(\)\{[^\n]*/)[0]), 'closeSheet does not restore focus');
-}, { xfail: 'F-24' });
+});
 
 test('lanes and boxes on the maps can be reached with keyboard / screen reader (focusable, role=button)', async () => {
   const a = await fresh();
   a.run('S.active="s1";syncPack();go("mapa")');
   assert.ok(/class="m-hit"[^>]*(tabindex|role="button")/.test(a.html('#v-mapa')), 'lane <rect> not focusable');
-}, { xfail: 'F-24' });
+});
 
 // ---- offline / service worker ----
 test('offline: fonts are self-hosted (no render-blocking request to fonts.googleapis.com)', () => {
