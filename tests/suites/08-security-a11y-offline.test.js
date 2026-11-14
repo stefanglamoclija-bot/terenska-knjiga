@@ -54,7 +54,54 @@ test('XSS: a restored backup file cannot inject markup (thumb, find id, deminer 
   await a.settle(); await a.run('restoreBackup()'); await a.settle();
   const hits = renderEverything(a).filter(([, h]) => RAW.test(h)).map(([w]) => w);
   assert.deepStrictEqual(hits, [], 'payload executes in: ' + hits.slice(0, 6).join(', '));
-}, { xfail: 'F-07' });
+});
+
+test('XSS: every text field a backup can carry is escaped, in every tab, document, P6 annex, the handover bundle and the sheets', async () => {
+  const a = await fresh({ idb: makeIndexedDB() });
+  a.run('S.active="s1";syncPack();openOrg()'); // create the organisation block so it travels in the backup
+  const st = a.json('S');
+  const s1 = st.sites.find(s => s.id === 's1'), r1 = st.sites.find(s => s.id === 'r1');
+  Object.assign(s1.msp, { opcina: PAYLOAD, ru: PAYLOAD, grad: PAYLOAD, kanton: PAYLOAD, entitet: PAYLOAD, kartaNaziv: PAYLOAD, infoPrije: PAYLOAD, zajednica: PAYLOAD });
+  Object.assign(s1.ci, { naziv: PAYLOAD, ocekivano: PAYLOAD });
+  Object.assign(s1.bh, { tok: PAYLOAD, monOrg: PAYLOAD, metoda: PAYLOAD });
+  s1.pairs[0].id = PAYLOAD; s1.pairs[1].a = PAYLOAD; s1.log[0].t = PAYLOAD; s1.log[1].e = PAYLOAD;
+  Object.assign(s1.finds[2], { type: PAYLOAD, cond: PAYLOAD, act: PAYLOAD, note: PAYLOAD + ' žica' });
+  s1.qc[0].met = PAYLOAD; s1.info.push({ day: s1.start, t: PAYLOAD }); s1.monitors[0].by = PAYLOAD;
+  st.org.naziv = PAYLOAD; st.org.ljudi[0].ime = PAYLOAD; st.org.oprema[0].tip = PAYLOAD; st.org.oprema[2].sn = PAYLOAD;
+  r1.boxes[1].id = PAYLOAD; r1.feats[0].name = PAYLOAD; r1.boxes[2].excl = { why: PAYLOAD, note: PAYLOAD, day: r1.start };
+  st.incident = { site: 's1', t0: Date.parse('2026-11-11T09:00:00'), day: '2026-11-11', start: '09:00', where: PAYLOAD, desc: PAYLOAD, box: null, lane: 3, dist: 2, steps: [PAYLOAD], v: { ad: PAYLOAD }, cat: PAYLOAD };
+  st.queue.push({ t: PAYLOAD, at: PAYLOAD });
+  const txt = JSON.stringify({ app: 'terenska-knjiga', format: 1, exported: new Date(NOW).toISOString(), state: st, photos: {} });
+  a.run(`onRestoreFile({text:()=>Promise.resolve(${JSON.stringify(txt)})})`);
+  await a.settle(); await a.run('restoreBackup()'); await a.settle();
+  assert.ok(a.run('S.sites.find(s=>s.id==="s1").msp.opcina') === PAYLOAD, 'backup was restored');
+  const out = renderEverything(a);
+  a.run('S.active="s1";syncPack()');
+  for (const k of ['p6a', 'p6b', 'p6c', 'p6d', 'p6e', 'p6f', 'p6g', 'p6h', 'pak', 'p12']) { a.run(`renderDoc("${k}")`); out.push(['s1 ' + k, a.html('#v-izvjestaji')]); }
+  a.run('openOrg()'); out.push(['org sheet', a.html('#sheet')]);
+  a.run('openSync()'); out.push(['sync sheet', a.html('#sheet')]);
+  a.run('go("hitno")'); out.push(['hitno', a.html('#v-hitno')]);
+  a.run('S.active="r1";syncPack();showIds=true;go("mapa")'); out.push(['r1 map ids', a.html('#v-mapa')]);
+  a.run('openBoxB(site().boxes[1].id)'); out.push(['r1 box sheet', a.html('#sheet')]);
+  a.run('openFeat(site().feats[0].id)'); out.push(['r1 feat sheet', a.html('#sheet')]);
+  a.run('go("nalaz")'); out.push(['r1 nalaz', a.html('#v-nalaz')]);
+  a.run('showIds=false');
+  const hits = out.filter(([, h]) => RAW.test(h)).map(([w]) => w);
+  assert.deepStrictEqual(hits, [], 'payload executes in: ' + hits.slice(0, 8).join(', '));
+});
+
+test('build output carries a Content-Security-Policy that only allows the app\'s own inline scripts (by hash)', () => {
+  const built = fs.readFileSync(path.join(ROOT, 'docs', 'index.html'), 'utf8');
+  const m = built.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/);
+  assert.ok(m, 'no CSP meta in docs/index.html');
+  assert.ok(/script-src 'sha256-/.test(m[1]) && !/unsafe-inline'[^;]*;/.test(m[1].match(/script-src[^;]*;/)[0]), m[1]);
+  const crypto = require('crypto');
+  for (const s of [...built.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(x => x[1])) {
+    const h = crypto.createHash('sha256').update(s, 'utf8').digest('base64');
+    assert.ok(m[1].includes("'sha256-" + h + "'"), 'inline script not covered by the CSP hash');
+  }
+  assert.ok(/connect-src 'self'/.test(m[1]) && /object-src 'none'/.test(m[1]));
+});
 
 // ---- accessibility ----
 const tokens = (block) => Object.fromEntries([...block.matchAll(/--([\w-]+):(#[0-9A-Fa-f]{6})/g)].map(m => [m[1], m[2]]));
@@ -117,17 +164,17 @@ test('lanes and boxes on the maps can be reached with keyboard / screen reader (
 // ---- offline / service worker ----
 test('offline: fonts are self-hosted (no render-blocking request to fonts.googleapis.com)', () => {
   assert.ok(!/fonts\.googleapis\.com\/css2/.test(APP), 'app loads Google Fonts CSS');
-}, { xfail: 'F-19' });
+});
 
 test('service worker install bypasses the HTTP cache for the app shell (cache: "reload")', () => {
   const sw = fs.readFileSync(path.join(ROOT, 'src', 'sw.js'), 'utf8');
   assert.ok(/cache:\s*['"](reload|no-cache)['"]/.test(sw), 'c.addAll(CORE) may store a stale index.html from the HTTP cache');
-}, { xfail: 'F-18' });
+});
 
 test('service worker tells the open app when a new version is ready (no silent stale app)', () => {
   const sw = fs.readFileSync(path.join(ROOT, 'src', 'sw.js'), 'utf8');
   assert.ok(/postMessage|controllerchange|updatefound/.test(sw + APP), 'no update notification path');
-}, { xfail: 'F-18' });
+});
 
 test('build output docs/index.html contains the current src/app.html script (rebuild after editing src)', () => {
   const built = appSource(path.join(ROOT, 'docs', 'index.html'));

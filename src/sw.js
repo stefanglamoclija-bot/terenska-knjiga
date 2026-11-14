@@ -1,29 +1,23 @@
 // Service worker for the standalone build: the app must open and work with no signal on site.
-// build.sh replaces __VERSION__ with a hash of index.html, so every deploy installs a fresh cache.
+// build.sh replaces __VERSION__ with a hash of index.html (every deploy installs a fresh cache) and __FONT_FILES__ with
+// the self-hosted font files in docs/fonts/ (if any).
 const V = 'tk-__VERSION__';
-const FONTS = 'tk-fonts';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
-const FONT_CSS = '__FONT_CSS__';
+const PAGES = 'tk-pages'; // other pages on the same site (sales pages /en/, /bs/): network first, last copy offline
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'__FONT_FILES__];
 
 self.addEventListener('install', e => {
-  e.waitUntil((async () => {
-    const c = await caches.open(V);
-    await c.addAll(CORE);
-    // fonts are a nicety: cache them if the network allows, never fail the install over them
-    try {
-      const fc = await caches.open(FONTS);
-      const css = await fetch(FONT_CSS);
-      await fc.put(FONT_CSS, css.clone());
-      const urls = [...(await css.text()).matchAll(/url\((https:[^)]+)\)/g)].map(m => m[1]);
-      await Promise.all(urls.map(u => fetch(u).then(r => r.ok && fc.put(u, r)).catch(() => {})));
-    } catch (err) {}
-    await self.skipWaiting();
-  })());
+  // cache: 'reload' skips the HTTP cache, so a new version never installs a stale index.html from it
+  e.waitUntil(caches.open(V).then(c => c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })))));
+  // no skipWaiting here: the open app shows "Nova verzija" and the user decides when to reload (message below)
+});
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'skip') self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k !== V && k !== FONTS) await caches.delete(k);
+    for (const k of await caches.keys()) if (k !== V && k !== PAGES) await caches.delete(k);
     await self.clients.claim();
   })());
 });
@@ -32,17 +26,20 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    e.respondWith(caches.open(FONTS).then(async c => (await c.match(req)) || fetch(req).then(r => { if (r.ok) c.put(req, r.clone()); return r; })));
+  if (url.origin !== location.origin) return;
+  const base = new URL(self.registration.scope).pathname;
+  if (!url.pathname.startsWith(base)) return;
+  const rel = url.pathname.slice(base.length);
+  const isApp = rel === '' || rel === 'index.html';
+  const inCore = isApp || CORE.includes('./' + rel);
+  if (inCore) {
+    // the app shell: cache first, so it opens instantly in the field; a new version arrives as a new service worker
+    e.respondWith(caches.open(V).then(async c => (await c.match(isApp ? './index.html' : req, { ignoreSearch: true })) || fetch(req)));
     return;
   }
-  if (url.origin !== location.origin) return;
-  // cache first so the app opens instantly in the field; refresh the copy in the background
-  e.respondWith(caches.open(V).then(async c => {
-    const key = req.mode === 'navigate' ? './index.html' : req;
-    const hit = await c.match(key, { ignoreSearch: true });
-    const net = fetch(req).then(r => { if (r.ok && r.type === 'basic') c.put(key, r.clone()); return r; }).catch(() => hit);
-    if (hit) { e.waitUntil(net); return hit; }
-    return net;
-  }));
+  // everything else (sales pages, their assets): network first, the last copy when offline
+  e.respondWith(fetch(req).then(r => {
+    if (r.ok && r.type === 'basic') { const copy = r.clone(); caches.open(PAGES).then(c => c.put(req, copy)); }
+    return r;
+  }).catch(() => caches.open(PAGES).then(c => c.match(req)).then(hit => hit || new Response('Nema mreže. / No connection.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }))));
 });

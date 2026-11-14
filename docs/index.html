@@ -2,6 +2,7 @@
 <html lang="bs" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-icwwrEibE3CX+6MJ1OX7UFAOW2sxVqCzoF0iml2D6Wg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
@@ -12,9 +13,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Terenska knjiga">
 <title>Terenska knjiga</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: phone-first field app. Status header with site switcher, one scrolling view, tab bar at the bottom.
    High contrast for sunlight, large targets for gloved hands. Red is reserved for hazard. Documents render as paper forms. */
@@ -25,9 +23,10 @@
   --cleared:#2B784A; --clr-soft:#C8E2D0;
   --work:#A86F0B; --work-soft:#F4DFAF;
   --paper:#FFFFFF; --paper-ink:#111511;
-  --font-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
-  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  /* no web fonts are fetched at runtime: brand fonts are used if self-hosted (build.sh, docs/fonts) or installed, else the system's */
+  --font-display:"Barlow Condensed","Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif-condensed,system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,"Roboto Mono","Droid Sans Mono",Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -190,6 +189,8 @@ h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0;lette
 /* persistent storage warning (never a toast only) and the recovery screen */
 .savewarn{background:var(--hazard);color:var(--on-hazard);padding:8px 14px;font-size:13px;font-weight:600;display:flex;flex-direction:column;gap:6px}
 .savewarn .btnrow{gap:6px}.savewarn .btn{background:var(--surface);color:var(--ink);border-color:var(--surface);flex:0 1 auto}
+.updbar{background:var(--accent);color:var(--on-accent);padding:8px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.updbar .btn{background:var(--surface);color:var(--ink);border-color:var(--surface);flex:none}
 .legacy{margin-top:8px;font-size:13px}.legacy summary{cursor:pointer;color:var(--muted);min-height:44px;display:flex;align-items:center}
 /* sheet */
 .scrim{position:absolute;inset:0;background:rgba(10,14,10,.4);display:flex;align-items:flex-end;z-index:5}
@@ -382,6 +383,7 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
     <button class="sync" id="syncBtn" data-act="sync" type="button"><span class="dot"></span><span id="syncLabel">…</span></button>
   </header>
   <div class="savewarn" id="saveWarn" role="alert" hidden></div>
+  <div class="updbar" id="updBar" role="status" hidden></div>
 
   <main id="main">
     <section class="view" id="v-rec" hidden></section>
@@ -486,7 +488,7 @@ const DAYS=['nedjelja','ponedjeljak','utorak','srijeda','četvrtak','petak','sub
 // "today" is read at the moment of use: a PWA stays open in the background for days, so nothing may freeze the date at load
 const today=()=>dayKey(new Date());
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
-const fmtD=k=>{if(!k)return '—';const [y,m,d]=k.split('-');return d+'.'+m+'.'+y+'.';};
+const fmtD=k=>{if(!k)return '—';const [y,m,d]=String(k).split('-');return esc(d+'.'+m+'.'+y+'.');};
 const longDate=d=>DAYS[d.getDay()]+', '+d.getDate()+'. '+MONTHS[d.getMonth()]+' '+d.getFullYear()+'.';
 function workdaysBack(n){const out=[];let d=addDays(new Date(),0);while(out.length<n){d=addDays(d,-1);if(d.getDay()!==0&&d.getDay()!==6)out.push(dayKey(d));}return out.reverse();}
 const TRI='<svg class="tri" viewBox="0 0 18 16" aria-hidden="true"><path d="M9 1 17 15H1z"/></svg>';
@@ -834,10 +836,10 @@ function renderDanas(){
     </dl></div>`;
 
   h+=`<div class="card"><div class="card-h"><h3>Dvojci</h3><span class="sub">smjena najviše ${R.shiftMax} min</span></div>`;
-  s.pairs.forEach(p=>{const st=pairState(p);const a=TEAM.find(x=>x.id===st.inLane),b=TEAM.find(x=>x.id===st.support);
-    h+=`<div class="pair${st.over?' over':''}" data-pair="${p.id}"><span class="tag">${p.id}</span>
-      <span class="grow"><b>Staza ${p.lane}</b> · ${num(laneDone(s,p.lane),1)} m<br><span class="sub">${a.id} u stazi · ${b.id} podrška na ${R.pairGap} m</span></span>
-      <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="t" data-timer="${p.id}">--:--</span><button class="btn sm" type="button" data-act="shift" data-p="${p.id}">Smjena</button></span></div>`;});
+  s.pairs.forEach(p=>{const st=pairState(p),q=esc(p.id);
+    h+=`<div class="pair${st.over?' over':''}" data-pair="${q}"><span class="tag">${q}</span>
+      <span class="grow"><b>Staza ${esc(p.lane)}</b> · ${num(laneDone(s,p.lane),1)} m<br><span class="sub">${esc(st.inLane)} u stazi · ${esc(st.support)} podrška na ${R.pairGap} m</span></span>
+      <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="t" data-timer="${q}">--:--</span><button class="btn sm" type="button" data-act="shift" data-p="${q}">Smjena</button></span></div>`;});
   h+=`</div>`;
 
   h+=`<div class="card"><div class="card-h"><h3>Usklađenost sa standardom</h3><span class="sub">${esc(P.kratko)}</span></div><ul class="chk">${compliance(s).map(c=>`<li class="${c.st}"><span class="ic">${c.st==='ok'?'✓':'!'}</span><span>${esc(c.t)}</span><span class="v">${esc(c.v)}</span></li>`).join('')}</ul></div>`;
@@ -866,7 +868,7 @@ function mapSVG(s,opts={}){
   g+=`<line class="m-zero" x1="${X(b.x0-0.5)}" x2="${X(b.x1+0.5)}" y1="${Y(0)}" y2="${Y(0)}"/>`;
   s.finds.forEach(f=>{const cx=X(f.lane-0.5+(f.off||0)),cy=Y(f.dist),r=opts.paper?3.2:4;g+=`<path class="m-mk" d="M${cx} ${cy-r}L${cx+r} ${cy+r*.8}H${cx-r}Z"/>`;});
   if(opts.paper){s.poly.forEach((p,i)=>{g+=`<circle class="m-tp" cx="${X(p[0])}" cy="${Y(p[1])}" r="2.4"/><text class="m-t ink" x="${X(p[0])+4}" y="${Y(p[1])-3}">T${i+1}</text>`;});}
-  else{const ps=s.pairs.slice().sort((a,b)=>a.lane-b.lane);ps.forEach(p=>{g+=`<text class="m-t big" x="${X(p.lane-0.5)}" y="${Y(laneLen(s,p.lane))-4}" text-anchor="middle">${p.id}</text>`;});
+  else{const ps=s.pairs.slice().sort((a,b)=>a.lane-b.lane);ps.forEach(p=>{g+=`<text class="m-t big" x="${X(p.lane-0.5)}" y="${Y(laneLen(s,p.lane))-4}" text-anchor="middle">${esc(p.id)}</text>`;});
     for(let i=1;i<ps.length;i++){const y=Y(0)+12+((i%2)*9);g+=`<line class="m-gap" x1="${X(ps[i-1].lane-0.5)}" x2="${X(ps[i].lane-0.5)}" y1="${y}" y2="${y}"/><text class="m-t" x="${(X(ps[i-1].lane-0.5)+X(ps[i].lane-0.5))/2}" y="${y-2}" text-anchor="middle">${(ps[i].lane-ps[i-1].lane)*R.lane} m</text>`;}}
   g+=`<circle cx="${X(0)}" cy="${Y(0)}" r="4.5" fill="var(--ink)"/><text class="m-t ink" x="${X(0)+2}" y="${Y(0)+(opts.paper?24:36)}">NT · nulta tačka</text>`;
   g+=`<text class="m-t" x="${X(b.x1+0.5)}" y="${Y(0)+(opts.paper?24:36)}" text-anchor="end">sigurna staza · nulta linija</text>`;
@@ -900,7 +902,7 @@ function openLane(i){
   openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · širina ${R.lane} m</div><h2>Radna staza ${i}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
     <dl class="kv"><dt>Očišćeno</dt><dd>${num(d,1)} m od ${num(L,1)} m · ${num(d*R.lane,1)} m²</dd>
       <dt>Čelo staze</dt><dd class="mono">${crsFmt(s,head)}</dd>
-      ${p?`<dt>Dvojac</dt><dd>${p.id}: ${pairState(p).inLane} u stazi, ${pairState(p).support} podrška</dd>`:''}
+      ${p?`<dt>Dvojac</dt><dd>${esc(p.id)}: ${esc(pairState(p).inLane)} u stazi, ${esc(pairState(p).support)} podrška</dd>`:''}
       <dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)+' na '+num(f.dist,1)+' m').join(', '):'nema'}</dd></dl>
     ${d<L?`<div class="grid3">
       <button class="btn" type="button" data-act="adv" data-l="${i}" data-m="0.5">+0,5 m</button>
@@ -915,7 +917,7 @@ function renderNalaz(){
   const pl=prefill&&prefill.lane||(s.pairs[0]&&s.pairs[0].lane)||1;
   const pd=prefill&&prefill.dist!=null?prefill.dist:laneDone(s,pl);
   prefill=null;
-  const laneOpts=[];for(let i=1;i<=lc;i++)if(laneLen(s,i)>0)laneOpts.push(`<option value="${i}" ${i===pl?'selected':''}>Staza ${i}${s.pairs.find(p=>p.lane===i)?' · dvojac '+s.pairs.find(p=>p.lane===i).id:''}</option>`);
+  const laneOpts=[];for(let i=1;i<=lc;i++)if(laneLen(s,i)>0)laneOpts.push(`<option value="${i}" ${i===pl?'selected':''}>Staza ${i}${s.pairs.find(p=>p.lane===i)?' · dvojac '+esc(s.pairs.find(p=>p.lane===i).id):''}</option>`);
   $('#v-nalaz').innerHTML=`<div><div class="label">${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><h2>Novi nalaz</h2></div>
   <form id="findForm" autocomplete="off">
     <fieldset><legend>Kategorija</legend><div class="chips" id="catChips">${Object.keys(P.cats).map((c,i)=>`<label><input type="radio" name="fcat" value="${c}" id="fcat${c}" ${i===0?'checked':''}><span>${P.cats[c]}</span></label>`).join('')}</div></fieldset>
@@ -1005,10 +1007,10 @@ const findWhere=f=>f.box!=null?'boks '+f.box:'staza '+f.lane+' na '+num(f.dist,1
 function fotoDoc(s){
   const withP=s.finds.filter(f=>f.thumb),without=s.finds.filter(f=>!f.thumb);
   const rs=s.pack==='RS',head=`<h4>FOTODOKUMENTACIJA ${rs?'PRONAĐENIH NUS':'PRONAĐENIH ES'}</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.msp.naziv)} · ${esc(s.ci.oznaka)} · stanje na dan ${fmtD(today())} · koordinate ${crsName()}</div>`;
-  const cards=withP.map((f,i)=>`<figure class="phf"><img alt="Fotografija ${f.id}" src="${f.thumb}" ${f.ph?`data-ph="${esc(phKey(s,f))}"`:''}>
-    <figcaption><b>Slika ${i+1}. ${f.id} · ${esc(f.type)}${f.qty>1?' ×'+f.qty:''}</b><br>${esc(findWhere(f))}, dubina ${f.depth} cm · ${esc(f.cond)}<br><span class="mono">${crsFmt(s,findPos(s,f))}</span><br>${fmtD(f.day)} u ${esc(f.time)} · ${esc(f.act)}${f.note?'<br>'+esc(f.note):''}${f.ph?'':'<br><span class="miss">samo umanjena slika</span>'}</figcaption></figure>`).join('');
+  const cards=withP.map((f,i)=>`<figure class="phf"><img alt="Fotografija ${esc(f.id)}" src="${esc(safeImg(f.thumb))}" ${f.ph?`data-ph="${esc(phKey(s,f))}"`:''}>
+    <figcaption><b>Slika ${i+1}. ${esc(f.id)} · ${esc(f.type)}${f.qty>1?' ×'+f.qty:''}</b><br>${esc(findWhere(f))}, dubina ${f.depth} cm · ${esc(f.cond)}<br><span class="mono">${crsFmt(s,findPos(s,f))}</span><br>${fmtD(f.day)} u ${esc(f.time)} · ${esc(f.act)}${f.note?'<br>'+esc(f.note):''}${f.ph?'':'<br><span class="miss">samo umanjena slika</span>'}</figcaption></figure>`).join('');
   return head+(cards?`<div class="phgrid">${cards}</div>`:'<p>Nijedan nalaz još nema fotografiju. Fotografija se dodaje u obrascu Nalaz.</p>')
-    +(without.length?`<div class="sec">Bez fotografije</div><p>${without.map(f=>f.id+' ('+esc(f.type)+')').join(', ')}</p>`:'')
+    +(without.length?`<div class="sec">Bez fotografije</div><p>${without.map(f=>esc(f.id)+' ('+esc(f.type)+')').join(', ')}</p>`:'')
     +`<div class="sig"><div>${rs?'Rukovodilac radilišta':'Vođa tima: '+esc(LEADER)}</div><div>Potpis</div></div>`;
 }
 let phURLs=[];
@@ -1156,7 +1158,7 @@ function tsMap(s,o={}){
     <text x="${L+bw+8}" y="${by+1.4}" font-size="2.4" font-weight="700">R 1:${sc}</text><text x="${L+mw}" y="${by+1.4}" font-size="1.8" text-anchor="end">${esc(crsName())} · mreža ${step} m</text></svg>`;
   return {svg:g,sc};
 }
-function findRows(s){return s.finds.map((f,i)=>`<tr><td>${i+1}.</td><td>${f.id}</td><td>${esc(f.type)}${f.qty>1?' ×'+f.qty:''}</td>${xyCells(s,findPos(s,f))}<td class="n">${f.depth}</td><td>${esc(f.act)}</td></tr>`).join('');}
+function findRows(s){return s.finds.map((f,i)=>`<tr><td>${i+1}.</td><td>${esc(f.id)}</td><td>${esc(f.type)}${f.qty>1?' ×'+f.qty:''}</td>${xyCells(s,findPos(s,f))}<td class="n">${f.depth}</td><td>${esc(f.act)}</td></tr>`).join('');}
 const tpRows=s=>s.poly.map((p,i)=>`<tr><td>T${i+1}</td>${xyCells(s,toGK(s,p[0],p[1]))}</tr>`).join('');
 
 /* ---------- Prilog 9: Dnevni izvještaj ---------- */
@@ -1170,8 +1172,8 @@ function p9Doc(s,day){const o=org(),L=dayLog(s,day),ft=s.finds.filter(f=>f.day==
     <div class="keep"><div class="sec">PODACI O RADU I POSTIGNUTIM EFEKTIMA</div><table>
     <tr><td class="k">Metode rada:</td><td>${opt(0,'a-detektor')}${opt(0,'b-pipalica')}${opt(m2>0,'c-kombinacija')}${opt(0,'d-prege')}${opt(0,'d-stroj/mašina (prethodni rad)')}</td></tr>
     <tr><td class="k">Očišćeno:</td><td>${num(m2,1)} m² deminera, ${hasEq('poek')?DOP:'0'} m² prege, ukupno: <b>${num(m2,1)} m²</b></td></tr>
-    <tr><td class="k">Otkriveno mina/ESZR:</td><td>${ft.length?ft.map(f=>esc(f.type)+' – '+f.qty+' kom ('+f.id+', staza '+f.lane+')').join('; '):'nema'}</td></tr>
-    <tr><td class="k">Uništeno mina/ESZR:</td><td>${dest.length?dest.map(f=>esc(f.type)+' – '+f.qty+' kom ('+f.id+')').join('; '):'nema'}</td></tr>
+    <tr><td class="k">Otkriveno mina/ESZR:</td><td>${ft.length?ft.map(f=>esc(f.type)+' – '+f.qty+' kom ('+esc(f.id)+', staza '+f.lane+')').join('; '):'nema'}</td></tr>
+    <tr><td class="k">Uništeno mina/ESZR:</td><td>${dest.length?dest.map(f=>esc(f.type)+' – '+f.qty+' kom ('+esc(f.id)+')').join('; '):'nema'}</td></tr>
     <tr><td class="k">Utrošeno ES za uništavanje:</td><td>${kg?num(kg,2)+' kg TNT':(dest.length?DOP:'—')}</td></tr>
     <tr><td class="k">CASEVAC vježba izvedena:</td><td>${cas?fmtD(cas)+' godine':DOP}</td></tr>
     <tr><td class="k">Napomena:</td><td>${info.map(i=>'Prikupljena nova informacija o miniranosti tokom TI: '+esc(i.t)).join('<br>')||'—'}</td></tr></table>
@@ -1225,7 +1227,7 @@ function p13Doc(s){const o=org(),m=mspX(s);
     <div class="sec">DRUGI DIO</div>${sec(6,'VRSTA UKLONJENIH PP MINA','PP')}${sec(7,'VRSTA UKLONJENIH PT MINA','PT')}${sec(8,'VRSTA UKLONJENOG NUS-a','NUS')}
     <table><tr><td style="width:30px">9.</td><td>BROJ UKLONJENIH MINA IZNENAĐENJA</td><td class="n" style="width:80px">${mi.reduce((a,f)=>a+f.qty,0)}</td></tr></table>
     <p class="note">NAPOMENA: Ovaj izvještaj se popunjava i po potrebi prilaže uz Izjavu o čišćenju površine. Fotografije treba koristiti kao dodatni dokaz opisu neidentifikovanih ili neobičnih eksplozivnih sredstava. Sve mine iznenađenja treba detaljno opisati na posebnom listu.</p>
-    ${mi.length?`<div class="sec">POSEBNI LIST: OPIS MINA IZNENAĐENJA</div><table><thead><tr><th>ID</th><th>Položaj</th><th>Dubina</th><th>Opis</th></tr></thead><tbody>${mi.map(f=>`<tr><td>${f.id}</td><td>staza ${f.lane}, ${num(f.dist,1)} m</td><td>${f.depth} cm</td><td>${f.note?esc(f.note)+'; ':''}${DOP}</td></tr>`).join('')}</tbody></table>`:''}`
+    ${mi.length?`<div class="sec">POSEBNI LIST: OPIS MINA IZNENAĐENJA</div><table><thead><tr><th>ID</th><th>Položaj</th><th>Dubina</th><th>Opis</th></tr></thead><tbody>${mi.map(f=>`<tr><td>${esc(f.id)}</td><td>staza ${f.lane}, ${num(f.dist,1)} m</td><td>${f.depth} cm</td><td>${f.note?esc(f.note)+'; ':''}${DOP}</td></tr>`).join('')}</tbody></table>`:''}`
     +dfoot('Stručni izvještaj o ES · Prilog 13',s);}
 
 /* ---------- Prilog 6: Zapisnik o izvršenim aktivnostima TI i čišćenja CI/SI ---------- */
@@ -1246,7 +1248,7 @@ function p6Fields(s=site()){const b=bh(s),m=s.msp,o=org(),fs=s.finds,staze=b.vrs
     [16,'Metode internog monitoringa','Manuelno (detektor i pipalica)'],
     [17,'Interni monitoring obavio i veličina izvršenog internog uzorkovanja u m2',mons.length?esc(mons.join(', '))+'; uzorkovano '+num(qcM2(s),1)+' m² ('+num(cl?qcM2(s)/cl*100:0,1)+'% očišćene površine)':''],
     [18,'Monitorska organizacija koja je obavljala monitoring',esc(b.monOrg)],[19,'Vrste i količine otkrivenih ES',fs.length?typeList(fs):'Nisu otkrivena ES'],
-    [20,'Vrste i količine aktiviranih ES i ostalih naznaka ES',wire.length?wire.map(f=>esc(f.note)+' ('+f.id+', '+esc(f.type)+')').join('; '):'Nema aktiviranih ES ni drugih naznaka']];}
+    [20,'Vrste i količine aktiviranih ES i ostalih naznaka ES',wire.length?wire.map(f=>esc(f.note)+' ('+esc(f.id)+', '+esc(f.type)+')').join('; '):'Nema aktiviranih ES ni drugih naznaka']];}
 function p6Prilozi(s){const days=workDays(s);return [
   ['a','Spisak osoba odjeljenja (tima, sekcija) ili više njih koji su izvodili operacije sa funkcijama.','p6a','Spisak osoba tima sa funkcijama'],
   ['b','Pregled radnih dana i sati rada sa postignutim efektima po angažovanim odjeljenjima-sekcijama, timovima i grupama (podaci iz dnevnih izvještaja za deminere i prege, kao i poseban prilog za mehaničku pripremu ako je vršena).','p6b','Pregled radnih dana i sati rada sa postignutim efektima'],
@@ -1575,7 +1577,7 @@ function renderHitno(){
   else{
     h+=`${i.site!==S.active?`<div class="notice haz" role="alert">Nesreća je prijavljena na radilištu ${esc(s.msp.id)} · ${esc(s.ci.oznaka)}.</div>`:''}<div class="inc"><div><div class="label">Od nesreće</div><div class="tv" id="incEl">00:00</div><div style="font-size:12.5px">${esc(i.start)} · ${incWhere(s,i)?esc(incWhere(s,i)):'mjesto nije upisano'}</div></div>${R.accidentH?`<div><div class="label">Rok za Prilog 12</div><div class="tv" id="incDl">6:00:00</div><div style="font-size:12.5px">BHMAC, 6 sati</div></div>`:`<div><div class="label">Odmah obavesti</div><div class="tv" style="font-size:24px">CZRS · MUP</div><div style="font-size:12.5px">112 / 194</div></div>`}</div>
     <button class="btn ${incLocal(i)||i.where?'':'primary'} block" type="button" data-act="incWhere">${incLocal(i)||i.where?L10('Promijeni mjesto nesreće','Promeni mesto nesreće'):L10('Upiši mjesto nesreće','Upiši mesto nesreće')}</button>
-    <div class="card"><h3 style="margin-bottom:6px">Postupak</h3><ol class="steps">${P.steps.map((x,n)=>`<li><label><input type="checkbox" id="step${n}" data-act="step" data-i="${n}" ${i.steps[n]?'checked':''}><span>${esc(x)}</span><span class="t">${i.steps[n]||''}</span></label></li>`).join('')}</ol></div>
+    <div class="card"><h3 style="margin-bottom:6px">Postupak</h3><ol class="steps">${P.steps.map((x,n)=>`<li><label><input type="checkbox" id="step${n}" data-act="step" data-i="${n}" ${i.steps[n]?'checked':''}><span>${esc(x)}</span><span class="t">${esc(i.steps[n]||'')}</span></label></li>`).join('')}</ol></div>
     ${s.pack==='RS'?`<div class="btnrow"><button class="btn" type="button" data-act="incEnd">Zatvori incident</button></div>`:''}<div class="card"${s.pack==='RS'?' hidden':''}><h3 style="margin-bottom:8px">Podaci za Prilog 12</h3>
       <div class="grid3">${[['ad','Odrasli'],['ch','Djeca'],['lt','Lakše povr.'],['hv','Teže povr.'],['k','Poginuli']].map(([k2,l])=>`<label class="field">${l}<input type="number" min="0" max="20" id="v_${k2}" data-v="${k2}" value="${esc(+i.v[k2]||0)}" inputmode="numeric"></label>`).join('')}
       <label class="field">Vrsta ES<select id="iCat" data-ic="cat">${[['','— izaberi —'],['PP','PP mina'],['PT','PT mina'],['NUS','NUS'],['?','Nepoznato']].map(([a,b])=>`<option value="${a}" ${i.cat===a?'selected':''}>${b}</option>`).join('')}</select></label></div>
@@ -1595,7 +1597,7 @@ function renderHitno(){
 /* ================= sites sheet ================= */
 function openSites(){
   openSheet(`<div class="sheet-h"><div><div class="label">${esc(ORG)}</div><h2>Radilišta</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
-    ${S.sites.map(x=>`<button class="sitecard${x.id===S.active?' on':''}" type="button" data-act="pickSite" data-id="${x.id}"><span class="grow"><b>${esc(x.msp.id)} ${esc(x.msp.naziv)} · ${esc(x.ci.oznaka)}</b><br><span class="sub">${esc(x.msp.ru)} · ${num(clearedM2(x))} / ${num(totalArea(x))} m² · ${esc(x.status)}</span></span><span class="chip ${x.status==='u radu'?'work':''}">${x.id===S.active?'aktivno':'otvori'}</span></button>`).join('')}
+    ${S.sites.map(x=>`<button class="sitecard${x.id===S.active?' on':''}" type="button" data-act="pickSite" data-id="${esc(x.id)}"><span class="grow"><b>${esc(x.msp.id)} ${esc(x.msp.naziv)} · ${esc(x.ci.oznaka)}</b><br><span class="sub">${esc(x.msp.ru)} · ${num(clearedM2(x))} / ${num(totalArea(x))} m² · ${esc(x.status)}</span></span><span class="chip ${x.status==='u radu'?'work':''}">${x.id===S.active?'aktivno':'otvori'}</span></button>`).join('')}
     <button class="btn primary" type="button" data-act="newSite">+ Novo radilište iz dosijea</button>
     <button class="btn" type="button" data-bh="org">Organizacija, tim i oprema</button>
     ${storageCard()}
@@ -1762,7 +1764,7 @@ function openEvent(k){
     det:{t:'Test detektora',body:`<p class="sub">Test na UPMAH-3 ukopanom na 10 cm (13 cm s vegetacijom).</p><label class="field">Ispravnih detektora<input id="eN" type="number" min="0" value="6"></label>`},
     qc:{t:'Interna kontrola kvaliteta',body:`<div class="grid2"><label class="field">Staza<input id="eLane" type="number" min="1" value="${lanes[0]||1}"></label><label class="field">Uzorak (m²)<input id="eM2" type="number" step="0.5" min="0.5" value="3"></label></div><label class="field">Metoda<select id="eMet"><option>detektor</option><option>pipalica</option><option>kombinacija</option><option>vizuelno</option></select></label><label class="field">Rezultat<select id="eRes"><option>bez nalaza</option><option>pronađena greška, staza vraćena na ponovni tretman</option></select></label>`},
     mon:{t:'Interni nadzor',body:`<label class="field">Nadzor obavio<input id="eBy" value="Supervizor I. Jukić"></label>`},
-    dem:{t:L10('Uništavanje','Predaja NUS MUP-u'),body:`<p class="sub">${L10('Sredstva koja čekaju uništavanje:','Sredstva prijavljena MUP-u koja čekaju preuzimanje:')}</p>${s.finds.filter(f=>f.act===P.actions[0]).map(f=>`<label style="display:flex;gap:10px;align-items:center;padding:6px 0"><input type="checkbox" class="dmf" value="${f.id}" checked style="width:20px;height:20px">${esc(f.id+' '+f.type+' · '+(f.box?'boks '+f.box:'staza '+f.lane))}</label>`).join('')||'<p class="sub">Nema sredstava na čekanju.</p>'}<label class="field">Utrošeno ES (kg TNT)<input id="eKg" type="number" step="0.05" min="0" value="0.2"></label>`},
+    dem:{t:L10('Uništavanje','Predaja NUS MUP-u'),body:`<p class="sub">${L10('Sredstva koja čekaju uništavanje:','Sredstva prijavljena MUP-u koja čekaju preuzimanje:')}</p>${s.finds.filter(f=>f.act===P.actions[0]).map(f=>`<label style="display:flex;gap:10px;align-items:center;padding:6px 0"><input type="checkbox" class="dmf" value="${esc(f.id)}" checked style="width:20px;height:20px">${esc(f.id+' '+f.type+' · '+(f.box?'boks '+f.box:'staza '+f.lane))}</label>`).join('')||'<p class="sub">Nema sredstava na čekanju.</p>'}<label class="field">Utrošeno ES (kg TNT)<input id="eKg" type="number" step="0.05" min="0" value="0.2"></label>`},
     visit:{t:L10('Posjeta','Poseta'),body:`<label class="field">${L10('Ko je posjetio','Ko je posetio')}<input id="eWho" value="${L10('Inspektor za KK, BHMAC','Kontrolor CZRS')}"></label>`},
     info:{t:'Nova informacija o miniranosti',body:`<label class="field">Opis i izvor<textarea id="eInfo" style="font-family:var(--font-body)">Mještanin navodi da je 1993. put ispod kote miniran PROM-1.</textarea></label>`}
   }[k];
@@ -1955,7 +1957,7 @@ function renderDanasB(){
     <div class="bar" role="img" aria-label="${Math.round(cl/tot*100)}% površine završeno"><span style="width:${Math.min(100,cl/tot*100)}%"></span></div>
     <dl class="kv3"><div><dt>Završeno ukupno</dt><dd>${num(cl)} / ${num(tot)} m²</dd></div><div><dt>Nalazi danas</dt><dd>${ft.length}</dd></div><div><dt>Početak rada</dt><dd>${fmtD(s.start).slice(0,6)}</dd></div></dl></div>`;
   h+=`<div class="card"><div class="card-h"><h3>Raspored po boksovima</h3><span class="sub">${s.assign.length} u radu</span></div><ul class="rows">${s.assign.map(a=>{const m=TEAM.find(x=>x.id===a.who);
-    return `<li><span class="mono">${a.who}</span><span class="grow">${esc(m?m.n:'')}<br><span class="sub">Boks <b>${esc(a.box)}</b> · ${esc(P.methods[a.m])}</span></span><button class="btn sm" type="button" data-act="boxDone" data-w="${a.who}">Boks gotov</button></li>`;}).join('')||'<li class="sub">Nema raspoređenih. Dodirni boks na mapi.</li>'}</ul></div>`;
+    return `<li><span class="mono">${esc(a.who)}</span><span class="grow">${esc(m?m.n:'')}<br><span class="sub">Boks <b>${esc(a.box)}</b> · ${esc(P.methods[a.m])}</span></span><button class="btn sm" type="button" data-act="boxDone" data-w="${esc(a.who)}">Boks gotov</button></li>`;}).join('')||'<li class="sub">Nema raspoređenih. Dodirni boks na mapi.</li>'}</ul></div>`;
   h+=`<div class="card"><div class="card-h"><h3>Usklađenost</h3><span class="sub">${esc(P.kratko)}</span></div><ul class="chk">${complianceB(s).map(c=>`<li class="${c.st}"><span class="ic">${c.st==='ok'?'✓':'!'}</span><span>${esc(c.t)}</span><span class="v">${esc(c.v)}</span></li>`).join('')}</ul></div>`;
   h+=logCard(s)+briefCard();
   h+=backupNag()+`<div class="btnrow noprint" style="justify-content:center"><button class="linkbtn" type="button" data-act="reset">Vrati početne podatke demoa</button></div>`;
@@ -2018,7 +2020,7 @@ function boxMapSVG(s){
     :`<path class="m-buf" d="M${f.pts.map(q=>{const r=P(q);return f1(r[0])+' '+f1(r[1]);}).join('L')}" stroke-width="${f1(2*f.buf*sc)}"/>`).join('')+'</g>';
   const ctr=P(s.poly.reduce((a,q)=>[a[0]+q[0]/s.poly.length,a[1]+q[1]/s.poly.length],[0,0]));
   g+=`<g clip-path="url(#bxClip)">${feats(s).filter(f=>f.pts.length).map(f=>featSVG(f,P,false,'var(--ink)',ctr)).join('')}</g>`;
-  s.assign.forEach(a=>{const bx=boxById(s,a.box);if(bx){const c=P([bx.cx,bx.cy]);g+=`<text class="m-t ink" x="${f1(c[0])}" y="${f1(c[1]+3)}" text-anchor="middle" style="pointer-events:none">${a.who.slice(2)}</text>`;}});
+  s.assign.forEach(a=>{const bx=boxById(s,a.box);if(bx){const c=P([bx.cx,bx.cy]);g+=`<text class="m-t ink" x="${f1(c[0])}" y="${f1(c[1]+3)}" text-anchor="middle" style="pointer-events:none">${esc(String(a.who).slice(2))}</text>`;}});
   if(showIds||msel.length)s.boxes.forEach(bx=>{const c=P([bx.cx,bx.cy]);g+=`<text class="m-bid" x="${f1(c[0])}" y="${f1(c[1]+(asg[bx.id]?-5:2.5))}" text-anchor="middle">${esc(bx.id)}</text>`;});
   s.finds.forEach(f=>{const c=P([f.u,f.v]),cx=c[0],cy=c[1],r=3.6;g+=`<path class="m-mk" d="M${f1(cx)} ${f1(cy-r)}L${f1(cx+r)} ${f1(cy+r*.8)}H${f1(cx-r)}Z"/>`;});
   s.poly.forEach((p,i)=>{const c=P(p);g+=`<circle class="m-tp" cx="${f1(c[0])}" cy="${f1(c[1])}" r="2.2"/><text class="m-t ink" x="${f1(c[0]+4)}" y="${f1(c[1]-3)}">T${i+1}</text>`;});
@@ -2078,7 +2080,7 @@ function renderNalazB(){
   <form id="findForm" autocomplete="off">
     <fieldset><legend>Kategorija</legend><div class="chips" id="catChips">${Object.keys(P.cats).map((c,i)=>`<label><input type="radio" name="fcat" value="${c}" id="fcat${c}" ${i===0?'checked':''}><span>${P.cats[c]}</span></label>`).join('')}</div></fieldset>
     <fieldset><legend>Vrsta</legend><div class="chips mono" id="typeChips"></div></fieldset>
-    <label class="field">Boks<select id="fBox">${list.map(b=>`<option value="${esc(b.id)}" ${b.id===pre?'selected':''}>Boks ${esc(b.id)}${b.excl?' · isključen':''}${s.assign.find(a=>a.box===b.id)?' · '+s.assign.find(a=>a.box===b.id).who:''}</option>`).join('')}</select></label>
+    <label class="field">Boks<select id="fBox">${list.map(b=>`<option value="${esc(b.id)}" ${b.id===pre?'selected':''}>Boks ${esc(b.id)}${b.excl?' · isključen':''}${s.assign.find(a=>a.box===b.id)?' · '+esc(s.assign.find(a=>a.box===b.id).who):''}</option>`).join('')}</select></label>
     <div class="grid2"><label class="field">${s.az?'Od početnog ugla boksa, '+ax.u:'Istočno od JZ ugla'} (m)<input id="fE" type="number" step="0.1" min="0" max="${pb.w}" value="${(pb.w/2).toFixed(1)}" inputmode="decimal"></label>
       <label class="field">${s.az?'Od početnog ugla boksa, '+ax.v:'Severno od JZ ugla'} (m)<input id="fN" type="number" step="0.1" min="0" max="${pb.h}" value="${(pb.h/2).toFixed(1)}" inputmode="decimal"></label></div>
     <div class="calc" id="fCalc"></div>
@@ -2174,12 +2176,12 @@ function rsDoc(s,k){
       <table><thead><tr><th>Deminer</th><th>Metoda</th><th>Boksovi</th><th>m²</th><th>Napomena</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nema unetog učinka.</td></tr>'}</tbody>
       <tfoot><tr><td colspan="3">Ukupno CEIA / Schonstedt</td><td class="n">${num(tot.CEIA)} / ${num(tot.SCH)}</td><td></td></tr></tfoot></table>
       <div class="sec">Tok rada</div><table>${log.map(l=>`<tr><td class="mono" style="width:56px">${esc(l.t)}</td><td>${esc(l.e)}</td></tr>`).join('')||'<tr><td>Nema zapisa za ovaj dan.</td></tr>'}</table>
-      <div class="sec">Pronađena NUS tog dana</div><table>${ft.length?ft.map(f=>`<tr><td>${f.id}</td><td>${esc(f.type)}</td><td>boks ${esc(f.box)}</td><td>${f.depth} cm</td><td>${esc(f.act)}</td></tr>`).join(''):'<tr><td>Nema.</td></tr>'}</table>
+      <div class="sec">Pronađena NUS tog dana</div><table>${ft.length?ft.map(f=>`<tr><td>${esc(f.id)}</td><td>${esc(f.type)}</td><td>boks ${esc(f.box)}</td><td>${f.depth} cm</td><td>${esc(f.act)}</td></tr>`).join(''):'<tr><td>Nema.</td></tr>'}</table>
       <div class="sig"><div>Rukovodilac radilišta</div><div>Kontrolor CZRS</div></div>
       <p class="note">Oblik je napravljen po Uredbi 70/2013 i praksi CZRS-a (dnevna evidencija učinka po demineru). Kad dobijemo zvanični obrazac CZRS-a, menja se samo ovaj šablon.</p>`};}
   if(k==='rsn'){return {cls:'wide',h:`<h4>ZAPISNIK O PRONAĐENIM NUS</h4><div class="dsub">stanje na dan ${fmtD(today())} · koordinate SRB_ETRS89 / UTM 34N</div>${head}
       <table><thead><tr><th>R.br.</th><th>ID</th><th>Vrsta</th><th>Kom</th><th>Boks</th><th>E</th><th>N</th><th>Dub. cm</th><th>Metoda</th><th>Datum</th><th>Postupak</th></tr></thead>
-      <tbody>${s.finds.map((f,i)=>{const p=findPos(s,f);return `<tr><td>${i+1}.</td><td>${f.id}</td><td>${esc(f.type)}</td><td class="n">${f.qty}</td><td>${esc(f.box)}</td><td class="n mono">${gkn(p.Y)}</td><td class="n mono">${gkn(p.X)}</td><td class="n">${f.depth}</td><td>${esc(P.methods[f.method]||'')}</td><td>${fmtD(f.day)}</td><td>${esc(f.act)}</td></tr>`;}).join('')}</tbody></table>
+      <tbody>${s.finds.map((f,i)=>{const p=findPos(s,f);return `<tr><td>${i+1}.</td><td>${esc(f.id)}</td><td>${esc(f.type)}</td><td class="n">${f.qty}</td><td>${esc(f.box)}</td><td class="n mono">${gkn(p.Y)}</td><td class="n mono">${gkn(p.X)}</td><td class="n">${f.depth}</td><td>${esc(P.methods[f.method]||'')}</td><td>${fmtD(f.day)}</td><td>${esc(f.act)}</td></tr>`;}).join('')}</tbody></table>
       <p class="note">Uklanjanje i uništavanje NUS obavlja MUP (Zakon o smanjenju rizika od katastrofa, čl. 73); zapisnik o uništavanju dostavlja se CZRS-u i MUP-u (Uredba, čl. 17).</p>
       <div class="sig"><div>Rukovodilac radilišta</div><div>Predstavnik MUP-a</div></div>`};}
   if(k==='rsp'){const by={};s.finds.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);const pts=s.poly.map((p,i)=>{const q=toGK(s,p[0],p[1]);return `<tr><td>T${i+1}</td><td class="n mono">${gkn(q.Y)}</td><td class="n mono">${gkn(q.X)}</td></tr>`;}).join('');
@@ -2427,7 +2429,7 @@ function rerender(){if(!S)return;syncPack();if(tab!=='nalaz')RENDER[tab]();rende
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');
   if(!el){if(e.target.id==='scrim')closeSheet();return;}
-  const a=el.dataset.act;if(!S&&!['recRetry','recRaw','restoreOk','close'].includes(a))return;const s=S?site():null;
+  const a=el.dataset.act;if(!S&&!['recRetry','recRaw','restoreOk','close','swUpdate'].includes(a))return;const s=S?site():null;
   switch(a){
     case 'tab':closeSheet();go(el.dataset.tab);break;
     case 'close':closeSheet();break;
@@ -2472,6 +2474,7 @@ document.addEventListener('click',e=>{
     case 'recRaw':if(recRaw)saveFile('terenska-knjiga-neispravni-podaci-'+today()+'.json',JSON.stringify(recRaw),'application/json').then(ok=>{if(ok)toast('Fajl sa podacima je spreman. Sačuvaj ga i pošalji podršci.',5000);});break;
     case 'backup':if(el.disabled)break;el.disabled=true;exportBackup().catch(()=>toast('Kopija nije napravljena. Pokušaj ponovo.')).finally(()=>{el.disabled=false;});break;
     case 'restoreOk':restoreBackup();break;
+    case 'swUpdate':if(updReg&&updReg.waiting){swAsked=true;updReg.waiting.postMessage({type:'skip'});$('#updBar').hidden=true;}break;
   }
 });
 document.addEventListener('input',e=>{const t=e.target;if(!S||!S.incident)return;if(t.dataset.v){S.incident.v[t.dataset.v]=Math.max(0,+t.value||0);save();}if(t.dataset.ic){S.incident[t.dataset.ic]=t.value;save();}});
@@ -2494,9 +2497,17 @@ async function boot(){Object.assign(ST,{db:null,mode:'mem',failed:false,fallback
   S=st;try{leaveRecovery();go(start);}catch(e){const raw=snapshot();showRecovery(new LoadError('Podaci su učitani, ali se ne mogu prikazati ('+(e&&e.message||e)+').',raw));return;}
   curDay=today();renderSaveWarn();requestPersist();}
 boot();
+/* ---------- installed app: service worker, and "new version" instead of silently running old code ---------- */
+let updReg=null,swAsked=false;
+function swInit(){try{if(inFrame||!('serviceWorker' in navigator)||!document.querySelector('link[rel="manifest"]'))return;
+  navigator.serviceWorker.register('sw.js').then(reg=>{const show=()=>{if(reg.waiting&&navigator.serviceWorker.controller){updReg=reg;const el=$('#updBar');el.hidden=false;
+      el.innerHTML='<span>Nova verzija aplikacije je spremna. Podaci ostaju.</span><button class="btn sm" type="button" data-act="swUpdate">Osvježi</button>';}};
+    show();reg.addEventListener('updatefound',()=>{const w=reg.installing;if(w)w.addEventListener('statechange',()=>{if(w.state==='installed')show();});});
+    setInterval(()=>{reg.update().catch(()=>{});},36e5);}).catch(()=>{});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(swAsked)location.reload();});}catch(e){}}
+addEventListener('load',swInit);
 ['online','offline'].forEach(ev=>addEventListener(ev,()=>{if(S)renderHeader();}));
 })();
 </script>
-<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>
 </html>
