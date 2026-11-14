@@ -25,10 +25,11 @@ async function siteWith(poly, size) {
 }
 const area = poly => { let s = 0; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) s += (poly[j][0] + poly[i][0]) * (poly[j][1] - poly[i][1]); return Math.abs(s / 2); };
 
-test('seeded Serbian site: box areas sum to the boundary polygon area (±0,5%)', async () => {
+test('seeded Serbian site: box areas (excluded boxes included) sum to the boundary polygon area (±0,5%)', async () => {
   const a = await fresh();
   a.run('S.active="r1";syncPack()');
-  const r = a.json('({sum:site().boxes.reduce((x,b)=>x+b.area,0),A:totalArea(site())})');
+  // the seed has an excluded box (H-03, building): it is still a box, but totalArea() leaves it out of the area to search
+  const r = a.json('({sum:site().boxes.reduce((x,b)=>x+b.area,0),A:polyArea(site().poly)})');
   assert.ok(Math.abs(r.sum - r.A) / r.A <= 0.005, `${r.sum} vs ${r.A}`);
 });
 
@@ -132,7 +133,7 @@ test('nextBoxFor never hands the same box+method to two deminers, never a done o
     check();
   }
   const s = a.json('site()');
-  const left = s.boxes.filter(b => !b.done.CEIA).length;
+  const left = s.boxes.filter(b => !b.excl && !b.done.CEIA).length; // excluded boxes are never searched
   assert.strictEqual(left, 0, left + ' boxes never got CEIA');
 });
 

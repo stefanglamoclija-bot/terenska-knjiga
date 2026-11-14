@@ -953,7 +953,7 @@ function wdBetween(a,b){if(!a||!b||b<a)return null;let n=0,d=new Date(a+'T12:00:
 function planeXY(s,p){const o=outCrs(s);if(o===s.crs)return [p.Y,p.X];const w=planeToWgs(s,p);if(o==='UTM34'){const u=wgsToUtm34(w.lat,w.lon);return [u.E,u.N];}const g=wgsToGk6(w.lat,w.lon);return [g.Y,g.X];}
 const axes=s=>outCrs(s)==='UTM34'?['E','N']:['Y','X'];
 const xyCells=(s,p)=>{const q=planeXY(s,p);return `<td class="n mono">${gkn(q[0])}</td><td class="n mono">${gkn(q[1])}</td>`;};
-const yx=(s,p)=>{const q=planeXY(s,p);return 'Y= '+gkn(q[0])+'   X= '+gkn(q[1]);};
+const yx=(s,p)=>{const q=planeXY(s,p),a=axes(s);return a[0]+'= '+gkn(q[0])+'   '+a[1]+'= '+gkn(q[1]);};
 
 /* ---------- day records: live log (s.log, stamped with the day) + archived past days (s.bh.log) ---------- */
 function dayLog(s,day){return s.log.filter(l=>(l.d||TODAY)===day).concat(bh(s).log.filter(l=>l.d===day)).sort((a,b)=>a.t.localeCompare(b.t));}

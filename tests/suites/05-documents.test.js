@@ -47,8 +47,12 @@ test('both crs choices (GK6 / UTM34) render every BiH document', async () => {
   a.run('S.active="s1";S.crs="UTM34";syncPack()');
   const out = renderAll(a);
   assertClean(out, 's1/UTM34');
-  assert.ok(/E [\d ]+,\d\d\s+N /.test(out['doc:p6']), 'P6 coordinates printed as E/N in UTM mode');
-  assert.ok(!/Y 6 5/.test(out['doc:p6']), 'no GK coordinates mixed into a UTM document');
+  // P6 itself prints the entry point; the coordinate tables live in prilog e)
+  a.run('renderDoc("p6e")');
+  const p6e = a.html('#v-izvjestaji');
+  assert.ok(/<th>E<\/th><th>N<\/th>/.test(p6e), 'P6 e) coordinate table headed E/N in UTM mode');
+  assert.ok(/Y= /.test(out['doc:p6']) === false || /E= /.test(out['doc:p6']), 'P6 entry point not labelled Y/X in UTM mode');
+  assert.ok(!/>6 5\d\d \d{3},\d\d</.test(p6e) && !/Y 6 5/.test(out['doc:p6']), 'no GK coordinates mixed into a UTM document');
 });
 
 async function newBaSite(a, over = {}) {
@@ -126,9 +130,9 @@ test('active incident: Hitno and P12 render for BiH, Hitno for Serbia', async ()
 });
 
 // ---- content checks ----
-test('P6 lomne tačke table lists every boundary point once with Y/X', async () => {
+test('P6 prilog e) lomne tačke table lists every boundary point once with Y/X', async () => {
   const a = await fresh();
-  a.run('S.active="s1";syncPack();renderDoc("p6")');
+  a.run('S.active="s1";syncPack();renderDoc("p6e")');
   const h = a.html('#v-izvjestaji');
   const n = a.run('site().poly.length');
   for (let i = 1; i <= n; i++) assert.ok(new RegExp(`<td>T${i}</td><td class="n mono">6 57\\d \\d{3},\\d\\d</td><td class="n mono">4 92\\d \\d{3},\\d\\d</td>`).test(h), 'T' + i);
@@ -159,7 +163,7 @@ test('P12 does not assert land use or marking that the user never entered', asyn
   const h = a.html('#v-izvjestaji');
   assert.ok(!/Poljoprivredno \(iz dosijea\)/.test(h), 'hard-coded "Poljoprivredno (iz dosijea)"');
   assert.ok(!/<span class="box">×<\/span>Da, službenim znacima/.test(h), 'hard-coded "Da, službenim znacima" ticked');
-}, { xfail: 'F-10' });
+});
 
 test('Nalaz form shows no invented "GPS telefona (kontrola): odstupanje" value', async () => {
   const a = await fresh();
@@ -174,7 +178,7 @@ test('P6 field 15 states the search depth actually used, not the standard minimu
   a.run('S.active="s1";syncPack()');
   const f = a.json('p6Fields()').find(x => x[0] === 15);
   assert.ok(!/minimum po standardu/.test(f[2]), f[2]);
-}, { xfail: 'F-10' });
+});
 
 test('BiH pack uses the standard\'s term "PO mina" (protuoklopna), not "PT mina"', async () => {
   const a = await fresh();
