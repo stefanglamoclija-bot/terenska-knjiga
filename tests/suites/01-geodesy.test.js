@@ -127,11 +127,21 @@ test('UTM34: round trip < 1 cm also in western BiH (15.7°E, 5.3° off the CM)',
   const u = a.json('wgsToUtm34(44.5,15.7)'), w = a.json(`utm34ToWgs(${u.E},${u.N})`);
   const d = ref.metres({ lat: 44.5, lon: 15.7 }, w);
   assert.ok(d < 0.01, 'round trip ' + (d * 1000).toFixed(1) + ' mm');
-}, { xfail: 'F-17' });
+});
 
-// F-17: BiH west of 18°E is UTM zone 33N; the app forces 34N for every BiH site.
-test('UTM for BiH sites west of 18°E should use zone 33N (app always prints UTM 34N)', async () => {
+// F-17: BiH west of 18°E is UTM zone 33N.
+test('UTM output for a BiH site west of 18°E is zone 33N (labelled so), east of 18°E zone 34N', async () => {
   const a = await app();
-  const src = a.run('wgsToUtm34.toString()+crsName.toString()+outCrs.toString()');
-  assert.ok(/33/.test(src), 'no zone 33 handling in UTM output path');
-}, { xfail: 'F-17' });
+  const ref = require('../lib/geo-ref');
+  // a site near Bihać (≈15.9°E): GK6 coordinates from the reference projection
+  const g = ref.wgsToMgiGk6(44.8, 15.9);
+  a.run(`S.sites.push(checkState({sites:[{id:'w1',pack:'BA',crs:'GK6',mode:'lanes',msp:{id:'MSP W'},ci:{oznaka:'CI-1'},nt:{Y:${g.Y},X:${g.X}},az:0,poly:[[0,0],[20,0],[20,20],[0,20]]}]}).sites[0]);S.active='w1';S.crs='UTM34';syncPack()`);
+  assert.strictEqual(a.run('utmZone(site())'), 33);
+  assert.strictEqual(a.run('crsName()'), 'UTM 33N');
+  const w = ref.mgiGk6ToWgs(g.Y, g.X), u = ref.tmForward(w.lat, w.lon, ref.ELL.wgs84, 15, 0.9996, 500000);
+  const q = a.json('outXY(site(),site().nt)');
+  assert.ok(Math.hypot(q[0] - u.E, q[1] - u.N) < 0.01, `${q} vs ${u.E},${u.N}`);
+  a.run('S.active="s1";syncPack()');
+  assert.strictEqual(a.run('crsName()'), 'UTM 34N', 'Tuzla area (18.8°E) stays in zone 34');
+  a.run('S.crs="GK6";S.sites=S.sites.filter(s=>s.id!=="w1")');
+});

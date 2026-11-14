@@ -32,9 +32,10 @@ function renderEverything(a) {
 test('XSS: text typed by the user (site name, CI, note, visit, info, monitor) is escaped everywhere', async () => {
   const a = await fresh();
   const d = a.dom.document;
-  for (const [k, v] of Object.entries({ '#nsCrs': 'GK6', '#nsY': '6571900.00', '#nsX': '4922400.00', '#nsAz': '0', '#nsMsp': 'MSP ' + PAYLOAD, '#nsName': PAYLOAD, '#nsTip': 'CI', '#nsCi': PAYLOAD,
+  for (const [k, v] of Object.entries({ '#nsCrs': 'GK6', '#nsY': '6571898.00', '#nsX': '4922400.00', '#nsAz': '0', '#nsMsp': 'MSP ' + PAYLOAD, '#nsName': PAYLOAD, '#nsTip': 'CI', '#nsCi': PAYLOAD,
     '#nsTp': '6571898 4922400\n6571950 4922400\n6571956 4922440\n6571900 4922462' })) d.querySelector(k).value = v;
-  a.run('createSite();openSiteWork()');
+  assert.strictEqual(a.run('createSite()'), true, 'site created: ' + a.toastText());
+  a.run('openSiteWork()');
   a.run(`site().finds.push({id:'N-901',cat:'PP',type:'PMA-2',lane:1,dist:2,off:0,day:today(),time:'10:00',depth:5,qty:1,cond:'Neoštećeno',act:'x',synced:false,note:${JSON.stringify(PAYLOAD + ' žica')}})`);
   for (const [k, field, val] of [['visit', '#eWho', PAYLOAD], ['info', '#eInfo', PAYLOAD], ['mon', '#eBy', PAYLOAD]]) { a.run(`openEvent("${k}")`); d.querySelector(field).value = val; a.run(`saveEvent("${k}")`); }
   a.run(`S.incident=null;`); a.click('incStart'); a.run(`S.incident.desc=${JSON.stringify(PAYLOAD)}`);
@@ -186,16 +187,34 @@ test('new site: a third column (H, elevation) in the lomne tačke is not merged 
   const a = await fresh();
   const p = a.json('parseTPs("6571898 4922400 512\\n6 571 950,00 4 922 400,00 498")');
   assert.deepStrictEqual(p, [[6571898, 4922400], [6571950, 4922400]], JSON.stringify(p));
-}, { xfail: 'F-12' });
+});
 
 test('new site: a mistyped lomna tačka 100 km away is rejected instead of freezing the app', () => {
   const child = `
     const h=require(${JSON.stringify(path.join(__dirname, '..', 'lib', 'harness.js'))});
     (async()=>{const a=await h.loadApp({now:'${NOW}'});const d=a.dom.document;
-      const v={'#nsCrs':'GK6','#nsY':'6571900','#nsX':'4922400','#nsAz':'0','#nsMsp':'MSP 1','#nsName':'x','#nsTip':'CI','#nsCi':'CI-1',
+      const v={'#nsCrs':'GK6','#nsY':'6571898','#nsX':'4922400','#nsAz':'0','#nsMsp':'MSP 1','#nsName':'x','#nsTip':'CI','#nsCi':'CI-1',
         '#nsTp':'6571898 4922400\\n6571950 4922400\\n6571956 5022440\\n6571900 4922462'};
       for(const k in v)d.querySelector(k).value=v[k];
       a.run('createSite()');console.log('DONE '+a.run('S.sites.length')+' '+a.toastText());process.exit(0);})();`;
   const r = spawnSync(process.execPath, ['-e', child], { timeout: 8000, encoding: 'utf8', env: process.env });
-  assert.ok(!r.error && /DONE 3 /.test(r.stdout), r.error ? 'app froze (killed after 8 s) while drawing the 100 km site' : 'site accepted: ' + r.stdout.trim());
-}, { xfail: 'F-12', timeout: 15000 });
+  assert.ok(!r.error && /DONE 3 /.test(r.stdout) && /100,0 km od nulte tačke/.test(r.stdout), r.error ? 'app froze (killed after 8 s) while drawing the 100 km site' : 'site accepted or wrong reason: ' + r.stdout.trim());
+}, { timeout: 15000 });
+
+test('new BiH site: wrong zone, swapped Y/X, a self-crossing boundary, an absurd area and a polygon left of the NT are rejected with a message', async () => {
+  const a = await fresh();
+  const d = a.dom.document;
+  const base = { '#nsCrs': 'GK6', '#nsY': '6571898', '#nsX': '4922400', '#nsAz': '0', '#nsMsp': 'MSP 1', '#nsName': 'x', '#nsTip': 'CI', '#nsCi': 'CI-1', '#nsPmin': '', '#nsPmax': '', '#nsOpc': '', '#nsRu': '',
+    '#nsTp': '6571898 4922400\n6571950 4922400\n6571956 4922440\n6571900 4922462' };
+  const tryIt = over => { for (const [k, v] of Object.entries(Object.assign({}, base, over))) d.querySelector(k).value = v; return a.json('checkNewSiteBA()'); };
+  assert.ok(tryIt({}).site, 'the valid dosije passes: ' + JSON.stringify(tryIt({}).err));
+  assert.match(tryIt({ '#nsY': '4922400', '#nsX': '6571898' }).err, /Nulta tačka nije u BiH/);
+  assert.match(tryIt({ '#nsCrs': 'UTM34' }).err, /Nulta tačka nije u BiH/);
+  assert.match(tryIt({ '#nsTp': '6571898 4922400\n6571956 4922440\n6571950 4922400\n6571900 4922462' }).err, /siječe sama sa sobom/);
+  assert.match(tryIt({ '#nsY': '6571950', '#nsTp': '6571898 4922400\n6571950 4922400\n6571956 4922440\n6571900 4922462' }).err, /lijevo od nulte tačke/);
+  assert.match(tryIt({ '#nsPmin': '20000', '#nsPmax': '25000' }).err, /ne odgovara površini iz dosijea/);
+  assert.match(tryIt({ '#nsTp': '6571898 4922400\n6571950 4922400 512 7' }).err, /očekuju se 2 broja/);
+  const ok = tryIt({ '#nsTp': '6571898 4922400 512\n6571950 4922400 498\n6571956 4922440 501\n6571900 4922462 503' });
+  assert.ok(ok.site && ok.info.some(x => /visina H\) zanemarena u 4/.test(x)), JSON.stringify(ok.info || ok.err));
+  assert.strictEqual(a.run('S.sites.length'), 3, 'checking never creates a site');
+});

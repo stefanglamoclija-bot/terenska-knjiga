@@ -68,7 +68,7 @@ test('every seeded find lies inside its site boundary polygon', async () => {
   }
 });
 
-test('laneLen: end of every lane centreline is inside the polygon and within 0,5 m of the exact boundary (sampling 0,25 m + rounding 0,5 m)', async () => {
+test('laneLen: reaches the boundary on the centreline and is the farthest boundary point across the 1 m lane (to 1 cm)', async () => {
   const a = await app();
   for (const id of ['s1', 's2']) {
     a.run(`S.active="${id}";syncPack()`);
@@ -77,7 +77,8 @@ test('laneLen: end of every lane centreline is inside the polygon and within 0,5
       const L = a.run(`laneLen(site(),${i})`);
       if (L <= 0) continue;
       const exact = boundaryAt(s.poly, i - 0.5);
-      assert.ok(Math.abs(L - exact) <= 0.5 + 1e-9, `${id} lane ${i}: laneLen ${L} vs exact ${exact.toFixed(3)}`);
+      let far = -Infinity; for (let k = 0; k <= 100; k++) far = Math.max(far, boundaryAt(s.poly, i - 1 + k / 100));
+      assert.ok(L >= exact - 1e-6 && L <= far + 0.011, `${id} lane ${i}: laneLen ${L} vs centreline ${exact.toFixed(3)}, strip max ${far.toFixed(3)}`);
       assert.ok(inPoly([i - 0.5, Math.min(L, exact) - 0.01], s.poly), `${id} lane ${i} end outside`);
     }
   }
@@ -96,7 +97,7 @@ test('laneLen never ends short of the boundary anywhere across the 1 m lane widt
     }
   }
   assert.deepStrictEqual(short, [], short.length + ' lanes stop short: ' + short.slice(0, 6).join('; '));
-}, { xfail: 'F-14' });
+});
 
 test('every point of the POPO polygon is covered by some lane 1..laneCount (nothing left of the nulta tačka)', async () => {
   const a = await app();
@@ -104,22 +105,23 @@ test('every point of the POPO polygon is covered by some lane 1..laneCount (noth
   const s = a.json('site()'), lc = a.run('laneCount(site())');
   const lens = {}; for (let i = 1; i <= lc; i++) lens[i] = a.run(`laneLen(site(),${i})`);
   let miss = 0, missArea = 0;
-  for (let u = -4; u <= 65; u += 0.25) for (let v = 0.125; v <= 52; v += 0.25) {
+  for (let u = -3.875; u <= 65; u += 0.25) for (let v = 0.125; v <= 52; v += 0.25) { // cell centres, never on an edge
     if (!inPoly([u, v], s.poly)) continue;
     const lane = Math.ceil(u);
     if (lane < 1 || lane > lc || v > lens[lane]) { miss++; missArea += 0.0625; }
   }
   assert.strictEqual(miss, 0, `~${missArea.toFixed(0)} m² of the polygon is in no lane (e.g. u<0 strip left of NT)`);
-}, { xfail: 'F-14' });
+});
 
 test('sum of full lane areas matches polygon area within 1%', async () => {
   const a = await app();
   for (const id of ['s1', 's2']) {
     a.run(`S.active="${id}";syncPack()`);
-    const r = a.json('(()=>{const s=site();let t=0;for(let i=1;i<=laneCount(s);i++)t+=laneLen(s,i)*R.lane;return {t,A:totalArea(s)};})()');
-    assert.ok(Math.abs(r.t - r.A) / r.A < 0.01, `${id}: lanes ${r.t} m² vs polygon ${r.A} m² (${((r.t / r.A - 1) * 100).toFixed(1)}%)`);
+    // area of each full lane inside the boundary (a slanted end is cut by the boundary)
+    const r = a.json('(()=>{const s=site();let t=0;for(let i=1;i<=laneCount(s);i++)t+=segM2(s,i,0,laneLen(s,i));return {t,A:totalArea(s)};})()');
+    assert.ok(Math.abs(r.t - r.A) / r.A < 0.001, `${id}: lanes ${r.t} m² vs polygon ${r.A} m² (${((r.t / r.A - 1) * 100).toFixed(1)}%)`);
   }
-}, { xfail: 'F-14' });
+});
 
 test('advancing a lane (+1 m, Do kraja) records progress for TODAY and cleared m² = metres × 1 m', async () => {
   const a = await fresh();
@@ -129,7 +131,9 @@ test('advancing a lane (+1 m, Do kraja) records progress for TODAY and cleared m
   const L = a.run('laneLen(site(),10)');
   a.click('adv', { l: '10', m: String(L) });
   assert.strictEqual(a.run('laneDone(site(),10)'), L);
-  assert.ok(Math.abs(a.run('clearedM2(site())') - before - (L - d0)) < 1e-9);
+  const seg = a.run(`segM2(site(),10,${d0},${L})`);
+  assert.ok(Math.abs(a.run('clearedM2(site())') - before - seg) < 1e-9, 'cleared m² grows by the lane area inside the boundary');
+  assert.ok(seg <= L - d0 + 1e-9 && seg > (L - d0) - 1, 'at most metres × 1 m');
   const last = a.json('site().progress.slice(-2)');
   assert.deepStrictEqual(last.map(p => p.day), ['2026-11-11', '2026-11-11']);
   assert.ok(last[1].to <= L + 1e-9, 'never past lane end');
@@ -159,4 +163,4 @@ test('"Premjesti dvojac ovdje" from a lane moves the pair working nearest / chos
   a.click('moveA', { l: '60' });
   const pairs = a.json('site().pairs.map(p=>[p.id,p.lane])');
   assert.ok(pairs.some(p => p[1] === 60), 'no pair could be moved to lane 60: ' + JSON.stringify(pairs) + ' toast: ' + a.toastText());
-}, { xfail: 'F-27' });
+});

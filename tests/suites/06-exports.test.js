@@ -153,11 +153,15 @@ test('CSV box finds: local metres are measured from the box SW corner and lie wi
   }
 });
 
-test('find ids are unique per site even after 100 new finds (no collision with seeded N-201..N-207)', async () => {
+test('find ids are unique per site even after 100 new finds (no collision with seeded N-201..N-207), and never reused after a delete', async () => {
   const a = await fresh();
   a.run('S.active="r1";syncPack();S.next=200');
-  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:today(),time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
-  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:today(),time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
+  for (let i = 0; i < 100; i++) a.run('site().finds.push({id:newFindId(site()),box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:today(),time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""})');
   const ids = a.json('site().finds.map(f=>f.id)');
   assert.strictEqual(new Set(ids).size, ids.length, 'duplicate ids: ' + ids.filter((x, i) => ids.indexOf(x) !== i));
-}, { xfail: 'F-22' });
+  assert.strictEqual(ids[7], 'N-208');
+  a.run('site().finds.pop()');
+  assert.strictEqual(a.run('newFindId(site())'), 'N-308', 'a removed id is not handed out again');
+  a.run('S.active="s1";syncPack()');
+  assert.strictEqual(a.run('newFindId(site())'), 'N-108', 'BiH site counts on its own');
+});

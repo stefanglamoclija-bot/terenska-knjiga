@@ -1,7 +1,7 @@
 // Service worker for the standalone build: the app must open and work with no signal on site.
-// build.sh replaces d1de042aa3 with a hash of index.html (every deploy installs a fresh cache) and  with
+// build.sh replaces 21e7765306 with a hash of index.html (every deploy installs a fresh cache) and  with
 // the self-hosted font files in docs/fonts/ (if any).
-const V = 'tk-d1de042aa3';
+const V = 'tk-21e7765306';
 const PAGES = 'tk-pages'; // other pages on the same site (sales pages /en/, /bs/): network first, last copy offline
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 

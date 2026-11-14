@@ -57,7 +57,7 @@ test('both crs choices (GK6 / UTM34) render every BiH document', async () => {
 
 async function newBaSite(a, over = {}) {
   const d = a.dom.document;
-  const v = Object.assign({ '#nsCrs': 'GK6', '#nsY': '6571900.00', '#nsX': '4922400.00', '#nsAz': '0', '#nsMsp': 'MSP 0455', '#nsName': 'Kosa', '#nsTip': 'CI', '#nsCi': 'CI-1',
+  const v = Object.assign({ '#nsCrs': 'GK6', '#nsY': '6571898.00', '#nsX': '4922400.00', '#nsAz': '0', '#nsMsp': 'MSP 0455', '#nsName': 'Kosa', '#nsTip': 'CI', '#nsCi': 'CI-1',
     '#nsTp': '6 571 898,00 4 922 400,00\n6 571 950,00 4 922 400,00\n6 571 956,00 4 922 440,00\n6 571 930,00 4 922 470,00\n6 571 900,00 4 922 462,00' }, over);
   for (const [k, x] of Object.entries(v)) d.querySelector(k).value = x;
   a.run('createSite()');
@@ -116,7 +116,7 @@ test('new BiH site: općina and regional office come from the user, not hard-cod
   const m = a.json('site().msp');
   a.run('renderDoc("p11")');
   assert.ok(m.ru !== 'RU Tuzla' && m.opcina !== 'Općina Primjer', 'P11 is addressed to: ' + (a.html('#v-izvjestaji').match(/<b>Za:<\/b> ([^<]*)/) || [])[1]);
-}, { xfail: 'F-10' });
+});
 
 test('active incident: Hitno and P12 render for BiH, Hitno for Serbia', async () => {
   const a = await fresh();
@@ -188,7 +188,7 @@ test('Nalaz form shows no invented "GPS telefona (kontrola): odstupanje" value',
   a.dom.document.querySelector('#fLane').value = '4'; a.dom.document.querySelector('#fDist').value = '10'; a.dom.document.querySelector('#fOff').value = '0';
   a.run('calcPos()');
   assert.ok(!/odstupanje/.test(a.html('#fCalc')), a.html('#fCalc').replace(/<[^>]+>/g, ' ').trim().slice(-80));
-}, { xfail: 'F-10' });
+});
 
 test('P6 field 15 states the search depth actually used, not the standard minimum', async () => {
   const a = await fresh();
@@ -197,23 +197,34 @@ test('P6 field 15 states the search depth actually used, not the standard minimu
   assert.ok(!/minimum po standardu/.test(f[2]), f[2]);
 });
 
-test('BiH pack uses the standard\'s term "PO mina" (protuoklopna), not "PT mina"', async () => {
+// F-21 checked against the standard text: its abbreviations list ("PT MINE ... Protiv tenkovske mine") and Prilog 13
+// ("VRSTA UKLONJENIH PT ...") use PT, so the app keeps "PT mina"; PP for anti-personnel.
+test('BiH pack uses the standard\'s own terms: "PT mina" (protutenkovska) and P13 "VRSTA UKLONJENIH PT MINA"', async () => {
   const a = await fresh();
   const cats = a.json('PACKS.BA.cats');
-  assert.ok(!/PT/.test(JSON.stringify(cats)), JSON.stringify(cats));
-}, { xfail: 'F-21' });
+  assert.strictEqual(cats.PT, 'PT mina'); assert.strictEqual(cats.PP, 'PP mina');
+  a.run('S.active="s1";syncPack();renderDoc("p13")');
+  assert.ok(/VRSTA UKLONJENIH PT MINA/.test(a.html('#v-izvjestaji')));
+});
 
 test('demolition distance for buried charges includes +100 m per additional 10 kg', async () => {
   const a = await fresh();
-  const d = a.json('PACKS.BA.demolition').find(x => /Zakopano/.test(x[0]));
-  assert.ok(/100 m/.test(d[1]) || /10 kg/.test(d[1]), JSON.stringify(d));
-}, { xfail: 'F-21' });
+  const dem = a.json('PACKS.BA.demolition'), d = dem.find(x => /jami/.test(x[0]));
+  assert.ok(/500 m za 10 kg/.test(d[1]) && /\+100 m za svakih dodatnih 10 kg/.test(d[1]), JSON.stringify(d));
+  assert.ok(dem.some(x => /razorno-probojne/.test(x[0]) && x[1] === '1000 m'), 'PT razorno-probojne 1000 m (table of the standard)');
+  const dist = a.json('PACKS.BA.distances');
+  assert.ok(dist.some(x => /Monitor/.test(x[0]) && /25 m/.test(x[1])) && dist.some(x => /mašine/.test(x[0]) && /150 m/.test(x[1])), 'supervisor distances');
+});
 
-test('P6 Zapisnik has the 26 fields of Prilog 6 (app counts "od 20 polja")', async () => {
+test('P6 Zapisnik has the 26 fields of Prilog 6: 1–20 in the statement, 21–26 in the declarations; the list says so', async () => {
   const a = await fresh();
   a.run('S.active="s1";syncPack()');
-  assert.ok(a.run('p6Fields().length') >= 26, a.run('p6Fields().length') + ' fields');
-}, { xfail: 'F-21' });
+  assert.strictEqual(a.run('p6Fields().length'), 20);
+  a.run('renderDoc("p6")');
+  const h = a.html('#v-izvjestaji');
+  for (const n of [21, 22, 23, 24, 25, 26]) assert.ok(new RegExp('>' + n + '\\. |' + n + '\\. ').test(h), 'field ' + n);
+  assert.ok(/od 20 polja \(21–26 pri predaji\)/.test(a.run('DOCS_BA.find(d=>d.k==="p6").d()')));
+});
 
 // found in the browser walk-through: switching site while a document is open keeps docView
 test('switching from a BiH site to a Serbian site while P11 is open does not print a BHMAC P11 for the Serbian site', async () => {
@@ -223,7 +234,7 @@ test('switching from a BiH site to a Serbian site while P11 is open does not pri
   a.click('pickSite', { id: 'r1' });
   const h = a.html('#v-izvjestaji');
   assert.ok(!/SEDMIČNI IZVJEŠTAJ/.test(h), 'Serbian site shows: ' + (h.match(/<h4>[^<]*<\/h4>/) || [''])[0].slice(0, 60) + ' / ' + (h.match(/<b>Za:<\/b>[^·]*/) || [''])[0]);
-}, { xfail: 'F-28' });
+});
 
 test('switching from a Serbian site to a BiH site while the skica is open does not show an empty document', async () => {
   const a = await fresh();
@@ -232,4 +243,38 @@ test('switching from a Serbian site to a BiH site while the skica is open does n
   a.click('pickSite', { id: 's1' });
   const h = a.html('#v-izvjestaji');
   assert.ok(/<h4>/.test(h) || /doclist/.test(h), 'empty paper document shown');
-}, { xfail: 'F-28' });
+});
+
+// ---- regression: documents state only what was entered ----
+test('a new BiH site carries no invented plan area, RU, općina or method: documents say "dopuniti"', async () => {
+  const a = await fresh();
+  await newBaSite(a);
+  const s = a.json('site()');
+  assert.strictEqual(s.ci.pmin, null); assert.strictEqual(s.msp.ru, ''); assert.strictEqual(s.msp.opcina, '');
+  a.run('renderDoc("p11")'); assert.ok(/BHMAC – <span class="miss">dopuniti/.test(a.html('#v-izvjestaji')), 'P11 addressee');
+  a.run('renderDoc("p10")'); const p10 = a.html('#v-izvjestaji');
+  assert.ok(/min\. <span class="miss">dopuniti<\/span> m² max\. <span class="miss">dopuniti/.test(p10), 'P10 plan area');
+  assert.ok(/Tehničke metode: <span class="miss">dopuniti/.test(p10), 'P10 method');
+  a.run('openSiteWork()');
+  a.run('renderDoc("p9")'); assert.ok(!/<span class="box">×<\/span>c-kombinacija/.test(a.html('#v-izvjestaji')), 'P9 method not ticked by itself');
+});
+
+test('the method entered for the CI/SI is what P9 and P6 print', async () => {
+  const a = await fresh();
+  a.run('S.active="s1";syncPack();bh(site()).metoda="detektor";renderDoc("p9")');
+  assert.ok(/<span class="box">×<\/span>a-detektor/.test(a.html('#v-izvjestaji')));
+  assert.ok(/\(detektor\)/.test(a.json('p6Fields()').find(x => x[0] === 9)[2]));
+  assert.ok(/detektor/.test(a.json('p6Fields()').find(x => x[0] === 16)[2]), 'monitoring methods from the QC records');
+});
+
+test('Nalaz form: no GPS line without a GPS; with navigator.geolocation the comparison uses the real position and accuracy', async () => {
+  const a = await fresh();
+  a.run('S.active="s1";syncPack();go("nalaz")');
+  assert.ok(!/GPS/.test(a.html('#fCalc')), 'no GPS button when the device has no geolocation');
+  a.run('navigator.geolocation={getCurrentPosition:(ok)=>ok({coords:{latitude:gpsPos.lat+0.0001,longitude:gpsPos.lon,accuracy:6},timestamp:Date.now()})}');
+  a.run('calcPos()');
+  assert.ok(/Uporedi sa GPS-om/.test(a.html('#fCalc')));
+  a.run('gpsCompare()');
+  assert.ok(/GPS telefona: 11,1 m od izračunatog položaja \(tačnost GPS-a ±6 m/.test(a.el('#gpsOut').textContent), a.el('#gpsOut').textContent);
+  a.run('delete navigator.geolocation');
+});
