@@ -686,6 +686,7 @@ function fillTop(st){if(!st.sites.some(x=>x.id===st.active))st.active=st.sites[0
   if(st.org){const o=st.org;['naziv','podizvodjac','tel','tim','radnoVrijeme','odmori'].forEach(k=>{if(o[k]!=null)o[k]=String(o[k]);});['odgovorna','sastavio'].forEach(k=>{const x=isObj(o[k])?o[k]:{};o[k]={ime:S_(x.ime),poz:S_(x.poz)};});
     o.ljudi=A_(o.ljudi).filter(isObj).map(p=>Object.assign(p,{id:S_(p.id),ime:S_(p.ime),fn:S_(p.fn,'Deminer')},p.nap!=null?{nap:String(p.nap)}:{}));
     o.oprema=A_(o.oprema).filter(isObj).map(q=>({kat:EQK[q.kat]?q.kat:'ost',tip:S_(q.tip),sn:S_(q.sn),kom:Math.max(0,Math.round(N_(q.kom,0)))}));}
+  st.csvSep=st.csvSep===','?',':';';
   st.lastBackup=typeof st.lastBackup==='string'&&isFinite(Date.parse(st.lastBackup))?st.lastBackup:null;
   if(st.rev!=null)st.rev=Math.max(0,Math.round(N_(st.rev,0)));if(st.savedAt!=null&&!(typeof st.savedAt==='string'&&isFinite(Date.parse(st.savedAt))))delete st.savedAt;
   if(st.migratedFrom!=null)st.migratedFrom=String(st.migratedFrom);delete st.lastSync;return st;}
@@ -1071,8 +1072,9 @@ function renderDoc(k){
   if(BHD[k]){bhShow(s,k,v);return;}
   if(k==='exp'){
     h=`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · ${crsName()} i WGS84</div>
-      <p>CSV nalaza se otvara u Excelu. GeoJSON se otvara u QGIS-u ili ArcGIS-u i služi za unos u IMSMA kad centar to prihvati.</p>
+      <p>CSV nalaza se otvara u Excelu. GeoJSON se otvara u QGIS-u ili ArcGIS-u i služi za unos u IMSMA kad centar to prihvati.${demoShift(s)?' WGS84 koordinate za BiH računaju se demo transformacijom (nije potvrđena od BHMAC-a).':''}</p>${sepPick()}
       <table><tr><td class="k">Nalaza</td><td>${s.finds.length}</td></tr><tr><td class="k">${s.mode==='boxes'?'Boksova':'Radnih staza sa napretkom'}</td><td>${s.mode==='boxes'?s.boxes.length:Object.keys(s.lanes).length}</td></tr><tr><td class="k">Lomnih tačaka</td><td>${s.poly.length}</td></tr></table>
+      ${(!inFrame||(matchMedia('(pointer:coarse)').matches&&!!navigator.canShare))?'<div class="btnrow noprint"><button class="btn primary" type="button" data-rs="dl" data-k="csv">Preuzmi CSV</button><button class="btn" type="button" data-rs="dl" data-k="geo">Preuzmi GeoJSON</button></div>':''}
       <div class="btnrow noprint"><button class="btn" type="button" data-act="copyCsv">Kopiraj CSV nalaza</button><button class="btn" type="button" data-act="copyGeo">Kopiraj GeoJSON</button></div>`;
   }
   v.innerHTML=docShell(h,k);
@@ -1601,14 +1603,21 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-bh]');if(
   if(a==='delE')o.oprema.splice(+el.dataset.i,1);
   save();openOrg();});
 document.addEventListener('toggle',e=>{const d=e.target;if(d.matches&&d.matches('.orgf details')&&d.open)orgSec=d.dataset.sec;},true);
-function csvText(){const s=site();const q=v=>{v=String(v==null?'':v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};const o=outCrs(s);
+// CSV: ';' with decimal comma by default (Excel in BiH/Serbia), ',' with decimal point on request. Text that a spreadsheet
+// would run as a formula (= + - @, tab, CR at the start) gets a leading apostrophe; any field with the separator, a quote
+// or a line break is quoted. Files get a UTF-8 BOM (saveFile), so č/ć/š/ž/đ open correctly.
+function csvText(sep){const s=site();sep=sep||S.csvSep||';';const dc=sep===';',need=new RegExp('["\\n\\r'+(sep===';'?';':',')+']');
+  const q=v=>{v=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(v)&&!/^-?\d+([.,]\d+)?$/.test(v))v="'"+v;return need.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const n=x=>{const t=String(x==null?'':x);return dc?t.replace('.',','):t;};const o=outCrs(s);
   const z=utmZone(s),head=['id','projekat','sektor','datum','vrijeme','kategorija','vrsta','kolicina','lokacija','lokalno_1_m','lokalno_2_m','dubina_cm','stanje','postupak',o==='UTM34'?'utm'+z+'_E':'gk6_Y',o==='UTM34'?'utm'+z+'_N':'gk6_X','wgs84_lat','wgs84_lon','napomena'];
-  return [head.join(',')].concat(s.finds.map(f=>{const g=findPos(s,f),w=planeToWgs(s,g);const [a,b]=outXY(s,g);
+  return [head.join(sep)].concat(s.finds.map(f=>{const g=findPos(s,f),w=planeToWgs(s,g);const [a,b]=outXY(s,g);
     const loc=f.box?('boks '+f.box):('staza '+f.lane),l1=f.box?(f.u-boxById(s,f.box).x0).toFixed(2):f.dist,l2=f.box?(f.v-boxById(s,f.box).y0).toFixed(2):f.off;
-    return [f.id,s.msp.id,s.ci.oznaka,f.day,f.time,P.cats[f.cat],f.type,f.qty,loc,l1,l2,f.depth,f.cond,f.act,a.toFixed(2),b.toFixed(2),w.lat.toFixed(7),w.lon.toFixed(7),f.note].map(q).join(',');})).join('\n');}
+    return [f.id,s.msp.id,s.ci.oznaka,f.day,f.time,P.cats[f.cat],f.type,n(f.qty),loc,n(l1),n(l2),n(f.depth),f.cond,f.act,n(a.toFixed(2)),n(b.toFixed(2)),n(w.lat.toFixed(7)),n(w.lon.toFixed(7)),f.note].map(q).join(sep);})).join('\r\n');}
+const sepPick=()=>`<div class="chips noprint" role="radiogroup" aria-label="Razdjelnik u CSV"><label><input type="radio" name="csvsep" value=";" data-act="csvSep" ${(S.csvSep||';')===';'?'checked':''}><span>CSV „;” (Excel BiH/SRB, decimalni zarez)</span></label><label><input type="radio" name="csvsep" value="," data-act="csvSep" ${S.csvSep===','?'checked':''}><span>CSV „,” (decimalna tačka)</span></label></div>`;
 function geoText(){const s=site();const w=(u,v)=>{const p=planeToWgs(s,toGK(s,u,v));return [+p.lon.toFixed(7),+p.lat.toFixed(7)];};
-  const feats=[{type:'Feature',properties:{vrsta:'granica',projekat:s.msp.id,sektor:s.ci.oznaka},geometry:{type:'Polygon',coordinates:[s.poly.concat([s.poly[0]]).map(p=>w(p[0],p[1]))]}}];
-  const ring=r=>r.concat([r[0]]).map(p=>w(p[0],p[1]));
+  const ccw=c=>{let a=0;for(let i=0;i<c.length-1;i++)a+=c[i][0]*c[i+1][1]-c[i+1][0]*c[i][1];return a<0?c.slice().reverse():c;};
+  const ring=r=>ccw(r.concat([r[0]]).map(p=>w(p[0],p[1])));
+  const feats=[{type:'Feature',properties:{vrsta:'granica',projekat:s.msp.id,sektor:s.ci.oznaka},geometry:{type:'Polygon',coordinates:[ring(s.poly)]}}];
   if(s.mode==='boxes'){s.boxes.forEach(b=>{const rs=boxRings(b);feats.push({type:'Feature',properties:{vrsta:'boks',id:b.id,povrsina_m2:b.area,ceia:b.done.CEIA?b.done.CEIA.day:null,schonstedt:b.done.SCH?b.done.SCH.day:null,zavrseno:boxDone(b),
       stanje:{n:'nije pregledano',p:'delimicno',d:'zavrseno',x:'iskljuceno'}[boxStat(b)],iskljuceno:b.excl?exclTxt(b.excl):null},geometry:rs.length===1?{type:'Polygon',coordinates:[ring(rs[0])]}:{type:'MultiPolygon',coordinates:rs.map(r=>[ring(r)])}});});
     (s.feats||[]).filter(f=>f.pts.length).forEach(f=>feats.push({type:'Feature',properties:{vrsta:f.kind,naziv:f.name||'',schonstedt_pojas_m:f.buf||0},geometry:f.pts.length===1?{type:'Point',coordinates:w(f.pts[0][0],f.pts[0][1])}:{type:'LineString',coordinates:f.pts.map(q=>w(q[0],q[1]))}}));}
@@ -1904,7 +1913,30 @@ function axisTxt(s){const a=s.az||0;return a?{corner:'početnog ugla',Corner:'Po
    One rect normally; a split gives smaller rects, a merge gives several. poly = outline ring of the union. */
 function sArea(p){let a=0;for(let i=0,j=p.length-1;i<p.length;j=i++)a+=(p[j][0]+p[i][0])*(p[j][1]-p[i][1]);return -a/2;}
 const r2=q=>[+q[0].toFixed(2),+q[1].toFixed(2)];
-function partsOf(s,rects){return rects.map(r=>clipRect(s.poly,r[0],r[1],r[2],r[3])).filter(p=>p.length&&polyArea(p)>0.01).map(p=>p.map(r2));}
+// Sutherland–Hodgman keeps a concave boundary clipped to a rectangle as ONE ring whose pieces are joined by zero-width
+// "bridges" running back and forth along the rectangle's sides. splitRing cuts every edge at the vertices lying on it,
+// cancels each edge against an opposite copy of itself, and walks what is left into the separate pieces.
+function splitRing(p){const K=q=>q[0].toFixed(6)+','+q[1].toFixed(6),pts=p.map(q=>[+q[0],+q[1]]),n=pts.length;if(n<3)return [];
+  const seg=[];for(let i=0;i<n;i++){const a=pts[i],b=pts[(i+1)%n],dx=b[0]-a[0],dy=b[1]-a[1],L2=dx*dx+dy*dy;if(L2<1e-12)continue;
+    const ts=[0,1];pts.forEach(v=>{const t=((v[0]-a[0])*dx+(v[1]-a[1])*dy)/L2;if(t>1e-9&&t<1-1e-9&&Math.abs((v[0]-a[0])*dy-(v[1]-a[1])*dx)/Math.sqrt(L2)<1e-7)ts.push(t);});
+    ts.sort((x,y)=>x-y);for(let k=1;k<ts.length;k++){if(ts[k]-ts[k-1]<1e-12)continue;seg.push([[a[0]+dx*ts[k-1],a[1]+dy*ts[k-1]],[a[0]+dx*ts[k],a[1]+dy*ts[k]]]);}}
+  const cnt=new Map();seg.forEach(([a,b])=>{const k=K(a)+'>'+K(b);cnt.set(k,(cnt.get(k)||0)+1);});
+  const keep=[];seg.forEach(([a,b])=>{const k=K(a)+'>'+K(b),r=K(b)+'>'+K(a);if((cnt.get(r)||0)>0&&(cnt.get(k)||0)>0){cnt.set(r,cnt.get(r)-1);cnt.set(k,cnt.get(k)-1);return;}if((cnt.get(k)||0)>0){cnt.set(k,cnt.get(k)-1);keep.push([a,b]);}});
+  const out=new Map();keep.forEach(e2=>{const k=K(e2[0]);if(!out.has(k))out.set(k,[]);out.get(k).push(e2);});
+  const rings=[];let guard=0;
+  for(const e0 of keep){if(e0.used)continue;const r=[];let cur=e0;while(cur&&!cur.used&&guard++<10000){cur.used=true;r.push(cur[0]);const nx=(out.get(K(cur[1]))||[]).find(x=>!x.used);cur=nx;}
+    const c=r.filter((q,i)=>{const a=r[(i-1+r.length)%r.length],b=r[(i+1)%r.length];return Math.abs((q[0]-a[0])*(b[1]-a[1])-(q[1]-a[1])*(b[0]-a[0]))>1e-9;});
+    if(c.length>=3&&polyArea(c)>1e-6)rings.push(c);}
+  return rings;}
+function partsOf(s,rects){return [].concat(...rects.map(r=>splitRing(clipRect(s.poly,r[0],r[1],r[2],r[3])))).filter(p=>p.length>=3&&polyArea(p)>0.01).map(p=>p.map(r2)).sort((a,b)=>polyArea(b)-polyArea(a));}
+// a point inside a (possibly concave) ring, near its area centroid: the centroid if inside, else the middle of the widest
+// inside stretch on the horizontal line through it
+function labelPt(p){let A=0,cx=0,cy=0;for(let i=0,j=p.length-1;i<p.length;j=i++){const f=p[j][0]*p[i][1]-p[i][0]*p[j][1];A+=f;cx+=(p[j][0]+p[i][0])*f;cy+=(p[j][1]+p[i][1])*f;}
+  const c=A?[cx/(3*A),cy/(3*A)]:[p.reduce((a,q)=>a+q[0],0)/p.length,p.reduce((a,q)=>a+q[1],0)/p.length];if(inPoly(c,p))return c;
+  const b=bounds(p);for(const y of [c[1],(b.y0+b.y1)/2,b.y0+(b.y1-b.y0)*0.37,b.y0+(b.y1-b.y0)*0.63]){const xs=[];
+    for(let i=0,j=p.length-1;i<p.length;j=i++){const [x1,y1]=p[j],[x2,y2]=p[i];if((y1>y)!==(y2>y))xs.push(x1+(y-y1)*(x2-x1)/(y2-y1));}
+    xs.sort((a,b2)=>a-b2);let best=null;for(let k=0;k+1<xs.length;k+=2)if(!best||xs[k+1]-xs[k]>best[1]-best[0])best=[xs[k],xs[k+1]];if(best&&best[1]-best[0]>1e-6)return [(best[0]+best[1])/2,y];}
+  return c;}
 function bxParts(b){return b.parts&&b.parts.length?b.parts:[b.poly];}
 function inBox(b,pt){return bxParts(b).some(p=>inPoly(pt,p));}
 // outline segments of the union of the parts: seams between merged cells are left out (T-junctions are split first)
@@ -1927,12 +1959,14 @@ function buildBox(s,o){const parts=partsOf(s,o.rects);if(!parts.length)return nu
   const area=parts.reduce((a,p)=>a+polyArea(p),0),R4=o.rects,x0=Math.min(...R4.map(r=>r[0])),y0=Math.min(...R4.map(r=>r[1])),x1=Math.max(...R4.map(r=>r[2])),y1=Math.max(...R4.map(r=>r[3]));
   const b={id:o.id,x0,y0,w:+(x1-x0).toFixed(2),h:+(y1-y0).toFixed(2),rects:R4,parts,poly:parts[0],area:+area.toFixed(1),cx:0,cy:0,need:o.need||['CEIA'],done:o.done||{}};
   if(o.excl)b.excl=o.excl;if(parts.length>1)b.poly=boxRings(b)[0];
-  const ctr=p=>[p.reduce((a,q)=>a+q[0],0)/p.length,p.reduce((a,q)=>a+q[1],0)/p.length];let c=ctr(parts[0]);
-  if(parts.length>1){c=[0,0];parts.forEach(p=>{const m=ctr(p),w=polyArea(p)/area;c[0]+=m[0]*w;c[1]+=m[1]*w;});if(!inBox(b,c))c=ctr(parts.slice().sort((p,q)=>polyArea(q)-polyArea(p))[0]);}
-  b.cx=+c[0].toFixed(2);b.cy=+c[1].toFixed(2);return b;}
+  const c=labelPt(b.poly);b.cx=+c[0].toFixed(2);b.cy=+c[1].toFixed(2);if(!inPoly([b.cx,b.cy],b.poly)){b.cx=+c[0].toFixed(3);b.cy=+c[1].toFixed(3);}return b;}
 function makeBoxes(s,size){
   const b=bounds(s.poly),gx=Math.floor(b.x0/size)*size,gy=Math.floor(b.y0/size)*size;s.boxes=[];s.grid=size;
-  for(let r=0;gy+r*size<b.y1;r++)for(let c=0;gx+c*size<b.x1;c++){const x0=gx+c*size,y0=gy+r*size,bx=buildBox(s,{id:rowName(r)+'-'+pad(c+1),rects:[[x0,y0,x0+size,y0+size]]});if(bx&&bx.area>=4)s.boxes.push(bx);}
+  for(let r=0;gy+r*size<b.y1;r++)for(let c=0;gx+c*size<b.x1;c++){const x0=gx+c*size,y0=gy+r*size,bx=buildBox(s,{id:rowName(r)+'-'+pad(c+1),rects:[[x0,y0,x0+size,y0+size]]});if(bx)s.boxes.push(bx);}
+  // a sliver of the boundary (< 4 m² in its cell) joins the largest neighbouring box instead of being dropped;
+  // with no neighbour it stays a box of its own, so every m² of the site is in some box
+  s.boxes.filter(x=>x.area<4).forEach(sm=>{const nb=s.boxes.filter(x=>x!==sm&&x.area>=4&&x.rects.some(r=>sm.rects.some(q=>rectsTouch(r,q)))).sort((a,c)=>c.area-a.area)[0];if(!nb)return;
+    const m=buildBox(s,{id:nb.id,rects:nb.rects.concat(sm.rects)});if(!m)return;s.boxes.splice(s.boxes.indexOf(nb),1,m);s.boxes.splice(s.boxes.indexOf(sm),1);});
 }
 // saved data from before box editing / features: fill the new fields so old sites keep working
 function normRS(s){if(!s||s.mode!=='boxes')return s;const g=s.grid||10;if(s.az==null)s.az=0;
@@ -1974,8 +2008,9 @@ function splitBox(s,id,mode,cu,cv){const b=boxById(s,id);if(!b)return 'Boks ne p
   const c=+(x0+cu).toFixed(2),d=+(y0+cv).toFixed(2);
   const rs=mode==='u'?[[x0,y0,c,y1],[c,y0,x1,y1]]:mode==='v'?[[x0,y0,x1,d],[x0,d,x1,y1]]:[[x0,y0,c,d],[c,y0,x1,d],[x0,d,c,y1],[c,d,x1,y1]];
   const sfx=/\d[a-z]$/.test(id)?['1','2','3','4']:['a','b','c','d'];
-  const kids=rs.map((r,i)=>buildBox(s,{id:freeId(s,id,sfx[i],id),rects:[r],need:b.need.slice(),done:JSON.parse(JSON.stringify(b.done)),excl:b.excl?Object.assign({},b.excl):null})).filter(k=>k&&k.area>=0.5);
+  const kids=rs.map((r,i)=>buildBox(s,{id:freeId(s,id,sfx[i],id),rects:[r],need:b.need.slice(),done:JSON.parse(JSON.stringify(b.done)),excl:b.excl?Object.assign({},b.excl):null})).filter(Boolean);
   if(kids.length<2)return 'Ovaj rez ne deli boks: drugi deo je van granice radilišta.';
+  if(kids.some(k=>k.area<0.5))return 'Jedan deo bi imao manje od 0,5 m². Pomeri rez.';
   s.boxes.splice(s.boxes.indexOf(b),1,...kids);rehomeFinds(s,[id],kids);
   s.assign.forEach(a=>{if(a.box!==id)return;const k=kids.find(x=>!x.done[a.m])||kids[0];a.box=k.id;});
   logAdd(s,{t:hm(Date.now()),e:'Boks '+id+' podeljen na '+kids.map(k=>k.id).join(', ')});addQ('Podela boksa '+id);return kids;}
@@ -2304,7 +2339,7 @@ function rsDoc(s,k){
   if(k==='rsexp'){const xn=s.boxes.filter(b=>b.excl).length,canFile=!inFrame||(matchMedia('(pointer:coarse)').matches&&!!navigator.canShare);
     return {h:`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · SRB_ETRS89 / UTM 34N i WGS84</div>
       <p>KML se otvara u Google Earth-u: granica, boksovi obojeni po stanju (nije pregledano, delimično, završeno, isključeno), objekti i nalazi sa vrstom, dubinom, metodom i datumom. CSV nalaza se otvara u Excelu, GeoJSON u QGIS-u.</p>
-      <table><tr><td class="k">Nalaza</td><td>${s.finds.length}</td></tr><tr><td class="k">Boksova</td><td>${s.boxes.length}${xn?' (isključeno '+xn+')':''}</td></tr><tr><td class="k">Objekata</td><td>${feats(s).length}</td></tr><tr><td class="k">Lomnih tačaka</td><td>${s.poly.length}</td></tr></table>
+      ${sepPick()}<table><tr><td class="k">Nalaza</td><td>${s.finds.length}</td></tr><tr><td class="k">Boksova</td><td>${s.boxes.length}${xn?' (isključeno '+xn+')':''}</td></tr><tr><td class="k">Objekata</td><td>${feats(s).length}</td></tr><tr><td class="k">Lomnih tačaka</td><td>${s.poly.length}</td></tr></table>
       ${canFile?`<div class="btnrow noprint"><button class="btn primary" type="button" data-rs="dl" data-k="kml">Preuzmi KML</button><button class="btn" type="button" data-rs="dl" data-k="csv">Preuzmi CSV</button><button class="btn" type="button" data-rs="dl" data-k="geo">Preuzmi GeoJSON</button></div>`
         :'<p class="note noprint">U ovom prikazu fajl se ne može preuzeti. Kopiraj tekst i sačuvaj ga kao .kml, ili otvori aplikaciju preko linka.</p>'}
       <div class="btnrow noprint" style="margin-top:8px"><button class="btn" type="button" data-rs="copyKml">Kopiraj KML</button><button class="btn" type="button" data-act="copyCsv">Kopiraj CSV nalaza</button><button class="btn" type="button" data-act="copyGeo">Kopiraj GeoJSON</button></div>`};}
@@ -2569,6 +2604,7 @@ document.addEventListener('click',e=>{
     case 'print':try{window.print();}catch(err){}break;
     case 'copyDoc':copy($('#docEl').innerText,'Izvještaj');break;
     case 'copyCsv':copy(csvText(),'CSV');break;
+    case 'csvSep':S.csvSep=el.value===','?',':';';save();break;
     case 'copyGeo':copy(geoText(),'GeoJSON');break;
     case 'copyNum':copy(el.dataset.v,'Broj');break;
     case 'gpsCmp':gpsCompare();break;
