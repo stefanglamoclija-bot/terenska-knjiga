@@ -104,10 +104,11 @@ for (const grid of ['10', '25']) {
 
 test('site with optional fields missing (karta, općina, RU, CI tip, plan area, start, estEnd, casevac, status) renders', async () => {
   const a = await fresh();
-  a.run(`S.sites.push({id:'m1',msp:{id:'MSP 1',naziv:'Min'},ci:{oznaka:'CI-9'},nt:{Y:6571900,X:4922400},az:10,
-    poly:[[0,0],[20,0],[20,30],[0,30]],lanes:{},pairs:[],progress:[],finds:[],log:[],qc:[],monitors:[],info:[]});S.active='m1';`);
+  // every state reaches the app through checkState() (storage, backup files, old versions), which fills the missing fields
+  a.run(`S=checkState(Object.assign({},S,{sites:S.sites.concat([{id:'m1',msp:{id:'MSP 1',naziv:'Min'},ci:{oznaka:'CI-9'},nt:{Y:6571900,X:4922400},az:10,
+    poly:[[0,0],[20,0],[20,30],[0,30]]}]),active:'m1'}));`);
   assertClean(renderAll(a), 'minimal');
-}, { xfail: 'F-08' });
+});
 
 test('new BiH site: općina and regional office come from the user, not hard-coded "Općina Primjer" / "RU Tuzla"', async () => {
   const a = await fresh();
