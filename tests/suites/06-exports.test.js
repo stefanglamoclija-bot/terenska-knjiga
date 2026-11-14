@@ -156,8 +156,8 @@ test('CSV box finds: local metres are measured from the box SW corner and lie wi
 test('find ids are unique per site even after 100 new finds (no collision with seeded N-201..N-207)', async () => {
   const a = await fresh();
   a.run('S.active="r1";syncPack();S.next=200');
-  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:TODAY,time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
-  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:TODAY,time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
+  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:today(),time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
+  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:today(),time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
   const ids = a.json('site().finds.map(f=>f.id)');
   assert.strictEqual(new Set(ids).size, ids.length, 'duplicate ids: ' + ids.filter((x, i) => ids.indexOf(x) !== i));
 }, { xfail: 'F-22' });

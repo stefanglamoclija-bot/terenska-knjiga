@@ -142,10 +142,25 @@ test('P12 coordinates are where the accident happened (pair C in lane 56), not a
   const a = await fresh();
   a.run('S.active="s1";syncPack()');
   a.click('incStart');
-  const i = a.json('S.incident');
-  // there is no way in the UI to say which lane the accident was in; it is always pairs[0]
-  assert.ok(i.site === 's1' && 'lane' in i && a.run('typeof openIncidentPlace') === 'function', 'incident lane fixed to pair A (lane ' + i.lane + '), no site id');
-}, { xfail: 'F-09' });
+  let i = a.json('S.incident');
+  assert.strictEqual(i.site, 's1', 'incident tied to the site');
+  assert.strictEqual(i.lane, null, 'no lane assumed');
+  a.run('renderDoc("p12")');
+  assert.ok(!/Y= \d/.test(a.html('#v-izvjestaji')), 'no coordinates before the place is entered');
+  a.run('openIncidentPlace()');
+  const d = a.dom.document;
+  d.querySelector('#ipLane').value = '56'; d.querySelector('#ipDist').value = '12'; d.querySelector('#ipWhere').value = '';
+  a.click('incPlace');
+  i = a.json('S.incident');
+  assert.strictEqual(i.lane, 56); assert.strictEqual(i.dist, 12);
+  a.run('renderDoc("p12")');
+  const q = a.json('planeXY(site(),toGK(site(),55.5,12))');
+  assert.ok(a.html('#v-izvjestaji').includes('Y= ' + a.run(`gkn(${q[0]})`)), 'P12 Y of lane 56 at 12 m');
+  a.click('incEnd');
+  assert.strictEqual(a.run('site().incidents.length'), 1, 'closed incident recorded in the site');
+  a.run('S.active="r1";syncPack()');
+  assert.strictEqual(a.run('siteIncident(site())'), null, 'another site does not inherit it');
+});
 
 test('P12 victims start empty, not pre-filled with 1 adult / 1 seriously injured', async () => {
   const a = await fresh();
@@ -153,7 +168,8 @@ test('P12 victims start empty, not pre-filled with 1 adult / 1 seriously injured
   a.click('incStart');
   const v = a.json('S.incident.v');
   assert.ok(Object.values(v).every(x => x === 0 || x == null), 'pre-filled victims ' + JSON.stringify(v));
-}, { xfail: 'F-09' });
+  assert.strictEqual(a.run('S.incident.cat'), '', 'type of explosive not pre-selected');
+});
 
 test('P12 does not assert land use or marking that the user never entered', async () => {
   const a = await fresh();

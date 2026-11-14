@@ -14,7 +14,7 @@ const strip = s => JSON.parse(JSON.stringify(s, (k, v) => (k === '_ll' || (k ===
 // a recognisable change made through the UI path the field user takes
 function addMarker(a) {
   a.run('S.active="s1";syncPack()');
-  a.run(`site().finds.push({id:'N-777',cat:'PP',type:'PMA-2',lane:7,dist:3.5,off:0,day:TODAY,time:'10:00',depth:5,qty:1,cond:'Neoštećeno',act:'x',synced:false,note:'marker'});save()`);
+  a.run(`site().finds.push({id:'N-777',cat:'PP',type:'PMA-2',lane:7,dist:3.5,off:0,day:today(),time:'10:00',depth:5,qty:1,cond:'Neoštećeno',act:'x',synced:false,note:'marker'});save()`);
 }
 const hasMarker = a => a.run('S.sites.some(s=>s.finds.some(f=>f.id==="N-777"))');
 

@@ -35,7 +35,7 @@ test('XSS: text typed by the user (site name, CI, note, visit, info, monitor) is
   for (const [k, v] of Object.entries({ '#nsCrs': 'GK6', '#nsY': '6571900.00', '#nsX': '4922400.00', '#nsAz': '0', '#nsMsp': 'MSP ' + PAYLOAD, '#nsName': PAYLOAD, '#nsTip': 'CI', '#nsCi': PAYLOAD,
     '#nsTp': '6571898 4922400\n6571950 4922400\n6571956 4922440\n6571900 4922462' })) d.querySelector(k).value = v;
   a.run('createSite();openSiteWork()');
-  a.run(`site().finds.push({id:'N-901',cat:'PP',type:'PMA-2',lane:1,dist:2,off:0,day:TODAY,time:'10:00',depth:5,qty:1,cond:'Neoštećeno',act:'x',synced:false,note:${JSON.stringify(PAYLOAD + ' žica')}})`);
+  a.run(`site().finds.push({id:'N-901',cat:'PP',type:'PMA-2',lane:1,dist:2,off:0,day:today(),time:'10:00',depth:5,qty:1,cond:'Neoštećeno',act:'x',synced:false,note:${JSON.stringify(PAYLOAD + ' žica')}})`);
   for (const [k, field, val] of [['visit', '#eWho', PAYLOAD], ['info', '#eInfo', PAYLOAD], ['mon', '#eBy', PAYLOAD]]) { a.run(`openEvent("${k}")`); d.querySelector(field).value = val; a.run(`saveEvent("${k}")`); }
   a.run(`S.incident=null;`); a.click('incStart'); a.run(`S.incident.desc=${JSON.stringify(PAYLOAD)}`);
   for (const [where, h] of renderEverything(a)) { const i = h.search(RAW); assert.ok(i < 0, "unescaped payload in " + where + ": …" + h.slice(Math.max(0, i - 120), i + 40)); }

@@ -1,6 +1,6 @@
 // Service worker for the standalone build: the app must open and work with no signal on site.
-// build.sh replaces 8211767252 with a hash of index.html, so every deploy installs a fresh cache.
-const V = 'tk-8211767252';
+// build.sh replaces 02f1d9446e with a hash of index.html, so every deploy installs a fresh cache.
+const V = 'tk-02f1d9446e';
 const FONTS = 'tk-fonts';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap';
