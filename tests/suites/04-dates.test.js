@@ -144,6 +144,7 @@ test('next morning: Dnevni izvještaj (P9) lists only today\'s events', async ()
 
 test('next morning: the pre-work briefing must be confirmed again before work starts', async () => {
   const b = await nextDay();
+  b.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   assert.strictEqual(b.run('dayInfo(site()).started'), false, 'work-started carried over from yesterday');
 });
 
@@ -160,6 +161,7 @@ test('work log entries carry a date', async () => {
 // ---- regression: the new day starts while the app stays open; old undated logs are migrated, not re-dated ----
 test('crossing midnight with the app open: checkDay() starts the new day (briefing unconfirmed, empty day log), data kept', async () => {
   const a = await at(DAYS.wed, '23:58:00');
+  a.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   a.run('S.active="s1";syncPack();go("danas")');
   assert.strictEqual(a.run('dayInfo(site()).started'), true);
   const n = a.run('S.sites.reduce((x,s)=>x+s.finds.length+s.log.length,0)');
