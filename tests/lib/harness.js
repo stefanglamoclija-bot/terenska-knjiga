@@ -11,7 +11,8 @@ const { makeLocalStorage } = require('./fake-storage');
 const { makeIndexedDB } = require('./fake-idb');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const APP_HTML = path.join(ROOT, 'src', 'app.html');
+// TK_APP: test another build of the page (used while a change is assembled from parts)
+const APP_HTML = process.env.TK_APP ? path.resolve(process.env.TK_APP) : path.join(ROOT, 'src', 'app.html');
 
 function appSource(file) {
   const html = fs.readFileSync(file || APP_HTML, 'utf8');

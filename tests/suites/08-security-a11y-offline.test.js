@@ -4,11 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { test } = require('../lib/t');
-const { loadApp, makeIndexedDB, appSource, ROOT } = require('../lib/harness');
+const { loadApp, makeIndexedDB, appSource, ROOT, APP_HTML } = require('../lib/harness');
 
 const NOW = '2026-11-11T10:00:00';
 const fresh = (o = {}) => loadApp(Object.assign({ now: NOW }, o));
-const APP = fs.readFileSync(path.join(ROOT, 'src', 'app.html'), 'utf8');
+const APP = fs.readFileSync(APP_HTML, 'utf8');
 const PAYLOAD = '<img src=x onerror=alert(1)>';
 const RAW = /<img src=x onerror|" onerror="alert/; // a real tag or an attribute break-out (escaped text is fine)
 
@@ -208,7 +208,7 @@ test('new site: a third column (H, elevation) in the lomne tačke is not merged 
 test('new site: a mistyped lomna tačka 100 km away is rejected instead of freezing the app', () => {
   const child = `
     const h=require(${JSON.stringify(path.join(__dirname, '..', 'lib', 'harness.js'))});
-    (async()=>{const a=await h.loadApp({now:'${NOW}'});const d=a.dom.document;
+    (async()=>{const a=await h.loadApp({now:'${NOW}'});const d=a.dom.document;a.run("S.ui='bs'");
       const v={'#nsCrs':'GK6','#nsY':'6571898','#nsX':'4922400','#nsAz':'0','#nsMsp':'MSP 1','#nsName':'x','#nsTip':'CI','#nsCi':'CI-1',
         '#nsTp':'6571898 4922400\\n6571950 4922400\\n6571956 5022440\\n6571900 4922462'};
       for(const k in v)d.querySelector(k).value=v[k];
@@ -219,6 +219,7 @@ test('new site: a mistyped lomna tačka 100 km away is rejected instead of freez
 
 test('new BiH site: wrong zone, swapped Y/X, a self-crossing boundary, an absurd area and a polygon left of the NT are rejected with a message', async () => {
   const a = await fresh();
+  a.run("S.ui='bs'"); // messages asserted in Bosnian (the demo starts on a Serbian site)
   const d = a.dom.document;
   const base = { '#nsCrs': 'GK6', '#nsY': '6571898', '#nsX': '4922400', '#nsAz': '0', '#nsMsp': 'MSP 1', '#nsName': 'x', '#nsTip': 'CI', '#nsCi': 'CI-1', '#nsPmin': '', '#nsPmax': '', '#nsOpc': '', '#nsRu': '',
     '#nsTp': '6571898 4922400\n6571950 4922400\n6571956 4922440\n6571900 4922462' };

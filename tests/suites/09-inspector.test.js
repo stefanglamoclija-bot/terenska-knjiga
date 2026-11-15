@@ -13,7 +13,8 @@ const PAYLOAD = '<img src=x onerror=alert(1)>';
 const RAW = /<img src=x onerror|" onerror="alert/;
 const FIX = n => JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'fixtures', n), 'utf8'));
 const fresh = (o = {}) => loadApp(Object.assign({ now: NOW }, o));
-const rs = async () => { const a = await fresh(); a.run('S.active="r1";syncPack()'); return a; };
+// the inspector screens are asserted in Serbian (the UI language is pinned, not left to 'auto')
+const rs = async () => { const a = await fresh(); a.run('S.active="r1";S.ui="sr";syncPack()'); return a; };
 const asK = a => a.run('qa(site()).role="czrs";syncPack()');
 
 // every tab, every Serbian document, the inspector's sheets; returns [[where, html]]
@@ -210,6 +211,7 @@ test('inspector documents and screens render for the seeded site (both roles) wi
 
 test('inspector documents and screens render for a freshly created empty Serbian site', async () => {
   const a = await fresh();
+  a.run("S.ui='sr'"); // UI text below is asserted in Serbian
   const d = a.dom.document;
   d.querySelector('#nsTp').value = '457 010 4 955 020\n457 080 4 955 000\n457 105 4 955 060\n457 060 4 955 110\n457 000 4 955 090';
   d.querySelector('#nsGrid').value = '10'; d.querySelector('#nsMsp').value = 'ID 0322/26'; d.querySelector('#nsName').value = 'Kosa'; d.querySelector('#nsSek').value = 'Sektor 1';

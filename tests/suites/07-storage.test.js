@@ -96,6 +96,7 @@ test('upgrade from v2: data saved by the v2 app (key terenska-knjiga-v2) is foun
 test('IndexedDB write failure shows "Podaci NISU sačuvani" to the user', async () => {
   const idb = makeIndexedDB();
   const a = await loadApp({ now: NOW, idb });
+  a.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   idb.failPut = true;
   addMarker(a);
   await a.run('saveQ');
@@ -106,6 +107,7 @@ test('IndexedDB write failure shows "Podaci NISU sačuvani" to the user', async 
 test('localStorage quota exceeded shows "Podaci NISU sačuvani"', async () => {
   const storage = makeLocalStorage();
   const a = await loadApp({ now: NOW, storage });
+  a.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   storage.quota = 1000;
   addMarker(a);
   assert.ok(/NISU sačuvani/.test(a.toastText()), 'toast: ' + a.toastText());
@@ -114,6 +116,7 @@ test('localStorage quota exceeded shows "Podaci NISU sačuvani"', async () => {
 test('after a failed save the warning stays visible (not one 8 s toast), until a save succeeds', async () => {
   const idb = makeIndexedDB();
   const a = await loadApp({ now: NOW, idb });
+  a.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   idb.failPut = true;
   addMarker(a); await a.run('saveQ');
   a.flushTimers(); // the toast timer hides it
@@ -194,6 +197,7 @@ test('backup -> restore on a new device brings back every site, find and full-si
 
 test('backup marks lastBackup and the backup nag disappears', async () => {
   const a = await loadApp({ now: NOW, idb: makeIndexedDB() });
+  a.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   a.run('S.active="s1";go("danas")');
   assert.ok(/Rezervna kopija/.test(a.html('#v-danas')));
   await makeBackup(a);
@@ -299,6 +303,7 @@ test('a corrupt state in IndexedDB does not white-screen: recovery screen offers
 test('demo reset: step 1 names what is lost and offers a backup, step 2 needs OBRIŠI, then data and photos are replaced', async () => {
   const idb = makeIndexedDB();
   const a = await loadApp({ now: NOW, idb });
+  a.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   addMarker(a); await a.run('saveQ');
   await a.run(`idbPut('photos','s1/N-777',new Blob([new Uint8Array([1])]))`);
   a.click('reset');
@@ -316,6 +321,7 @@ test('demo reset: step 1 names what is lost and offers a backup, step 2 needs OB
 
 test('sync button: says the pilot does not send anything and lists the queue as waiting', async () => {
   const a = await loadApp({ now: NOW });
+  a.run("S.ui='bs'"); // UI text below is asserted in Bosnian
   assert.ok(/Sinhronizacija:<br>u pilotu/.test(a.el('#syncLabel').innerHTML), a.el('#syncLabel').innerHTML);
   a.click('sync');
   const h = a.html('#sheet');
