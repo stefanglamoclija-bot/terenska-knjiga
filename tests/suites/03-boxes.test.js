@@ -25,10 +25,11 @@ async function siteWith(poly, size) {
 }
 const area = poly => { let s = 0; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) s += (poly[j][0] + poly[i][0]) * (poly[j][1] - poly[i][1]); return Math.abs(s / 2); };
 
-test('seeded Serbian site: box areas sum to the boundary polygon area (±0,5%)', async () => {
+test('seeded Serbian site: box areas (excluded boxes included) sum to the boundary polygon area (±0,5%)', async () => {
   const a = await fresh();
   a.run('S.active="r1";syncPack()');
-  const r = a.json('({sum:site().boxes.reduce((x,b)=>x+b.area,0),A:totalArea(site())})');
+  // the seed has an excluded box (H-03, building): it is still a box, but totalArea() leaves it out of the area to search
+  const r = a.json('({sum:site().boxes.reduce((x,b)=>x+b.area,0),A:polyArea(site().poly)})');
   assert.ok(Math.abs(r.sum - r.A) / r.A <= 0.005, `${r.sum} vs ${r.A}`);
 });
 
@@ -51,7 +52,7 @@ test('no sliver of the boundary polygon is silently dropped from the box grid (b
   const r = a.json('({sum:site().boxes.reduce((x,b)=>x+b.area,0),A:totalArea(site())})');
   if (r.A - r.sum > 0.5) lost.push(`seed r1: ${(r.A - r.sum).toFixed(1)} m² not in any box`);
   assert.ok(!lost.length, lost.join('; '));
-}, { xfail: 'F-15' });
+});
 
 async function allCases() {
   const out = [];
@@ -60,13 +61,16 @@ async function allCases() {
   return out;
 }
 
-test('box ids are unique, every box stays inside its own grid cell, stored area matches its polygon', async () => {
+test('box ids are unique, every box stays inside its own grid cell(s), stored area matches its parts', async () => {
   for (const [name, s, size] of await allCases()) {
     const ids = new Set();
     for (const b of s.boxes) {
       assert.ok(!ids.has(b.id), `${name}/${size}: duplicate id ${b.id}`); ids.add(b.id);
-      for (const q of b.poly) assert.ok(q[0] >= b.x0 - 0.01 && q[0] <= b.x0 + size + 0.01 && q[1] >= b.y0 - 0.01 && q[1] <= b.y0 + size + 0.01, `${name}: ${b.id} vertex outside its cell`);
-      assert.ok(Math.abs(area(b.poly) - b.area) < 0.2, `${name}/${size}: ${b.id} stored area ${b.area} vs polygon ${area(b.poly)}`);
+      // a sliver merged into its neighbour makes a box of two cells: check against the box's own extent
+      for (const q of b.poly) assert.ok(q[0] >= b.x0 - 0.01 && q[0] <= b.x0 + b.w + 0.01 && q[1] >= b.y0 - 0.01 && q[1] <= b.y0 + b.h + 0.01, `${name}: ${b.id} vertex outside its cell(s)`);
+      assert.ok(b.w <= 2 * size + 0.01 && b.h <= 2 * size + 0.01, `${name}: ${b.id} spans more than two cells`);
+      const parts = b.parts && b.parts.length ? b.parts : [b.poly];
+      assert.ok(Math.abs(parts.reduce((x, p) => x + area(p), 0) - b.area) < 0.2, `${name}/${size}: ${b.id} stored area ${b.area} vs parts`);
     }
   }
 });
@@ -76,7 +80,7 @@ test('no box polygon has a vertex outside the boundary (clipping a concave bound
   for (const [name, s, size] of await allCases())
     for (const b of s.boxes) for (const q of b.poly) if (!onOrIn(q, s.poly)) { bad.push(`${name}/${size}: ${b.id} vertex ${q}`); break; }
   assert.deepStrictEqual(bad, [], bad.length + ' boxes: ' + bad.slice(0, 5).join('; '));
-}, { xfail: 'F-15' });
+});
 
 test('box label/sort point (cx,cy) lies inside its box (concave boundary)', async () => {
   const bad = [];
@@ -85,7 +89,7 @@ test('box label/sort point (cx,cy) lies inside its box (concave boundary)', asyn
     for (const b of s.boxes) if (!inPoly([b.cx, b.cy], b.poly)) bad.push(`${name}/${size}:${b.id}`);
   }
   assert.ok(!bad.length, bad.length + ' boxes: ' + bad.slice(0, 6).join(', '));
-}, { xfail: 'F-15' });
+});
 
 test('methodM2 / clearedM2 / perDeminer are consistent sums over boxes, per method and per day', async () => {
   const a = await fresh();
@@ -132,7 +136,7 @@ test('nextBoxFor never hands the same box+method to two deminers, never a done o
     check();
   }
   const s = a.json('site()');
-  const left = s.boxes.filter(b => !b.done.CEIA).length;
+  const left = s.boxes.filter(b => !b.excl && !b.done.CEIA).length; // excluded boxes are never searched
   assert.strictEqual(left, 0, left + ' boxes never got CEIA');
 });
 

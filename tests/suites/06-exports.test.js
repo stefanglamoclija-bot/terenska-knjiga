@@ -7,14 +7,16 @@ const ref = require('../lib/geo-ref');
 const NOW = '2026-11-11T10:00:00';
 const fresh = () => loadApp({ now: NOW });
 
-// RFC 4180 parser (handles quotes, doubled quotes, embedded commas and newlines)
+// RFC 4180 parser (handles quotes, doubled quotes, embedded separators and newlines); the separator is read from the header
 function parseCsv(text) {
+  text = text.replace(/^\uFEFF/, '');
+  const sep = text.split('\n')[0].includes(';') ? ';' : ',';
   const rows = []; let row = [], f = '', q = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
     if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
     else if (c === '"') q = true;
-    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === sep) { row.push(f); f = ''; }
     else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
     else if (c === '\r') { if (text[i + 1] !== '\n') { row.push(f); rows.push(row); row = []; f = ''; } }
     else f += c;
@@ -22,6 +24,7 @@ function parseCsv(text) {
   row.push(f); rows.push(row);
   return rows;
 }
+const toN = x => +String(x).replace(',', '.');
 function inRing(pt, ring) { let c = false; for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) { const [xi, yi] = ring[i], [xj, yj] = ring[j]; if (((yi > pt[1]) !== (yj > pt[1])) && (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi)) c = !c; } return c; }
 const signedArea = r => { let s = 0; for (let i = 0; i < r.length - 1; i++) s += r[i][0] * r[i + 1][1] - r[i + 1][0] * r[i][1]; return s / 2; };
 
@@ -84,7 +87,7 @@ test('GeoJSON polygons are counter-clockwise (RFC 7946 §3.1.6 right-hand rule)'
     for (const f of g.features.filter(x => x.geometry.type === 'Polygon')) if (signedArea(f.geometry.coordinates[0]) < 0) { bad.push(id + ':' + (f.properties.id || f.properties.vrsta)); }
   }
   assert.ok(!bad.length, bad.length + ' clockwise rings, e.g. ' + bad.slice(0, 4).join(', '));
-}, { xfail: 'F-25' });
+});
 
 async function csvWith(note, id = 's1') {
   const a = await fresh();
@@ -103,7 +106,7 @@ for (const id of ['s1', 'r1']) {
     for (const r of rows) assert.strictEqual(r.length, head.length, r.join('|'));
     const iE = head.findIndex(h => /_(Y|E)$/.test(h)), iN = head.findIndex(h => /_(X|N)$/.test(h)), iLat = head.indexOf('wgs84_lat'), iLon = head.indexOf('wgs84_lon');
     for (const r of rows.slice(1)) {
-      const E = +r[iE], N = +r[iN], lat = +r[iLat], lon = +r[iLon];
+      const E = toN(r[iE]), N = toN(r[iN]), lat = toN(r[iLat]), lon = toN(r[iLon]);
       if (id === 'r1') assert.ok(E > 300000 && E < 700000 && N > 4600000 && N < 5200000, 'UTM ' + E + ' ' + N);
       else assert.ok(E > 6400000 && E < 6700000 && N > 4700000 && N < 5100000, 'GK ' + E + ' ' + N);
       assert.ok(lat > 41.8 && lat < 46.4 && lon > 15.5 && lon < 23.1, lat + ',' + lon);
@@ -128,36 +131,53 @@ test('CSV quotes a bare carriage return (\\r) so a pasted Windows note does not 
   const { csv } = await csvWith('red 1\rred 2');
   const rows = parseCsv(csv);
   assert.ok(rows.every(r => r.length === rows[0].length), 'a row was split by \\r');
-}, { xfail: 'F-20' });
+});
 
 test('CSV neutralises spreadsheet formulas in user text (=, +, -, @)', async () => {
   const { csv } = await csvWith('=HYPERLINK("http://x","klik")');
   const r = parseCsv(csv).find(x => x[0] === 'N-900');
   assert.ok(!/^[=+\-@]/.test(r[r.length - 1]), 'note exported as a live formula: ' + r[r.length - 1]);
-}, { xfail: 'F-20' });
+});
 
 test('CSV opens in a BCS-locale Excel: ";" separator or "sep=" hint, UTF-8 BOM for č/ć/š/ž', async () => {
   const a = await fresh();
   a.run('S.active="s1";syncPack()');
   const csv = a.run('csvText()');
   assert.ok(/^﻿/.test(csv) || /^sep=/.test(csv) || csv.split('\n')[0].includes(';'), 'comma-separated, no BOM, no sep= line');
-}, { xfail: 'F-20' });
+});
 
 test('CSV box finds: local metres are measured from the box SW corner and lie within the box', async () => {
   const a = await fresh();
   a.run('S.active="r1";syncPack()');
   const rows = parseCsv(a.run('csvText()')), h = rows[0], g = a.run('site().grid');
   for (const r of rows.slice(1)) {
-    const l1 = +r[h.indexOf('lokalno_1_m')], l2 = +r[h.indexOf('lokalno_2_m')];
+    const l1 = toN(r[h.indexOf('lokalno_1_m')]), l2 = toN(r[h.indexOf('lokalno_2_m')]);
     assert.ok(l1 >= 0 && l1 <= g && l2 >= 0 && l2 <= g, r[0] + ' ' + l1 + ',' + l2);
   }
 });
 
-test('find ids are unique per site even after 100 new finds (no collision with seeded N-201..N-207)', async () => {
+test('find ids are unique per site even after 100 new finds (no collision with seeded N-201..N-207), and never reused after a delete', async () => {
   const a = await fresh();
   a.run('S.active="r1";syncPack();S.next=200');
-  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:TODAY,time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
-  a.run('site().finds.push({id:"N-"+S.next,box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:TODAY,time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""});S.next++');
+  for (let i = 0; i < 100; i++) a.run('site().finds.push({id:newFindId(site()),box:site().boxes[0].id,u:1,v:1,cat:"NUS",type:"x",qty:1,day:today(),time:"10:00",depth:1,cond:"",act:"",method:"CEIA",note:""})');
   const ids = a.json('site().finds.map(f=>f.id)');
   assert.strictEqual(new Set(ids).size, ids.length, 'duplicate ids: ' + ids.filter((x, i) => ids.indexOf(x) !== i));
-}, { xfail: 'F-22' });
+  assert.strictEqual(ids[7], 'N-208');
+  a.run('site().finds.pop()');
+  assert.strictEqual(a.run('newFindId(site())'), 'N-308', 'a removed id is not handed out again');
+  a.run('S.active="s1";syncPack()');
+  assert.strictEqual(a.run('newFindId(site())'), 'N-108', 'BiH site counts on its own');
+});
+
+test('CSV with "," on request uses decimal points; downloads carry a UTF-8 BOM; negative numbers are not mistaken for formulas', async () => {
+  const a = await fresh();
+  a.run('S.active="s1";syncPack()');
+  const c = a.run('csvText(",")'), rows = parseCsv(c), h = rows[0];
+  assert.ok(h.includes('gk6_Y') && rows.length > 1 && /^\d+\.\d\d$/.test(rows[1][h.indexOf('gk6_Y')]), 'decimal point with ","');
+  const s = a.run('csvText(";")'), r2 = parseCsv(s);
+  assert.ok(/^\d+,\d\d$/.test(r2[1][r2[0].indexOf('gk6_Y')]), 'decimal comma with ";"');
+  const off = r2.map(r => r[r2[0].indexOf('lokalno_2_m')]).find(x => /^-/.test(x));
+  assert.ok(off && !/^'/.test(off), 'negative offset stays a number: ' + off);
+  a.blobs.length = 0; a.run('saveFile("x.csv","\uFEFF"+csvText(),"text/csv")'); await a.settle();
+  assert.deepStrictEqual([...new Uint8Array(await a.blobs[0].arrayBuffer())].slice(0, 3), [0xEF, 0xBB, 0xBF]);
+});

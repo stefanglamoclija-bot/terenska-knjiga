@@ -38,13 +38,15 @@ const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeo
   for (const t of selected) {
     if (t.file !== lastFile) { console.log('\n# ' + t.file); lastFile = t.file; }
     let err = null;
+    const t0 = Date.now();
     try { await withTimeout(Promise.resolve().then(t.fn), t.timeout); } catch (e) { err = e; }
     let status;
     if (t.xfail) status = err ? 'XFAIL' : 'XPASS';
     else status = err ? 'FAIL' : 'PASS';
     counts[status]++;
     const tag = t.xfail ? ' [' + t.xfail + ']' : '';
-    console.log('  ' + status.padEnd(5) + ' ' + t.name + tag);
+    const ms = Date.now() - t0;
+    console.log('  ' + status.padEnd(5) + ' ' + t.name + tag + (ms > 2000 ? '  (' + (ms / 1000).toFixed(1) + ' s)' : ''));
     if (status === 'FAIL') { failures.push({ t, err }); console.log('        ' + String(err && err.stack || err).split('\n').slice(0, 4).join('\n        ')); }
     if (status === 'XFAIL' && verbose) console.log('        ' + String(err && err.message || err).split('\n')[0]);
     if (status === 'XPASS') xpasses.push(t);
