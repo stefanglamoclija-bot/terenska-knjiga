@@ -106,7 +106,8 @@ test('methodM2 / clearedM2 / perDeminer are consistent sums over boxes, per meth
       for (const [who, r] of Object.entries(pd)) for (const id of r[m]) assert.strictEqual(s.boxes.find(b => b.id === id).done[m].by, who);
     }
   }
-  const cleared = s.boxes.filter(b => b.need.every(m => b.done[m])).reduce((x, b) => x + b.area, 0);
+  // a box sent back by the CZRS inspector (b.ret) is not cleared even though its methods were done once
+  const cleared = s.boxes.filter(b => !b.ret && b.need.every(m => b.done[m])).reduce((x, b) => x + b.area, 0);
   assert.ok(Math.abs(a.run('clearedM2(site())') - cleared) < 1e-9);
   assert.ok(a.run('clearedM2(site())') <= a.run('methodM2(site(),"CEIA")') + 1e-9, 'cleared never exceeds CEIA area');
 });
