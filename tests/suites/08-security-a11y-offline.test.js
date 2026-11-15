@@ -234,3 +234,34 @@ test('new BiH site: wrong zone, swapped Y/X, a self-crossing boundary, an absurd
   assert.ok(ok.site && ok.info.some(x => /visina H\) zanemarena u 4/.test(x)), JSON.stringify(ok.info || ok.err));
   assert.strictEqual(a.run('S.sites.length'), 3, 'checking never creates a site');
 });
+
+// The built service worker in a vm: app shell from the cache, other pages (sales pages /en/, /bs/) from the network
+test('service worker: the app shell comes from the cache; /en/ and /bs/ go to the network (last copy offline); install bypasses the HTTP cache', async () => {
+  const vm = require('vm');
+  const src = fs.readFileSync(path.join(ROOT, 'docs', 'sw.js'), 'utf8');
+  const L = {}, stores = {}, net = [];
+  const key = k => (typeof k === 'string' ? new URL(k, 'https://x.io/tk/').href : k.url).split('#')[0];
+  const cache = name => (stores[name] = stores[name] || { m: new Map(),
+    async match(k) { return this.m.get(key(k)); },
+    async put(k, v) { this.m.set(key(k), v); },
+    async addAll(reqs) { for (const r of reqs) { assert.strictEqual(r.cache, 'reload', 'install uses cache:reload'); this.m.set(key(r.url), { body: 'cached:' + r.url }); } } });
+  let online = true;
+  const ctx = { URL, Response: class { constructor(b, o) { this.body = b; this.status = o && o.status; } },
+    Request: class { constructor(u, o) { this.url = u; this.cache = o && o.cache; } },
+    location: new URL('https://x.io/tk/sw.js'), caches: { open: async n => cache(n), keys: async () => Object.keys(stores), delete: async n => delete stores[n] },
+    fetch: async r => { net.push(r.url); if (!online) throw new Error('offline'); return { ok: true, type: 'basic', body: 'net:' + r.url, clone() { return this; } }; } };
+  ctx.self = { addEventListener: (ev, fn) => { L[ev] = fn; }, registration: { scope: 'https://x.io/tk/' }, skipWaiting() { ctx.skipped = true; }, clients: { claim: async () => {} } };
+  vm.runInNewContext(src, ctx);
+  let p; L.install({ waitUntil: x => { p = x; } }); await p;
+  assert.ok(!ctx.skipped, 'a new version waits for the user');
+  L.message({ data: { type: 'skip' } }); assert.ok(ctx.skipped, 'Osvježi activates it');
+  const go = async (url, mode = 'navigate') => { let r; L.fetch({ request: { method: 'GET', url, mode }, respondWith: x => { r = x; }, waitUntil() {} }); return r && await r; };
+  assert.strictEqual((await go('https://x.io/tk/')).body, 'cached:./index.html');
+  assert.strictEqual((await go('https://x.io/tk/index.html')).body, 'cached:./index.html');
+  assert.strictEqual(net.length, 0, 'the app shell never waits for the network');
+  assert.strictEqual((await go('https://x.io/tk/en/')).body, 'net:https://x.io/tk/en/', 'sales page from the network, not the app');
+  await new Promise(r => setImmediate(r));
+  online = false;
+  assert.strictEqual((await go('https://x.io/tk/en/')).body, 'net:https://x.io/tk/en/', 'offline: the last copy of the sales page');
+  assert.strictEqual((await go('https://x.io/tk/bs/')).status, 503, 'offline and never seen: a plain offline answer');
+});
