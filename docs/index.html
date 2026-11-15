@@ -2,7 +2,7 @@
 <html lang="bs" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-uKUaY2mXtowtxanyHcl/B2+cNIDNQqfYxtUTQOD6vR8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-k4eLZSoAlL3JDIKGiVYxU38bQovDO2fFE/hAAwCuBG4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
@@ -224,6 +224,7 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
 .chips input:checked + span{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .chips input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.orgf .grid2{align-items:end}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;min-width:0}
 .field input,.field select,.field textarea{min-height:46px;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-weight:400;font-size:15px;width:100%}
@@ -610,6 +611,7 @@ bs:{
 "c.save":"Sačuvaj",
 "c.yes":"Da",
 "danas.cAgo":"prije {n} r. d.",
+"danas.cMonNone":"još nije vršen · {n} r. d. od početka",
 "danas.cDet":"Test detektora na UPMAH-3 danas",
 "danas.cDone":"urađen",
 "danas.cDue":"za {d}{h} h",
@@ -737,7 +739,7 @@ bs:{
 "find.cond":"Stanje",
 "find.demoTr":"(demo transformacija)",
 "find.depth":"Dubina (cm)",
-"find.dist":"Udaljenost od startne linije (m)",
+"find.dist":"Udaljenost od nulte linije (m)",
 "find.gpsBtn":"Uporedi sa GPS-om",
 "find.gpsDemo":"; za BiH uključuje i demo transformaciju",
 "find.gpsDenied":"pristup lokaciji nije dozvoljen",
@@ -893,7 +895,7 @@ bs:{
 "ns.axis":"Glavna osa",
 "ns.axisBtn":"Po najdužoj strani granice",
 "ns.az":"Azimut (°)",
-"ns.baInfo":["{a} m², {n} radnih staza, najduža {l} m","{a} m², {n} radnih staza, najduža {l} m","{a} m², {n} radnih staza, najduža {l} m"],
+"ns.baInfo":["{a} m², {n} radna staza, najduža {l} m","{a} m², {n} radne staze, najduža {l} m","{a} m², {n} radnih staza, najduža {l} m"],
 "ns.boxSize":"Veličina boksa",
 "ns.check":"Provjeri",
 "ns.checked":"Provjereno:",
@@ -950,7 +952,7 @@ bs:{
 "ns.rng.UTM34":"E oko 50 000–700 000, N oko 4 700 000–5 050 000",
 "ns.rot":"Zaokret mreže (°)",
 "ns.rotHint":"0 = boksovi prema sjeveru; + u smjeru kazaljke",
-"ns.rsInfo":["{a} m², oko {n} boksova {s}×{s} m","{a} m², oko {n} boksova {s}×{s} m","{a} m², oko {n} boksova {s}×{s} m"],
+"ns.rsInfo":["{a} m², oko {n} boks {s}×{s} m","{a} m², oko {n} boksa {s}×{s} m","{a} m², oko {n} boksova {s}×{s} m"],
 "ns.ru":"RU BHMAC",
 "ns.sector":"Sektor",
 "ns.si":"SI · sistematska",
@@ -1098,7 +1100,7 @@ bs:{
 "qa.k.data":"podaci izvođača",
 "qa.k.excl":"Isključeno iz pretrage",
 "qa.k.finds":"Nalazi izvođača",
-"qa.k.found":"pronađeno {type}",
+"qa.k.found":"nalaz: {type}",
 "qa.k.inRnd":"Boks je nasumično izabran u uzorak {id}.",
 "qa.k.notSampled":"nije uzorkovan",
 "qa.k.rm":"Ukloni iz uzorka {id}",
@@ -1139,7 +1141,7 @@ bs:{
 "qa.out.none":"Još nema upisanog učinka.",
 "qa.out.sub":"CEIA do {n} m² dnevno (CZRS)",
 "qa.ov.aria":"{p}% površine završeno",
-"qa.ov.boxN":["{n} boks.","{n} boks.","{n} boks."],
+"qa.ov.boxN":["{n} boks","{n} boksa","{n} boksova"],
 "qa.ov.done":"Završeno",
 "qa.ov.doneSub":"završeno (vraćeni boksovi se ne računaju) · {p} %",
 "qa.ov.excl":"Isključeno",
@@ -1378,7 +1380,7 @@ bs:{
 "rsd.doc.zkNo":"Prijedlog još nije moguć · {x}",
 "rsd.doc.zkOk":"Uslovi za prijedlog uvjerenja ispunjeni",
 "rsd.doneTotal":"Završeno ukupno",
-"rsd.entered":"Uneseno: {tp} lomnih tačaka, površina {m2} m², {nb} boksova {g}×{g} m.",
+"rsd.entered":"Uneseno: lomne tačke {tp}, površina {m2} m², boksovi {g}×{g} m: {nb}.",
 "rsd.exp.boxes":"Boksova",
 "rsd.exp.cpCsv":"Kopiraj CSV nalaza",
 "rsd.exp.cpGeo":"Kopiraj GeoJSON",
@@ -1448,7 +1450,7 @@ bs:{
 "sites.active":"aktivno",
 "sites.ba":"Bosna i Hercegovina",
 "sites.new":"+ Novo radilište iz dosijea",
-"sites.notMarket":"nije tržište",
+"sites.notMarket":"nije aktivan",
 "sites.open":"otvori",
 "sites.org":"Organizacija, tim i oprema",
 "sites.pack":"Paket zemlje",
@@ -1811,6 +1813,7 @@ sr:{
 "c.save":"Sačuvaj",
 "c.yes":"Da",
 "danas.cAgo":"pre {n} r. d.",
+"danas.cMonNone":"još nije vršen · {n} r. d. od početka",
 "danas.cDet":"Test detektora na UPMAH-3 danas",
 "danas.cDone":"urađen",
 "danas.cDue":"za {d}{h} h",
@@ -1938,7 +1941,7 @@ sr:{
 "find.cond":"Stanje",
 "find.demoTr":"(demo transformacija)",
 "find.depth":"Dubina (cm)",
-"find.dist":"Udaljenost od startne linije (m)",
+"find.dist":"Udaljenost od nulte linije (m)",
 "find.gpsBtn":"Uporedi sa GPS-om",
 "find.gpsDemo":"; za BiH uključuje i demo transformaciju",
 "find.gpsDenied":"pristup lokaciji nije dozvoljen",
@@ -2094,7 +2097,7 @@ sr:{
 "ns.axis":"Glavna osa",
 "ns.axisBtn":"Po najdužoj strani granice",
 "ns.az":"Azimut (°)",
-"ns.baInfo":["{a} m², {n} radnih staza, najduža {l} m","{a} m², {n} radnih staza, najduža {l} m","{a} m², {n} radnih staza, najduža {l} m"],
+"ns.baInfo":["{a} m², {n} radna staza, najduža {l} m","{a} m², {n} radne staze, najduža {l} m","{a} m², {n} radnih staza, najduža {l} m"],
 "ns.boxSize":"Veličina boksa",
 "ns.check":"Proveri",
 "ns.checked":"Provereno:",
@@ -2151,7 +2154,7 @@ sr:{
 "ns.rng.UTM34":"E oko 50 000–700 000, N oko 4 700 000–5 050 000",
 "ns.rot":"Zaokret mreže (°)",
 "ns.rotHint":"0 = boksovi prema severu; + u smeru kazaljke",
-"ns.rsInfo":["{a} m², oko {n} boksova {s}×{s} m","{a} m², oko {n} boksova {s}×{s} m","{a} m², oko {n} boksova {s}×{s} m"],
+"ns.rsInfo":["{a} m², oko {n} boks {s}×{s} m","{a} m², oko {n} boksa {s}×{s} m","{a} m², oko {n} boksova {s}×{s} m"],
 "ns.ru":"RU BHMAC",
 "ns.sector":"Sektor",
 "ns.si":"SI · sistematska",
@@ -2299,7 +2302,7 @@ sr:{
 "qa.k.data":"podaci izvođača",
 "qa.k.excl":"Isključeno iz pretrage",
 "qa.k.finds":"Nalazi izvođača",
-"qa.k.found":"pronađeno {type}",
+"qa.k.found":"nalaz: {type}",
 "qa.k.inRnd":"Boks je nasumično izabran u uzorak {id}.",
 "qa.k.notSampled":"nije uzorkovan",
 "qa.k.rm":"Ukloni iz uzorka {id}",
@@ -2340,7 +2343,7 @@ sr:{
 "qa.out.none":"Još nema upisanog učinka.",
 "qa.out.sub":"CEIA do {n} m² dnevno (CZRS)",
 "qa.ov.aria":"{p}% površine završeno",
-"qa.ov.boxN":["{n} boks.","{n} boks.","{n} boks."],
+"qa.ov.boxN":["{n} boks","{n} boksa","{n} boksova"],
 "qa.ov.done":"Završeno",
 "qa.ov.doneSub":"završeno (vraćeni boksovi se ne računaju) · {p} %",
 "qa.ov.excl":"Isključeno",
@@ -2579,7 +2582,7 @@ sr:{
 "rsd.doc.zkNo":"Predlog još nije moguć · {x}",
 "rsd.doc.zkOk":"Uslovi za predlog uverenja ispunjeni",
 "rsd.doneTotal":"Završeno ukupno",
-"rsd.entered":"Uneto: {tp} lomnih tačaka, površina {m2} m², {nb} boksova {g}×{g} m.",
+"rsd.entered":"Uneto: lomne tačke {tp}, površina {m2} m², boksovi {g}×{g} m: {nb}.",
 "rsd.exp.boxes":"Boksova",
 "rsd.exp.cpCsv":"Kopiraj CSV nalaza",
 "rsd.exp.cpGeo":"Kopiraj GeoJSON",
@@ -2649,7 +2652,7 @@ sr:{
 "sites.active":"aktivno",
 "sites.ba":"Bosna i Hercegovina",
 "sites.new":"+ Novo radilište iz dosijea",
-"sites.notMarket":"nije tržište",
+"sites.notMarket":"nije aktivan",
 "sites.open":"otvori",
 "sites.org":"Organizacija, tim i oprema",
 "sites.pack":"Paket zemlje",
@@ -3012,6 +3015,7 @@ en:{
 "c.save":"Save",
 "c.yes":"Yes",
 "danas.cAgo":["{n} working day ago","{n} working days ago"],
+"danas.cMonNone":["not done yet · {n} working day since start","not done yet · {n} working days since start"],
 "danas.cDet":"Detector test on UPMAH-3 today",
 "danas.cDone":"done",
 "danas.cDue":"in {d}{h} h",
@@ -3850,7 +3854,7 @@ en:{
 "sites.active":"active",
 "sites.ba":"Bosnia and Herzegovina",
 "sites.new":"+ New site from the task dossier",
-"sites.notMarket":"not a market",
+"sites.notMarket":"not active",
 "sites.open":"open",
 "sites.org":"Organisation, team and equipment",
 "sites.pack":"Country pack",
@@ -4227,7 +4231,7 @@ function seedSite(){
     mk(104,'PT','TMA-3',29,9.0,0.2,past[3],'13:40',18,'Neoštećeno',ACTIONS[2],true),
     mk(105,'NUS','Ručna bomba M75',54,26.0,0.3,past[4],'08:55',3,'Korodirano',ACTIONS[1],true),
     mk(106,'PP','PMA-3',55,40.5,-0.1,past[5],'12:12',5,'Neoštećeno',ACTIONS[1],true),
-    mk(107,'PP','PMA-2',4,15.2,0.1,today(),'09:12',7,'Neoštećeno',ACTIONS[0],false,'Upaljač UPMAH-1 vidljiv')
+    mk(107,'PP','PMA-2',4,15.2,0.1,today(),'09:12',7,'Neoštećeno',ACTIONS[0],false,'Upaljač UPMAH-2 vidljiv')
   ];
   site.log=[
     {t:'07:00',e:'Dolazak na radilište'},
@@ -4481,7 +4485,7 @@ function renderHeader(){
   const nav=document.querySelector('nav.tabs');if(nav)nav.setAttribute('aria-label',t('hdr.nav'));
   const sb=document.querySelector('.site-btn');if(sb)sb.setAttribute('aria-label',t('hdr.siteBtn'));
   $('#hdrSite').textContent=s.msp.id+' · '+s.ci.oznaka;
-  $('#hdrMeta').innerHTML=(k?'<span class="pack role">'+t('hdr.inspector')+'</span> ':'')+esc([s.msp.naziv,s.msp.ru].filter(Boolean).join(' · '))+' <span class="pack">'+esc(P.kratko)+'</span>';
+  $('#hdrMeta').innerHTML=(k?'<span class="pack role">'+t('hdr.inspector')+'</span> ':'')+esc([s.msp.naziv,s.msp.ru].filter(Boolean).join(' · '))+(k?'':' <span class="pack">'+esc(P.kratko)+'</span>');
   // there is no server yet: say so plainly, never "sent"
   const b=$('#syncBtn'),n=S.queue.length;b.classList.remove('ok');
   $('#syncLabel').innerHTML=t('hdr.syncLbl')+(n?t('hdr.syncWait',{n}):'');
@@ -4509,7 +4513,7 @@ function compliance(s){
   const cl=clearedM2(s),q=qcM2(s),pct=cl?q/cl*100:0;
   out.push({st:pct>=R.qcMin?'ok':'warn',t:t('danas.cQc',{p:R.qcMin}),v:num(pct,1)+'% ('+num(q,1)+' m²)'});
   const lastMon=s.monitors.length?s.monitors[s.monitors.length-1].day:s.start;const wd=lastMon?workdaysSince(lastMon):0;
-  out.push({st:wd<R.monitorDays?(wd>=R.monitorDays-1?'warn':'ok'):'bad',t:t('danas.cMon',{d:R.monitorDays}),v:t('danas.cAgo',{n:wd})});
+  out.push({st:wd<R.monitorDays?(wd>=R.monitorDays-1?'warn':'ok'):'bad',t:t('danas.cMon',{d:R.monitorDays}),v:t(s.monitors.length?'danas.cAgo':'danas.cMonNone',{n:wd})});
   const w=weeklyWindow();const ms=w.deadline-Date.now();const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);
   out.push({st:ms<864e5?'warn':'ok',t:t('danas.cWeekly'),v:t('danas.cDue',{d:d?d+' d ':'',h})});
   return out;
@@ -4529,7 +4533,7 @@ function renderDanas(){
     <div class="sub">${t('danas.pairsSub',{n:s.pairs.length,w:R.lane})}</div>
     <div class="bar" role="img" aria-label="${t('danas.pctArea',{p:Math.round(cl/tot*100)})}"><span style="width:${Math.min(100,cl/tot*100)}%"></span></div>
     <dl class="kv3">
-      <div><dt>${t('danas.total',{ci:esc(s.ci.oznaka)})}</dt><dd>${num(cl)} / ${num(tot)} m²</dd></div>
+      <div><dt>${t('danas.total',{ci:esc(s.ci.oznaka)})}</dt><dd>${num(cl)} / ${num(tot)}&nbsp;m²</dd></div>
       <div><dt>${t('danas.findsToday')}</dt><dd>${ft.length}</dd></div>
       <div><dt>${t('danas.workStart')}</dt><dd>${fmtDS(s.start)}</dd></div>
     </dl></div>`;
@@ -4832,6 +4836,7 @@ const typeList=fs=>{const by={};fs.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);
 const opt=(on,label)=>`<span class="opt">${box(on)}${label}</span>`;
 const ciName=s=>esc(s.ci.oznaka)+(s.ci.naziv?' – '+esc(s.ci.naziv):'');
 const mspName=s=>esc(s.msp.id)+(s.msp.naziv?' '+esc(s.msp.naziv):'');
+const mspBare=s=>mspName(s).replace(/^MSP\s+/i,'');
 const ptag=t=>`<div class="ptag">${t}</div>`;
 const sgn=(cap,name)=>`<div class="sgl"><span class="sgn">${name?esc(name):''}</span><small>${cap}</small></div>`;
 const dfoot=(name,s,day)=>`<div class="dfoot"><span>${esc(name)}</span><span>${esc(s.msp.id)} · ${esc(s.ci.oznaka)} · ${fmtD(day||today())}</span></div>`;
@@ -4900,7 +4905,7 @@ function p9Doc(s,day){const o=org(),L=dayLog(s,day),ft=s.finds.filter(f=>f.day==
   const rows=(L.length?L.map(l=>`<tr><td class="mono">${esc(l.t)}</td><td>${esc(l.e)}</td></tr>`).join(''):`<tr><td></td><td>${DOP}: za ovaj dan nema zapisa u aplikaciji</td></tr>`)+'<tr class="hand"><td></td><td></td></tr>'.repeat(2);
   return ptag('Prilog 9')+`<h4>DNEVNI IZVJEŠTAJ</h4>
     <div class="dorg">${esc(o.naziv)} · ${esc(leader())}, vođa tima · ${esc(o.tim)}</div><div class="dsmall">(deminerska organizacija, naziv funkcije i oznaka odjeljenja-sekcije, tima)</div>
-    <table><tr><td><b>Datum:</b> ${fmtD(day)}</td><td><b>MSP</b> ${mspName(s)}</td><td><b>Naziv CI ili SI</b> ${ciName(s)}</td></tr></table>
+    <table><tr><td><b>Datum:</b> ${fmtD(day)}</td><td><b>MSP</b> ${mspBare(s)}</td><td><b>Naziv CI ili SI</b> ${ciName(s)}</td></tr></table>
     <table><thead><tr><th style="width:64px">Vrijeme<br>(a)</th><th>Evidencija trajanja deminerskih aktivnosti i događaja<br>(b)</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="keep"><div class="sec">PODACI O RADU I POSTIGNUTIM EFEKTIMA</div><table>
     <tr><td class="k">Metode rada:</td><td>${opt(bh(s).metoda==='detektor','a-detektor')}${opt(bh(s).metoda==='pipalica','b-pipalica')}${opt(bh(s).metoda==='kombinacija','c-kombinacija')}${opt(0,'d-prege')}${opt(0,'d-stroj/mašina (prethodni rad)')}${m2>0&&!METODA[bh(s).metoda]?' '+DOP:''}</td></tr>
@@ -4953,7 +4958,7 @@ function p13Doc(s){const o=org(),m=mspX(s);
   return ptag('Prilog 13')+`<h4>STRUČNI IZVJEŠTAJ O ES</h4>
     <table class="p13"><thead><tr><th style="width:30px">BR</th><th colspan="4">PRVI DIO</th></tr></thead><tbody>
     <tr><td>1.</td><td class="k2">Ime deminerske ili UES organizacije</td><td>${esc(o.naziv)}</td><td class="k2">Izvjestio (ime i prezime), funkcija</td><td>${dv(leader())}, vođa tima</td></tr>
-    <tr><td>2.</td><td class="k2">MSP</td><td>${mspName(s)}</td><td class="k2">Datum izvještaja</td><td>${fmtD(today())}</td></tr>
+    <tr><td>2.</td><td class="k2">MSP</td><td>${mspBare(s)}</td><td class="k2">Datum izvještaja</td><td>${fmtD(today())}</td></tr>
     <tr><td>3.</td><td class="k2">Najbliži grad</td><td>${dv(m.grad)}</td><td class="k2">CI ili SI</td><td>${ciName(s)}</td></tr>
     <tr><td>4.</td><td class="k2">Naziv karte</td><td>${dv(m.kartaNaziv)}</td><td class="k2">List karte i broj</td><td>${dv(m.kartaList)}</td></tr>
     <tr><td>5.</td><td class="k2">Razmjera</td><td>${dv(m.kartaRazmjer)}</td><td class="k2">Koordinate zadatka</td><td class="mono">${yx(s,s.nt)}<br><span class="dsmall">${esc(crsName())}, nulta tačka</span></td></tr></tbody></table>
@@ -5112,7 +5117,7 @@ function p10Doc(s){const o=org(),m=mspX(s),list=mspSites(s);list.forEach(bh);
     return `<tr><td>${i}.</td><td>${label}</td><td>${Object.entries(by).map(([t,e])=>esc(t)+(need||e.sn.length?' – ser. br. '+(e.sn.length?esc(e.sn.join(', ')):DOP):'')).join('<br>')||'—'}</td><td class="n">${n||'—'}</td></tr>`;};
   const extra=eqRows().filter(e=>e.kat==='pip'||e.kat==='ost');
   const ciPlan=x=>{const b=bh(x),pd=b.planDana||wdBetween(b.planOd,b.planDo),nd=deminers().length,dets=o.oprema.filter(q=>q.kat==='det').length,sup=person('Supervizor');
-    return `<div class="keep"><div class="sec">${esc(x.ci.oznaka)} (${esc(x.ci.naziv||'naziv')}):</div><p>Cilj: ${x.ci.tip==='SI'?'sistematska':'ciljana'} istraga, ${b.vrsta==='staze'?'radne staze unutar redukovane površine':'čišćenje definisane površine'} (${x.ci.pmin?num(x.ci.pmin):DOP}–${x.ci.pmax?num(x.ci.pmax):DOP} m²)${x.ci.ocekivano?'; očekivana ES prema dosijeu: '+esc(x.ci.ocekivano):''}. Angažirani kapaciteti: vođa tima, ${nd||DOP} deminera u dvojcima, ${medicTxt()}, ${dets||DOP} metal detektora. Planirani broj radnih dana: ${pd||DOP} (${b.planOd?fmtD(b.planOd):DOP} – ${b.planDo?fmtD(b.planDo):DOP}). Radno vrijeme: ${dv(o.radnoVrijeme)}; odmori: ${dv(o.odmori)}. Način rada interne kontrole: vođa tima uzorkovanjem najmanje ${BA_R.qcMin}% očišćene površine; interni monitoring${sup?' ('+esc(sup.fn.toLowerCase()+' '+sup.ime)+')':''} najmanje svakih ${BA_R.monitorDays} radnih dana. Mjesto ulaska u sumnjivu površinu: nulta tačka ${yx(x,x.nt)} (${esc(crsName())}), azimut napredovanja ${x.az}°. Raspored i broj istražnih staza: ${laneCount(x)} radnih staza širine ${BA_R.lane} m od nulte linije, razmak između dvojaca najmanje ${BA_R.pairGap} m. Tehničke metode: ${metodaTxt(b)}; dubina pretrage ${b.dubina?esc(b.dubina)+' cm':DOP}.</p></div>`;};
+    return `<div class="keep"><div class="sec">${esc(x.ci.oznaka)} (${esc(x.ci.naziv||'naziv')}):</div><p>Cilj: ${x.ci.tip==='SI'?'sistematska':'ciljana'} istraga, ${b.vrsta==='staze'?'radne staze unutar redukovane površine':'čišćenje definisane površine'} (${x.ci.pmin?num(x.ci.pmin):DOP}–${x.ci.pmax?num(x.ci.pmax):DOP} m²)${x.ci.ocekivano?'; očekivana ES prema dosijeu: '+esc(x.ci.ocekivano):''}. Angažirani kapaciteti: vođa tima, ${nd||DOP} deminera u dvojcima, ${medicTxt()}, ${dets||DOP} metal detektora. Planirani broj radnih dana: ${pd||DOP} (${b.planOd?fmtD(b.planOd):DOP} – ${b.planDo?fmtD(b.planDo):DOP}). Radno vrijeme: ${dv(o.radnoVrijeme)}; odmori: ${dv(o.odmori)}. Način rada interne kontrole: vođa tima uzorkovanjem najmanje ${BA_R.qcMin}% očišćene površine; interni monitoring${sup?' ('+esc(sup.fn.toLowerCase()+' '+sup.ime)+')':''} najmanje svakih ${BA_R.monitorDays} radnih dana. Mjesto ulaska u sumnjivu površinu: nulta tačka ${yx(x,x.nt)} (${esc(crsName())}), azimut napredovanja ${x.az}°. Raspored i broj istražnih staza: ${qaPl(laneCount(x),'radna staza','radne staze','radnih staza')} širine ${BA_R.lane} m od nulte linije, razmak između dvojaca najmanje ${BA_R.pairGap} m. Tehničke metode: ${metodaTxt(b)}; dubina pretrage ${b.dubina?esc(b.dubina)+' cm':DOP}.</p></div>`;};
   return ptag('Prilog 10')+`<h4>IZVEDBENI PLAN</h4>
     <table class="hd"><tr><td class="k">DEMINERSKA ORGANIZACIJA - IZVOĐAČ:</td><td>${esc(o.naziv)}</td></tr><tr><td class="k">DEMINERSKA ORGANIZACIJA - PODIZVOĐAČ:</td><td>${o.podizvodjac?esc(o.podizvodjac):'—'}</td></tr>
     <tr><td class="k">Broj:</td><td>${DOP}</td></tr><tr><td class="k">Datum:</td><td>${fmtD(today())}</td></tr><tr><td class="k">Za:</td><td>BHMAC – ${dv(ruShort(s))}</td></tr>
@@ -5218,7 +5223,7 @@ function pakParts(s){const P=[['P6','Zapisnik o izvršenim aktivnostima TI i či
   P.push(['FOTO','Fotodokumentacija nalaza',[fotoDoc(s)+dfoot('Fotodokumentacija nalaza',s)]]);return P;}
 function pakPages(s){const P=pakParts(s);let n=0;
   const toc=`<h4>PAKET ZA PREDAJU</h4><div class="dsub">Zapisnik o izvršenim aktivnostima tehničkog izviđanja i čišćenja CI/SI sa prilozima<br>${mspName(s)} · ${ciName(s)} · ${esc(org().naziv)}</div>
-    <table><thead><tr><th style="width:52px">Prilog</th><th>Dokument</th><th style="width:60px">Listova</th><th class="noprint" style="width:110px">Stanje</th></tr></thead><tbody>${P.map(p=>{const m=p[2].reduce((a,h)=>a+missN(h),0);return `<tr><td>${esc(p[0])}</td><td>${esc(p[1])}</td><td class="n">${p[2].length}</td><td class="noprint">${m?'<span class="miss">dopuniti: '+m+'</span>':'<b>spremno</b>'}</td></tr>`;}).join('')}</tbody></table>
+    <table><thead><tr><th style="width:52px">Prilog</th><th>Dokument</th><th style="width:60px">Listova</th><th class="noprint" style="width:110px">Stanje</th></tr></thead><tbody>${P.map(p=>{const m=p[2].reduce((a,h)=>a+missN(h),0),np=p[0]==='FOTO'?s.finds.filter(f=>!f.thumb).length:0;return `<tr><td>${esc(p[0])}</td><td>${esc(p[1])}</td><td class="n">${p[2].length}</td><td class="noprint">${m?'<span class="miss">dopuniti: '+m+'</span>':np?'<span class="miss">bez fotografije: '+np+'</span>':'<b>spremno</b>'}</td></tr>`;}).join('')}</tbody></table>
     <p class="note">Redoslijed prema Prilogu 6, dio III – Prilozi. Štampati na A4 bez skaliranja; svaki dokument počinje na novoj strani.</p>`+dfoot('Paket za predaju · sadržaj',s);
   return [pg(toc)].concat(...P.map(p=>p[2].map(h=>pg(h))));}
 function bhShow(s,k,v){const pages=inDoc(s,()=>BHD[k](s)),multi=pages.length>1||k==='pak';
@@ -5342,14 +5347,14 @@ function renderHitno(){
 
 /* ================= sites sheet ================= */
 function openSites(){
-  openSheet(`<div class="sheet-h"><div><div class="label">${esc(ORG)}</div><h2>${t('sites.title')}</h2></div><button class="x" type="button" data-act="close" aria-label="${t('c.close')}">×</button></div>
+  openSheet(`<div class="sheet-h"><div><div class="label">${esc((n=>site().pack==='RS'?n.replace('(primjer)','(primer)'):n)(org().naziv||ORG))}</div><h2>${t('sites.title')}</h2></div><button class="x" type="button" data-act="close" aria-label="${t('c.close')}">×</button></div>
     ${S.sites.map(x=>`<button class="sitecard${x.id===S.active?' on':''}" type="button" data-act="pickSite" data-id="${esc(x.id)}"><span class="grow"><b>${esc(x.msp.id)} ${esc(x.msp.naziv)} · ${esc(x.ci.oznaka)}</b><br><span class="sub">${x.msp.ru?esc(x.msp.ru)+' · ':''}${num(clearedM2(x))} / ${num(totalArea(x))} m² · ${esc(tv(x.status))}</span></span><span class="chip ${x.status==='u radu'?'work':''}">${x.id===S.active?t('sites.active'):t('sites.open')}</span></button>`).join('')}
     <button class="btn primary" type="button" data-act="newSite">${t('sites.new')}</button>
     <button class="btn" type="button" data-bh="org">${t('sites.org')}</button>
     <div class="card"><label class="field">${t('lang.label')}<select id="uiLang">${UI_OPTS.map(o=>`<option value="${o}"${(S.ui||'auto')===o?' selected':''}>${t('lang.'+o)}</option>`).join('')}</select></label><p class="fine">${t('lang.note')}</p></div>
     ${storageCard()}
     <div><div class="label" style="margin-bottom:6px">${t('sites.pack')}</div><div class="packs">
-      <div class="packrow"><span><b>${t('sites.ba')}</b><br><span class="sub">BHMAC · ${esc(tv(P.standard))}</span></span><span class="chip ok">${t('sites.packOn')}</span></div>
+      <div class="packrow"><span><b>${t('sites.ba')}</b><br><span class="sub">BHMAC · ${esc(tv(PACKS.BA.standard))}</span></span><span class="chip ok">${t('sites.packOn')}</span></div>
       <div class="packrow"><span><b>${t('sites.rs')}</b><br><span class="sub">${t('sites.rsDesc')}</span></span><span class="chip ok">${t('sites.packOn')}</span></div>
       <div class="packrow"><span><b>${t('sites.si')}</b><br><span class="sub">${t('sites.siDesc')}</span></span><span class="chip">${t('sites.notMarket')}</span></div></div>
       <p class="fine">${t('sites.packNote')}</p></div>`);
@@ -5725,8 +5730,13 @@ function mergeBoxes(s,ids){const bs=ids.map(id=>boxById(s,id)).filter(Boolean);i
   if(new Set(bs.map(key)).size>1)return t('bx.err.mergeState',{list:bs.map(b=>b.id+': '+key(b)).join('; ')});
   const done={};Object.keys(bs[0].done).forEach(m=>{if(!bs.every(b=>b.done[m]))return;const d=bs.map(b=>b.done[m]);
     done[m]={day:d.map(x=>x.day).sort().pop(),by:[...new Set(d.map(x=>x.by))].join(', ')};});
-  const nb=buildBox(s,{id:bs[0].id,rects:rects.map(r=>r.slice()),need,done,excl:bs[0].excl||null});if(!nb)return t('bx.err.mergeFail');
-  const gone=new Set(bs.map(b=>b.id));s.boxes.splice(s.boxes.indexOf(bs[0]),1,nb);s.boxes=s.boxes.filter(b=>b===nb||!gone.has(b.id));
+  // all parts of one split box merged back: the box gets its original name again (E-05a + E-05b -> E-05)
+  const gone=new Set(bs.map(b=>b.id)),base=bs[0].id.slice(0,-1),part=id=>id.length===base.length+1&&id.startsWith(base)&&/[a-d1-4]$/.test(id);
+  const nid=base&&bs.every(b=>part(b.id))&&!s.boxes.some(b=>!gone.has(b.id)&&(b.id===base||part(b.id)))?base:bs[0].id;
+  // parts that together fill a rectangle become one rectangle again, so the box can be split again
+  const bb=[Math.min(...rects.map(r=>r[0])),Math.min(...rects.map(r=>r[1])),Math.max(...rects.map(r=>r[2])),Math.max(...rects.map(r=>r[3]))],ra=r=>(r[2]-r[0])*(r[3]-r[1]);
+  const rr=Math.abs(ra(bb)-rects.reduce((a,r)=>a+ra(r),0))<1e-6?[bb]:rects.map(r=>r.slice());
+  const nb=buildBox(s,{id:nid,rects:rr,need,done,excl:bs[0].excl||null});if(!nb)return t('bx.err.mergeFail');s.boxes.splice(s.boxes.indexOf(bs[0]),1,nb);s.boxes=s.boxes.filter(b=>b===nb||!gone.has(b.id));
   s.finds.forEach(f=>{if(gone.has(f.box))f.box=nb.id;});
   s.assign.forEach(a=>{if(gone.has(a.box))a.box=nb.id;});s.assign=s.assign.filter((a,i,arr)=>arr.findIndex(x=>x.who===a.who)===i);
   logAdd(s,inDoc(s,()=>({t:hm(Date.now()),e:'Boksovi '+bs.map(b=>b.id).join(', ')+' spojeni u boks '+nb.id+' ('+num(nb.area)+' m²)'})));addQ('Spajanje boksova '+nb.id);return nb;}
@@ -5791,7 +5801,7 @@ function renderDanasB(){
   let h=roleBar(s)+qaCardIzv(s)+`<div class="card"><div class="label">${t('rsd.ceToday')}</div><div class="big">${num(ce)}<span class="unit">m²</span></div>
     <div class="sub">${t('rsd.schToday',{m2:num(sc),g:s.grid})}</div>
     <div class="bar" role="img" aria-label="${t('rsd.barAria',{p:Math.round(cl/tot*100)})}"><span style="width:${Math.min(100,cl/tot*100)}%"></span></div>
-    <dl class="kv3"><div><dt>${t('rsd.doneTotal')}</dt><dd>${num(cl)} / ${num(tot)} m²</dd></div><div><dt>${t('rsd.findsToday')}</dt><dd>${ft.length}</dd></div><div><dt>${t('rsd.workStart')}</dt><dd>${fmtDS(s.start)}</dd></div></dl></div>`;
+    <dl class="kv3"><div><dt>${t('rsd.doneTotal')}</dt><dd>${num(cl)} / ${num(tot)}&nbsp;m²</dd></div><div><dt>${t('rsd.findsToday')}</dt><dd>${ft.length}</dd></div><div><dt>${t('rsd.workStart')}</dt><dd>${fmtDS(s.start)}</dd></div></dl></div>`;
   h+=`<div class="card"><div class="card-h"><h3>${t('rsd.assignTitle')}</h3><span class="sub">${t('rsd.assignN',{n:s.assign.length})}</span></div><ul class="rows">${s.assign.map(a=>{const m=TEAM.find(x=>x.id===a.who);
     return `<li><span class="mono">${esc(a.who)}</span><span class="grow">${esc(m?m.n:'')}<br><span class="sub">${t('bx.box')} <b>${esc(a.box)}</b> · ${esc(tv(P.methods[a.m]))}</span></span><button class="btn sm" type="button" data-act="boxDone" data-w="${esc(a.who)}">${t('rsd.boxDone')}</button></li>`;}).join('')||`<li class="sub">${t('rsd.noAssign')}</li>`}</ul></div>`;
   h+=`<div class="card"><div class="card-h"><h3>${t('rsd.compliance')}</h3><span class="sub">${esc(P.kratko)}</span></div><ul class="chk">${complianceB(s).map(c=>`<li class="${c.st}"><span class="ic" aria-hidden="true">${c.st==='ok'?'✓':c.st==='info'?'i':'!'}</span><span>${esc(c.t)}</span><span class="v">${esc(c.v)}</span></li>`).join('')}</ul></div>`;
@@ -5996,7 +6006,7 @@ function skicaSVG(s){
   g+=`<text class="sk-s" x="${gx}" y="${legendTop+2}" style="font-weight:700">LEGENDA:</text>`+rows.map((r,i)=>`<g transform="translate(${gx} ${f2(legendTop+7+i*5.2)})">${r[0]}<text class="sk-l" x="7" y="2.4">${r[1]}</text></g>`).join('');
   const ceM=methodM2(s,'CEIA'),scM=methodM2(s,'SCH'),why=[...new Set(ex.map(x=>EXCL[x.excl.why]||x.excl.why))].join(', ');
   g+=`<text class="sk-l" x="${L}" y="${legendTop+4}">Pregledano CEIA: ${num(ceM)} m²</text><text class="sk-l" x="${L}" y="${legendTop+8.5}">Pregledano Schonstedtom: ${num(scM)} m²</text>
-    <text class="sk-l" x="${L}" y="${legendTop+13}">Završeno: ${num(clearedM2(s))} od ${num(totalArea(s))} m² · nalaza: ${s.finds.length}${rt.length?' · vraćeno na ponovni tretman: '+rt.length+' boks. ('+num(rt.reduce((a,b)=>a+b.area,0))+' m²)':''}</text>
+    <text class="sk-l" x="${L}" y="${legendTop+13}">Završeno: ${num(clearedM2(s))} od ${num(totalArea(s))} m² · nalaza: ${s.finds.length}${rt.length?' · vraćeno na ponovni tretman: '+qaPl(rt.length,'boks','boksa','boksova')+' ('+num(rt.reduce((a,b)=>a+b.area,0))+' m²)':''}</text>
     ${ex.length?`<text class="sk-l" x="${L}" y="${legendTop+17.5}">Isključeno iz pretrage: ${num(exclM2(s))} m² (${esc(why)})</text>`:''}
     <text class="sk-l" x="${L}" y="${legendTop+22}">Koordinate: SRB_ETRS89 / UTM 34N · boksovi ${s.grid}×${s.grid} m${s.az?', mreža zaokrenuta '+azTxt(s.az):''}</text>
     <text class="sk-s" x="${L}" y="${legendTop+32}">Skicu izradio:</text><line x1="${L+22}" y1="${legendTop+32.6}" x2="${L+80}" y2="${legendTop+32.6}" stroke="${ink}" stroke-width="0.15" stroke-dasharray="0.6 0.6"/>
@@ -6137,8 +6147,8 @@ function qaCloseRec(s,v,q){const made=[],shut=[],day=v.d||today();
   QA_CHK.forEach(([k,t])=>{const c=v.checks[k];if(!c||c.st!=='ned')return;const n={id:qaNextId(q.ncs,'NC-'),d:day,visit:v.id,kind:'chk',box:'',chk:k,text:t+(c.note?': '+c.note:''),redo:null,closed:null};q.ncs.push(n);made.push(n.id);});
   v.samples.forEach(x=>{const b=boxById(s,x.box),nc=b&&b.ret?q.ncs.find(c=>c.id===b.ret.nc&&!c.closed):null,what=x.type+(x.depth!=null?', dubina '+x.depth+' cm':'')+(x.note?' ('+x.note+')':'');
     if(x.res==='nus'){
-      if(nc){nc.text+='; ponovna kontrola '+v.id+(b.ret.redo?' posle ponovnog tretmana '+fmtD(b.ret.redo.day)+' ('+b.ret.redo.by+')':'')+': pronađeno '+what;b.ret.redo=null;b.ret.day=day;made.push(nc.id);}
-      else{const n={id:qaNextId(q.ncs,'NC-'),d:day,visit:v.id,kind:'box',box:x.box,chk:'',text:'Boks '+x.box+': pronađeno '+what,redo:null,closed:null};q.ncs.push(n);made.push(n.id);if(b)b.ret={nc:n.id,day,redo:null};}}
+      if(nc){nc.text+='; ponovna kontrola '+v.id+(b.ret.redo?' posle ponovnog tretmana '+fmtD(b.ret.redo.day)+' ('+b.ret.redo.by+')':'')+': nalaz '+what;b.ret.redo=null;b.ret.day=day;made.push(nc.id);}
+      else{const n={id:qaNextId(q.ncs,'NC-'),d:day,visit:v.id,kind:'box',box:x.box,chk:'',text:'Boks '+x.box+' – nalaz pri kontroli: '+what,redo:null,closed:null};q.ncs.push(n);made.push(n.id);if(b)b.ret={nc:n.id,day,redo:null};}}
     else if(b&&b.ret&&b.ret.redo){if(nc){nc.redo=Object.assign({},b.ret.redo);nc.closed={d:day,visit:v.id,note:'ponovna kontrola posle ponovnog tretmana bez nalaza'};shut.push(nc.id);}delete b.ret;}});
   v.closed=day;return {made,shut};}
 // a nonconformity from a check is closed by the inspector with a note; one from a box only by a clean re-check
@@ -6188,7 +6198,7 @@ function renderPregledK(){
     <div class="sub">${t('qa.ov.doneSub',{p:tot?num(cl/tot*100,1):'0'})}</div>
     <div class="bar" role="img" aria-label="${t('qa.ov.aria',{p:tot?Math.round(cl/tot*100):0})}"><span style="width:${tot?Math.min(100,cl/tot*100):0}%"></span></div>
     <dl class="kv3"><div><dt>${t('qa.ov.done')}</dt><dd>${t('qa.ov.boxN',{n:cnt('d')})}</dd></div><div><dt>${t('qa.ov.part')}</dt><dd>${cnt('p')}</dd></div><div><dt>${t('qa.ov.none')}</dt><dd>${cnt('n')}</dd></div>
-      <div><dt>${t('qa.ov.ret')}</dt><dd>${cnt('r')}${cnt('k')?' + '+t('qa.ov.waitK',{n:cnt('k')}):''}</dd></div><div><dt>${t('qa.ov.excl')}</dt><dd>${cnt('x')}</dd></div><div><dt>${t('qa.ov.sampled')}</dt><dd>${num(t2.m2)} m²${cl?' · '+num(t2.m2/cl*100,1)+' %':''}</dd></div></dl></div>`;
+      <div><dt>${t('qa.ov.ret')}</dt><dd>${cnt('r')}${cnt('k')?' + '+t('qa.ov.waitK',{n:cnt('k')}):''}</dd></div><div><dt>${t('qa.ov.excl')}</dt><dd>${cnt('x')}</dd></div><div><dt>${t('qa.ov.sampled')}</dt><dd>${num(t2.m2)} m²${cl?' · '+num(t2.m2/cl*100,1)+'&nbsp;%':''}</dd></div></dl></div>`;
   h+=`<div class="card"><div class="card-h"><h3>${t('qa.zk')}</h3><span class="chip ${c.ok?'ok':'work'}">${c.ok?t('qa.zk.ok'):t('qa.zk.obstN',{n:c.why.length})}</span></div>
     ${c.ok?`<p class="sub" style="margin:0">${t('qa.zk.okTxt')}</p>`:`<ul class="missing">${c.why.slice(0,5).map(x=>`<li>${esc(x)}</li>`).join('')}${c.why.length>5?'<li>…</li>':''}</ul>`}
     <button class="btn block" type="button" data-act="doc" data-k="zk" style="margin-top:8px">${t('qa.zk.open')}</button></div>`;
