@@ -340,3 +340,18 @@ test('inspector visit through the UI: start, draw, record, close; the sample is 
   const b = await loadApp({ now: NOW, storage });
   assert.strictEqual(b.run('S.sites.find(s=>s.id==="r1").qa.visits.length'), a.run('qa(site()).visits.length'));
 });
+
+test('release QA: Serbian site screens name the right standard and use ekavica; inspector header and wording', async () => {
+  const a = await rs();
+  a.run('openSites()');
+  const sh = a.html('#sheet');
+  assert.ok(/BHMAC · Standard za PMA u BiH/.test(sh), 'BiH pack row shows the BiH standard on a Serbian site');
+  assert.ok(!/BHMAC · Uredba/.test(sh), 'BiH pack row must not show the Serbian standard');
+  assert.ok(!/primjer/i.test(sh), 'no ijekavica on the Serbian sites sheet');
+  a.run('closeSheet()'); asK(a); a.run('renderHeader()');
+  assert.ok(/KONTROLOR/.test(a.html('#hdrMeta')) && !/class="pack">/.test(a.html('#hdrMeta')), 'inspector header: role badge, no duplicate pack chip');
+  a.run('go("danas")');
+  const ov = a.html('#v-danas');
+  assert.ok(!/\d boks\./.test(ov) && !/pronađeno Fragment/.test(ov), 'no "26 boks." abbreviation, no "pronađeno Fragment"');
+  assert.ok(/nalaz pri kontroli: Fragment/.test(ov), 'nonconformity wording');
+});

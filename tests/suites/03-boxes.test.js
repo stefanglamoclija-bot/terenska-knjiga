@@ -153,3 +153,18 @@ test('opening a new Serbian site assigns 4 different boxes to 4 deminers', async
   assert.strictEqual(new Set(s.assign.map(x => x.box)).size, 4);
   assert.ok(Math.abs(s.boxes.reduce((x, b) => x + b.area, 0) - area(s.poly)) / area(s.poly) < 0.005);
 });
+
+test('split a box in two, merge the parts back: the box gets its original name and area back', async () => {
+  const a = await fresh();
+  a.run('S.active="r1";syncPack()');
+  const r = a.json(`(()=>{const s=site(),b=s.boxes.find(x=>!x.excl&&!x.ret&&x.rects.length===1&&Math.abs(x.area-100)<0.01),id=b.id,A=b.area;
+    const parts=splitBox(s,id,'u').map(k=>k.id),nb=mergeBoxes(s,parts);
+    // merging only some parts of a box split into 4 keeps the first part's name (the other parts still exist)
+    const q=splitBox(s,id,'4').map(k=>k.id),half=mergeBoxes(s,[q[0],q[1]]);
+    return {id,A,parts,merged:nb.id,area:nb.area,half:half.id,left:s.boxes.filter(x=>x.id.startsWith(id)).map(x=>x.id).sort()};})()`);
+  assert.deepStrictEqual(r.parts, [r.id + 'a', r.id + 'b']);
+  assert.strictEqual(r.merged, r.id, 'merged back under the original name');
+  assert.ok(Math.abs(r.area - r.A) < 0.01, `${r.area} vs ${r.A}`);
+  assert.strictEqual(r.half, r.id + 'a', 'partial merge keeps the first part name');
+  assert.deepStrictEqual(r.left, [r.id + 'a', r.id + 'c', r.id + 'd']);
+});
