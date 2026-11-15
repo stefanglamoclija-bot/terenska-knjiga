@@ -2,7 +2,7 @@
 <html lang="bs" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-Sr8ffIZFLR/H+4LS3lDA+V6Xr4fSl9Jm+mCRuddDQ/0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-y5WKU0o/oK6SWZ/akWIwRGrLw86YyD7RsqBt37YbGd4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
@@ -382,6 +382,17 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
 .phf img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#E6E8E2}
 .phf figcaption{font-size:9.5pt;line-height:1.35;margin-top:5px}
 @media print{.phgrid{grid-template-columns:1fr 1fr}.phf img{aspect-ratio:auto;max-height:95mm;object-fit:contain}}
+/* CZRS inspector */
+.rolebar{display:flex;align-items:center;gap:8px}.rolebar .btn{flex:1 1 0;padding:6px 8px}
+.pack.role{border-color:var(--accent);color:var(--ink);font-weight:700}
+.bx-r{fill:url(#bxR)}.bx-k{fill:url(#bxK)}.bx-q{stroke:var(--accent);stroke-width:3.2}
+.qt{width:100%;border-collapse:collapse;font-size:13px}.qt th,.qt td{padding:7px 5px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+.qt td.nw{white-space:nowrap}.qt th{font-size:11.5px;color:var(--muted);font-weight:600;border-top:0}.qt td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.qitem{border-top:1px solid var(--line);padding:10px 0;display:flex;flex-direction:column;gap:8px}.qitem:first-of-type{border-top:0;padding-top:0}
+.qitem-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.qth{width:64px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.qrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.doc .qimg{width:100%;max-width:240px}
 </style>
 </head>
 <body>
@@ -685,11 +696,12 @@ function fillSite(s){
       b.need=A_(b.need).filter(x=>x==='CEIA'||x==='SCH');if(!b.need.length)b.need=['CEIA'];
       const dn={};if(isObj(b.done))['CEIA','SCH'].forEach(x=>{const d=b.done[x];if(isObj(d))dn[x]={day:D_(d.day),by:S_(d.by)};});b.done=dn;
       if(isObj(b.excl))b.excl={why:S_(b.excl.why),note:S_(b.excl.note),day:D_(b.excl.day)};else delete b.excl;
+      if(isObj(b.ret))b.ret={nc:S_(b.ret.nc),day:D_(b.ret.day),redo:isObj(b.ret.redo)?{day:D_(b.ret.redo.day),by:S_(b.ret.redo.by)}:null};else delete b.ret;
       if(b.poly!=null)b.poly=pts(b.poly);if(b.parts!=null)b.parts=A_(b.parts).map(pts).filter(p=>p.length>=3);if(b.rects!=null)b.rects=A_(b.rects).filter(r=>Array.isArray(r)&&r.length===4&&r.every(fin)).map(r=>r.map(Number));
       if(!b.poly||b.poly.length<3)b.poly=(b.parts&&b.parts[0])||[];});
     s.boxes=s.boxes.filter(b=>b.poly.length>=3);
     if(s.feats!=null)s.feats=A_(s.feats).filter(isObj).map(f=>({id:S_(f.id),kind:FK[f.kind]?f.kind:'put',name:S_(f.name),pts:pts(f.pts),buf:Math.max(0,N_(f.buf,0))}));
-    if(s.rail!=null)s.rail=pts(s.rail);}
+    if(s.rail!=null)s.rail=pts(s.rail);fillQa(s);}
   return s;}
 function fillIncident(i){i.site=S_(i.site);i.day=D_(i.day);i.start=T_(i.start);i.t0=N_(i.t0,Date.now());['where','desc','cat','box','end'].forEach(k=>{if(i[k]!=null)i[k]=String(i[k]);});
   ['lane','dist','pu','pv'].forEach(k=>{if(i[k]!=null)i[k]=N_(i[k],null);});const v=isObj(i.v)?i.v:{};i.v={};['ad','ch','lt','hv','k'].forEach(k=>{i.v[k]=Math.max(0,Math.round(N_(v[k],0)));});
@@ -768,7 +780,7 @@ async function loadState(){
 const snapshot=()=>JSON.parse(JSON.stringify(S,(k,v)=>k==='_ll'?undefined:v));
 // localStorage copy next to IndexedDB; if it does not fit, without thumbnails; if that fails too, no copy (never a stale one)
 function writeCopy(c){try{localStorage.setItem(KEY_COPY,JSON.stringify(c));return true;}catch(e){}
-  try{const t=JSON.parse(JSON.stringify(c));t.noThumbs=1;t.sites.forEach(x=>x.finds.forEach(f=>{delete f.thumb;}));localStorage.setItem(KEY_COPY,JSON.stringify(t));return true;}catch(e){}
+  try{const t=JSON.parse(JSON.stringify(c));t.noThumbs=1;t.sites.forEach(x=>{x.finds.forEach(f=>{delete f.thumb;});if(x.qa)A_(x.qa.visits).forEach(v=>Object.values(v.checks||{}).forEach(c=>{delete c.thumb;}));});localStorage.setItem(KEY_COPY,JSON.stringify(t));return true;}catch(e){}
   try{localStorage.removeItem(KEY_COPY);}catch(e){}return false;}
 let saveQ=Promise.resolve();
 function saveOk(){const was=ST.failed;ST.failed=false;if(was)renderSaveWarn();}
@@ -819,9 +831,10 @@ function closeSheet(){const back=lastFocus;lastFocus=null;$('#scrim').hidden=tru
 const inFrame=(()=>{try{return window.self!==window.top;}catch(e){return true;}})();
 
 function renderHeader(){
-  const s=site();{const t=document.querySelector('.tab[data-tab="mapa"]');if(t)t.lastChild.textContent=s.mode==='boxes'?'Boksovi':'Staze';}
+  const s=site(),k=isK(s),tl=(id,x)=>{const t=document.querySelector('.tab[data-tab="'+id+'"]');if(t)t.lastChild.textContent=x;};
+  tl('mapa',s.mode==='boxes'?'Boksovi':'Staze');tl('danas',k?'Pregled':'Danas');tl('nalaz',k?'Kontrola':'Nalaz');
   $('#hdrSite').textContent=s.msp.id+' · '+s.ci.oznaka;
-  $('#hdrMeta').innerHTML=esc([s.msp.naziv,s.msp.ru].filter(Boolean).join(' · '))+' <span class="pack">'+esc(P.kratko)+'</span>';
+  $('#hdrMeta').innerHTML=(k?'<span class="pack role">KONTROLOR</span> ':'')+esc([s.msp.naziv,s.msp.ru].filter(Boolean).join(' · '))+' <span class="pack">'+esc(P.kratko)+'</span>';
   // there is no server yet: say so plainly, never "sent"
   const b=$('#syncBtn'),n=S.queue.length;b.classList.remove('ok');
   $('#syncLabel').innerHTML='Sinhronizacija:<br>u pilotu'+(n?' · '+n+' čeka':'');
@@ -855,7 +868,7 @@ function compliance(s){
   return out;
 }
 function renderDanas(){
-  const s=site(), v=$('#v-danas');if(s.mode==='boxes')return renderDanasB();
+  const s=site(), v=$('#v-danas');if(s.mode==='boxes')return isK(s)?renderPregledK():renderDanasB();
   if(!s.pairs.length&&s.status==='planirano'){
     v.innerHTML=`<div class="card"><div class="label">${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><h2 style="margin-top:4px">Radilište još nije otvoreno</h2>
       <p class="sub">Dosije je unesen: nulta tačka, azimut ${s.az}° i ${s.poly.length} lomnih tačaka. Površina ${num(totalArea(s))} m², oko ${laneCount(s)} radnih staza po 1 m.</p>
@@ -958,7 +971,7 @@ function openLane(i){
 
 /* ================= NALAZ ================= */
 function renderNalaz(){
-  photoData=null;photoTok++;const s=site();if(s.mode==='boxes')return renderNalazB();const lc=laneCount(s);
+  photoData=null;photoTok++;const s=site();if(s.mode==='boxes')return isK(s)?renderKontrola():renderNalazB();const lc=laneCount(s);
   const pl=prefill&&prefill.lane||(s.pairs[0]&&s.pairs[0].lane)||1;
   const pd=prefill&&prefill.dist!=null?prefill.dist:laneDone(s,pl);
   prefill=null;
@@ -1044,8 +1057,8 @@ const DOCS_BA=[
 ];
 function renderIzvjestaji(){
   if(docView){renderDoc(docView);return;}
-  const s=site(),rs=s.pack==='RS',list=rs?DOCS_RS:DOCS_BA;
-  const top=rs?`<div><div class="label">${esc(P.standard)}</div><h2>Dokumenti za CZRS</h2></div>
+  const s=site(),rs=s.pack==='RS',K=isK(s),list=rs?(K?DOCS_RS.filter(d=>d.k==='kk'||d.k==='zk').concat(DOCS_RS.filter(d=>d.k!=='kk'&&d.k!=='zk')):DOCS_RS):DOCS_BA;
+  const top=rs?`<div><div class="label">${esc(P.standard)}</div><h2>${K?'Dokumenti kontrole CZRS':'Dokumenti za CZRS'}</h2></div>${K?'<div class="card"><p class="sub" style="margin:0">KK i ZK su zapisi kontrolora. Ostali dokumenti su izvođačevi i služe samo za pregled.</p></div>':''}
     <div class="card"><p class="sub" style="margin:0">Koordinate u svim dokumentima: SRB_ETRS89 / UTM 34N (zvanična projekcija Srbije).</p></div>`
    :`<div><div class="label">${esc(P.standard)}</div><h2>Izvještaji za BHMAC</h2></div>
     <div class="card"><div class="card-h"><span class="sub">Koordinatni sistem u dokumentima</span></div>
@@ -1083,7 +1096,7 @@ function renderDoc(k){
   const s=site(), v=$('#v-izvjestaji'); let h='';
   if(!docKeys(s).includes(k)){docView=null;renderIzvjestaji();return;}
   if(k==='foto'){v.innerHTML=docShell(fotoDoc(s),k);hydratePhotos();return;}
-  if(s.pack==='RS'&&k!=='exp'){const d=rsDoc(s,k);if(d){v.innerHTML=docShell(d.h,k).replace('<pre ',(d.pre||'')+(d.cls==='wide'||docZ>1?wideHint:'')+'<pre ');if(d.cls)$('#docEl').classList.add(d.cls);return;}}
+  if(s.pack==='RS'&&k!=='exp'){const d=rsDoc(s,k);if(d){v.innerHTML=docShell(d.h,k).replace('<pre ',(d.pre||'')+(d.cls==='wide'||docZ>1?wideHint:'')+'<pre ');if(d.cls)$('#docEl').classList.add(d.cls);if(k==='kk')hydratePhotos();return;}}
   if(BHD[k]){bhShow(s,k,v);return;}
   if(k==='exp'){
     h=`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · ${crsName()} i WGS84</div>
@@ -1634,7 +1647,7 @@ function geoText(){const s=site();const w=(u,v)=>{const p=planeToWgs(s,toGK(s,u,
   const ring=r=>ccw(r.concat([r[0]]).map(p=>w(p[0],p[1])));
   const feats=[{type:'Feature',properties:{vrsta:'granica',projekat:s.msp.id,sektor:s.ci.oznaka},geometry:{type:'Polygon',coordinates:[ring(s.poly)]}}];
   if(s.mode==='boxes'){s.boxes.forEach(b=>{const rs=boxRings(b);feats.push({type:'Feature',properties:{vrsta:'boks',id:b.id,povrsina_m2:b.area,ceia:b.done.CEIA?b.done.CEIA.day:null,schonstedt:b.done.SCH?b.done.SCH.day:null,zavrseno:boxDone(b),
-      stanje:{n:'nije pregledano',p:'delimicno',d:'zavrseno',x:'iskljuceno'}[boxStat(b)],iskljuceno:b.excl?exclTxt(b.excl):null},geometry:rs.length===1?{type:'Polygon',coordinates:[ring(rs[0])]}:{type:'MultiPolygon',coordinates:rs.map(r=>[ring(r)])}});});
+      stanje:{n:'nije pregledano',p:'delimicno',d:'zavrseno',x:'iskljuceno',r:'vraceno na ponovni tretman',k:'ceka ponovnu kontrolu'}[boxStat(b)],iskljuceno:b.excl?exclTxt(b.excl):null},geometry:rs.length===1?{type:'Polygon',coordinates:[ring(rs[0])]}:{type:'MultiPolygon',coordinates:rs.map(r=>[ring(r)])}});});
     (s.feats||[]).filter(f=>f.pts.length).forEach(f=>feats.push({type:'Feature',properties:{vrsta:f.kind,naziv:f.name||'',schonstedt_pojas_m:f.buf||0},geometry:f.pts.length===1?{type:'Point',coordinates:w(f.pts[0][0],f.pts[0][1])}:{type:'LineString',coordinates:f.pts.map(q=>w(q[0],q[1]))}}));}
   else for(const l in s.lanes){const d=s.lanes[l];if(d>0)feats.push({type:'Feature',properties:{vrsta:'radna_staza',staza:+l,ocisceno_m:d,sirina_m:1},geometry:{type:'LineString',coordinates:[w(l-0.5,0),w(l-0.5,d)]}});}
   s.finds.forEach(f=>{const L2=findLocal(f);feats.push({type:'Feature',properties:{vrsta:'nalaz',id:f.id,sredstvo:f.type,kategorija:P.cats[f.cat],dubina_cm:f.depth,datum:f.day},geometry:{type:'Point',coordinates:w(L2[0],L2[1])}});});
@@ -1746,7 +1759,7 @@ async function restoreBackup(){const d=pendingRestore;pendingRestore=null;if(!d)
   try{dryRun(d.st);}catch(e){fail('podaci iz nje se ne mogu prikazati ('+(e&&e.message||e)+').');return;}
   const st=d.st;st.rev=Math.max(+st.rev||0,old?(+old.rev||0):0)+1;st.savedAt=new Date().toISOString();
   if(!ST.db&&window.indexedDB&&ST.mode!=='ls'&&ST.mode!=='mem'){try{ST.db=await idbOpenRetry();ST.mode='idb';ST.fallback=false;}catch(e){}}
-  if(!ST.db)st.sites.forEach(x=>x.finds.forEach(f=>{if(f.ph)f.ph=0;}));
+  if(!ST.db)st.sites.forEach(x=>{x.finds.forEach(f=>{if(f.ph)f.ph=0;});if(x.qa)x.qa.visits.forEach(v=>Object.values(v.checks).forEach(c=>{if(c.ph)c.ph=0;}));});
   const c=JSON.parse(JSON.stringify(st,(k,v)=>k==='_ll'?undefined:v));
   try{if(ST.db){await idbSwap(c,d.photos.map(([k,u])=>[k,dataToBlob(u)]));markIdb();writeCopy(c);}
     else if(ST.mode==='ls')localStorage.setItem(KEY,JSON.stringify(c));
@@ -2010,12 +2023,13 @@ function bufTxt(s){const f=feats(s).filter(x=>x.buf>0);return f.length?f.map(x=>
 /* ---------- box editing: split, merge, rename, exclude ---------- */
 const EXCL={zgrada:'zgrada / objekat',put:'put',voda:'voda',ostalo:'ostalo'};
 const exclTxt=e=>e?(EXCL[e.why]||e.why)+(e.note?' ('+e.note+')':''):'';
-function boxStat(b){return b.excl?'x':boxDone(b)?'d':(Object.keys(b.done).some(m=>b.need.includes(m))?'p':'n');}
+// r = vraćeno na ponovni tretman (CZRS inspection found an item), k = re-treated, waiting for the inspector's re-check
+function boxStat(b){return b.excl?'x':b.ret?(b.ret.redo?'k':'r'):boxDone(b)?'d':(Object.keys(b.done).some(m=>b.need.includes(m))?'p':'n');}
 function rehomeFinds(s,fromIds,boxes){fromIds=new Set(fromIds);s.finds.forEach(f=>{if(!fromIds.has(f.box))return;const pt=[f.u,f.v];
   const hit=boxes.find(b=>inBox(b,pt))||boxes.slice().sort((a,b)=>Math.hypot(a.cx-pt[0],a.cy-pt[1])-Math.hypot(b.cx-pt[0],b.cy-pt[1]))[0];f.box=hit.id;});}
 function freeId(s,base,suf,skip){let id=base+suf,n=2;while(s.boxes.some(b=>b.id===id&&b.id!==skip))id=base+suf+'.'+(n++);return id;}
 // split in 2 along the cross axis (mode 'u'), along the main axis ('v') or into 4; cuts are metres from the box's start corner
-function splitBox(s,id,mode,cu,cv){const b=boxById(s,id);if(!b)return 'Boks ne postoji.';
+function splitBox(s,id,mode,cu,cv){const b=boxById(s,id);if(!b)return 'Boks ne postoji.';if(b.ret)return QA_LOCK;
   if(b.rects.length>1)return 'Spojeni boks se ne deli. Podeli boksove pre spajanja.';
   const [x0,y0,x1,y1]=b.rects[0],w=x1-x0,h=y1-y0;cu=isFinite(cu)?cu:w/2;cv=isFinite(cv)?cv:h/2;
   if((mode!=='v')&&(cu<0.5||cu>w-0.5))return 'Rez mora biti između 0,5 i '+num(w-0.5,1)+' m od početnog ugla.';
@@ -2032,7 +2046,7 @@ function splitBox(s,id,mode,cu,cv){const b=boxById(s,id);if(!b)return 'Boks ne p
 function rectsTouch(a,b){const e=0.01,ov=(p0,p1,q0,q1)=>Math.min(p1,q1)-Math.max(p0,q0)>e;
   return ((Math.abs(a[2]-b[0])<e||Math.abs(b[2]-a[0])<e)&&ov(a[1],a[3],b[1],b[3]))||((Math.abs(a[3]-b[1])<e||Math.abs(b[3]-a[1])<e)&&ov(a[0],a[2],b[0],b[2]));}
 // merge adjacent boxes into one (union of their grid cells); the first id is kept
-function mergeBoxes(s,ids){const bs=ids.map(id=>boxById(s,id)).filter(Boolean);if(bs.length<2)return 'Izaberi najmanje dva boksa.';
+function mergeBoxes(s,ids){const bs=ids.map(id=>boxById(s,id)).filter(Boolean);if(bs.length<2)return 'Izaberi najmanje dva boksa.';if(bs.some(b=>b.ret))return QA_LOCK;
   const rects=[].concat(...bs.map(b=>b.rects)),seen=new Set([0]),q=[0];while(q.length){const i=q.shift();rects.forEach((r,j)=>{if(!seen.has(j)&&rectsTouch(rects[i],r)){seen.add(j);q.push(j);}});}
   if(seen.size<rects.length)return 'Boksovi nisu susedni. Spajaju se samo boksovi koji dele stranu.';
   if(new Set(bs.map(b=>!!b.excl)).size>1)return 'Isključen boks i boks za pretragu ne mogu se spojiti.';
@@ -2048,9 +2062,9 @@ function mergeBoxes(s,ids){const bs=ids.map(id=>boxById(s,id)).filter(Boolean);i
 function renameBox(s,id,nid){nid=String(nid||'').trim().replace(/\s+/g,' ');const b=boxById(s,id);if(!b)return 'Boks ne postoji.';
   if(!nid||nid.length>16)return 'Naziv boksa: 1 do 16 znakova.';if(/[<>"&]/.test(nid))return 'Naziv ne sme imati znakove < > " &.';
   if(nid===id)return 'Naziv je isti.';if(boxById(s,nid))return 'Boks '+nid+' već postoji.';
-  b.id=nid;s.finds.forEach(f=>{if(f.box===id)f.box=nid;});s.assign.forEach(a=>{if(a.box===id)a.box=nid;});
+  b.id=nid;s.finds.forEach(f=>{if(f.box===id)f.box=nid;});s.assign.forEach(a=>{if(a.box===id)a.box=nid;});qaRename(s,id,nid);
   logAdd(s,{t:hm(Date.now()),e:'Boks '+id+' preimenovan u '+nid});addQ('Boks '+id+' → '+nid);return b;}
-function exclBox(s,id,why,note){const b=boxById(s,id);if(!b)return 'Boks ne postoji.';
+function exclBox(s,id,why,note){const b=boxById(s,id);if(!b)return 'Boks ne postoji.';if(why&&b.ret)return QA_LOCK;
   if(why){b.excl={why,note:String(note||'').trim().slice(0,80),day:today()};
     s.assign.filter(a=>a.box===id).forEach(a=>{const n=nextBoxFor(s,a.m,a.who);if(n)a.box=n.id;else s.assign=s.assign.filter(x=>x!==a);});
     logAdd(s,{t:hm(Date.now()),e:'Boks '+id+' isključen iz pretrage: '+exclTxt(b.excl)});}
@@ -2058,7 +2072,8 @@ function exclBox(s,id,why,note){const b=boxById(s,id);if(!b)return 'Boks ne post
   addQ('Boks '+id+(why?' isključen':' vraćen'));return b;}
 
 function boxById(s,id){return s.boxes.find(b=>b.id===id);}
-function boxDone(b){return !b.excl&&b.need.every(m=>b.done[m]);}
+// a box sent back by the CZRS inspector is not done until it is re-treated and passes the re-check
+function boxDone(b){return !b.excl&&!b.ret&&b.need.every(m=>b.done[m]);}
 function nextBoxFor(s,m,who){const taken=new Set(s.assign.filter(a=>a.who!==who).map(a=>a.box+'|'+a.m));
   return s.boxes.filter(b=>!b.excl&&b.need.includes(m)&&!b.done[m]&&(m!=='SCH'||b.done.CEIA)&&!taken.has(b.id+'|'+m)).sort((a,b)=>a.cy-b.cy||a.cx-b.cx)[0];}
 function methodM2(s,m,day){return s.boxes.filter(b=>!b.excl&&b.done[m]&&(!day||b.done[m].day===day)).reduce((a,b)=>a+b.area,0);}
@@ -2093,16 +2108,16 @@ function seedRS(){
   s.log=[{t:'07:00',e:'Dolazak na radilište'},{t:'07:10',e:'Brifing i podela zadataka'},{t:'07:20',e:'Provera CEIA detektora i Schonstedta na test-poligonu: ispravno',k:'det'},
     {t:'07:30',e:'Početak rada: D-01 do D-04 CEIA po boksovima, D-05 Schonstedt uz prugu'},{t:'08:50',e:'Nalaz N-207: upaljač art. projektila, boks '+nx[1].id+', dubina 7 cm; prijavljeno MUP-u',k:'find'},
     {t:'10:15',e:'Kontrola supervizora: boks '+ce[ce.length-2].id+', CEIA, bez nalaza',k:'qc'},{t:'11:00',e:'Poseta: kontrolor CZRS (primer)'}];
-  s.casevac=past[2];return s;
+  s.casevac=past[2];seedQa(s,past[3]);return s;
 }
 
 function renderDanasB(){
   const s=site(),v=$('#v-danas');
-  if(s.status==='planirano'){v.innerHTML=`<div class="card"><div class="label">${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><h2 style="margin-top:4px">Radilište još nije otvoreno</h2>
+  if(s.status==='planirano'){v.innerHTML=roleBar(s)+`<div class="card"><div class="label">${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><h2 style="margin-top:4px">Radilište još nije otvoreno</h2>
     <p class="sub">Uneto: ${s.poly.length} lomnih tačaka, površina ${num(totalArea(s))} m², ${s.boxes.length} boksova ${s.grid}×${s.grid} m.</p>
     <div class="btnrow"><button class="btn primary" type="button" data-act="openSite">Otvori radilište i rasporedi tim</button><button class="btn" type="button" data-act="tab" data-tab="mapa">Pogledaj boksove</button></div></div>`;return;}
   const ce=methodM2(s,'CEIA',today()),sc=methodM2(s,'SCH',today()),cl=clearedM2(s),tot=totalArea(s),ft=s.finds.filter(f=>f.day===today());
-  let h=`<div class="card"><div class="label">Pregledano danas · CEIA</div><div class="big">${num(ce)}<span class="unit">m²</span></div>
+  let h=roleBar(s)+qaCardIzv(s)+`<div class="card"><div class="label">Pregledano danas · CEIA</div><div class="big">${num(ce)}<span class="unit">m²</span></div>
     <div class="sub">Schonstedt danas ${num(sc)} m² · boksovi ${s.grid}×${s.grid} m</div>
     <div class="bar" role="img" aria-label="${Math.round(cl/tot*100)}% površine završeno"><span style="width:${Math.min(100,cl/tot*100)}%"></span></div>
     <dl class="kv3"><div><dt>Završeno ukupno</dt><dd>${num(cl)} / ${num(tot)} m²</dd></div><div><dt>Nalazi danas</dt><dd>${ft.length}</dd></div><div><dt>Početak rada</dt><dd>${fmtD(s.start).slice(0,6)}</dd></div></dl></div>`;
@@ -2120,7 +2135,8 @@ function complianceB(s){const o=[];const det=dayLog(s,today()).some(l=>l.k==='de
   const need=s.boxes.filter(b=>!b.excl&&b.need.includes('SCH')),dn=need.filter(b=>b.done.SCH).length;
   if(need.length)o.push({st:'ok',t:'Dubinska pretraga Schonstedtom uz '+(bufTxt(s)||'objekte'),v:dn+' od '+need.length+' boksova'});
   o.push({st:'info',t:'Dubina pretrage CEIA '+P.rules.minDepth+' cm (projekat)',v:'ne meri se'});
-  o.push({st:'ok',t:'Dnevna evidencija učinka po demineru',v:'vodi se sama'});return o;}
+  o.push({st:'ok',t:'Dnevna evidencija učinka po demineru',v:'vodi se sama'});
+  const on=qa(s).ncs.filter(n=>!n.closed).length;if(on||qa(s).visits.length)o.push({st:on?'bad':'ok',t:'Nedostaci iz kontrole CZRS',v:on?on+' otvoreno':'nema otvorenih'});return o;}
 function logCard(s){const log=dayLog(s,today()),old=legacyLog(s);
   return `<div class="card"><div class="card-h"><h3>${L10('Dnevnik rada','Dnevnik rada')}</h3><span class="sub">${L10('kolona (b), Prilog 9','tok rada za dnevnu evidenciju')}</span></div>
     <ul class="log">${log.map(l=>`<li class="${l.k==='find'||l.k==='inc'?'find':''}"><span class="tm">${esc(l.t)}</span><span class="ev">${esc(l.e)}</span></li>`).join('')||'<li><span class="tm"></span><span class="ev sub">Danas još nema zapisa.</span></li>'}</ul>
@@ -2162,55 +2178,57 @@ function boxMapSVG(s){
   const E=q=>enOf(s,q),b=bounds(s.poly.map(E)),padL=8,padR=8,padT=24,padB=16,sc0=(330-padL-padR)/(b.x1-b.x0+4),zoom=mapZoom&&sc0*(s.grid||10)<52;
   const sc=zoom?52/(s.grid||10):sc0,W=Math.round(padL+padR+(b.x1-b.x0+4)*sc),H=Math.round((b.y1-b.y0+4)*sc+padT+padB);lastMap={sc,zoom,W};
   const P=q=>{const e=E(q);return [padL+(e[0]-b.x0+2)*sc,padT+(b.y1+2-e[1])*sc];},f1=n=>n.toFixed(1),pth=p=>'M'+p.map(q=>{const r=P(q);return f1(r[0])+' '+f1(r[1]);}).join('L')+'Z';
-  const asg={};s.assign.forEach(a=>asg[a.box]=a);const msel=mergeSel&&mergeSel.site===s.id?mergeSel.ids:[];
+  const asg={};s.assign.forEach(a=>asg[a.box]=a);const msel=mergeSel&&mergeSel.site===s.id?mergeSel.ids:[],qv=isK(s)?qaOpen(s):null,qs=new Set(qv?qv.samples.map(x=>x.box):[]);
   let g=`<svg viewBox="0 0 ${W} ${H}" ${zoom?`width="${W}" height="${H}"`:''} role="group" aria-label="Boksovi ${esc(s.ci.oznaka)}, sever gore"><defs><pattern id="bxX" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="5" height="5" fill="var(--surface)"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--muted)" stroke-width="1.4"/></pattern>
+    <pattern id="bxR" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--haz-soft)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--hazard)" stroke-width="2.6"/></pattern><pattern id="bxK" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--work-soft)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--work)" stroke-width="2.6"/></pattern>
     <clipPath id="bxClip"><rect x="0" y="${padT-4}" width="${W}" height="${H-padT+4}"/></clipPath></defs>`;
   g+=`<path class="m-poly" d="${pth(s.poly)}"/>`;
   s.boxes.forEach(bx=>{const st=boxStat(bx);
-    g+=`<path class="bxp bx-${st}${asg[bx.id]?' bx-a':''}${selBox===bx.id?' bx-s':''}${msel.includes(bx.id)?' bx-m':''}" d="${boxRings(bx).map(pth).join('')}" fill-rule="evenodd" data-act="box" data-id="${esc(bx.id)}" role="button" tabindex="0" aria-label="Boks ${esc(bx.id)}"><title>Boks ${esc(bx.id)}${bx.excl?' · isključeno: '+esc(exclTxt(bx.excl)):''}</title></path>`;});
+    g+=`<path class="bxp bx-${st}${asg[bx.id]?' bx-a':''}${selBox===bx.id?' bx-s':''}${msel.includes(bx.id)?' bx-m':''}${qs.has(bx.id)?' bx-q':''}" d="${boxRings(bx).map(pth).join('')}" fill-rule="evenodd" data-act="box" data-id="${esc(bx.id)}" role="button" tabindex="0" aria-label="Boks ${esc(bx.id)}"><title>Boks ${esc(bx.id)}${bx.excl?' · isključeno: '+esc(exclTxt(bx.excl)):''}${bx.ret?' · '+QA_STAT[st]:''}</title></path>`;});
   g+=`<g clip-path="url(#bxClip)">`+feats(s).filter(f=>f.buf>0&&f.pts.length).map(f=>f.pts.length===1?(()=>{const c=P(f.pts[0]);return `<circle class="m-bufp" cx="${f1(c[0])}" cy="${f1(c[1])}" r="${f1(f.buf*sc)}"/>`;})()
     :`<path class="m-buf" d="M${f.pts.map(q=>{const r=P(q);return f1(r[0])+' '+f1(r[1]);}).join('L')}" stroke-width="${f1(2*f.buf*sc)}"/>`).join('')+'</g>';
   const ctr=P(s.poly.reduce((a,q)=>[a[0]+q[0]/s.poly.length,a[1]+q[1]/s.poly.length],[0,0]));
   g+=`<g clip-path="url(#bxClip)">${feats(s).filter(f=>f.pts.length).map(f=>featSVG(f,P,false,'var(--ink)',ctr)).join('')}</g>`;
   s.assign.forEach(a=>{const bx=boxById(s,a.box);if(bx){const c=P([bx.cx,bx.cy]);g+=`<text class="m-t ink" x="${f1(c[0])}" y="${f1(c[1]+3)}" text-anchor="middle" style="pointer-events:none">${esc(String(a.who).slice(2))}</text>`;}});
-  if(showIds||msel.length)s.boxes.forEach(bx=>{const c=P([bx.cx,bx.cy]);g+=`<text class="m-bid" x="${f1(c[0])}" y="${f1(c[1]+(asg[bx.id]?-5:2.5))}" text-anchor="middle">${esc(bx.id)}</text>`;});
+  if(showIds||msel.length||qs.size)s.boxes.forEach(bx=>{const c=P([bx.cx,bx.cy]);g+=`<text class="m-bid" x="${f1(c[0])}" y="${f1(c[1]+(asg[bx.id]?-5:2.5))}" text-anchor="middle">${esc(bx.id)}</text>`;});
   s.finds.forEach(f=>{const c=P([f.u,f.v]),cx=c[0],cy=c[1],r=3.6;g+=`<path class="m-mk" d="M${f1(cx)} ${f1(cy-r)}L${f1(cx+r)} ${f1(cy+r*.8)}H${f1(cx-r)}Z"/>`;});
   s.poly.forEach((p,i)=>{const c=P(p);g+=`<circle class="m-tp" cx="${f1(c[0])}" cy="${f1(c[1])}" r="2.2"/><text class="m-t ink" x="${f1(c[0]+4)}" y="${f1(c[1]-3)}">T${i+1}</text>`;});
   const tn=trueNorth(s)/D2R,nx=W-14,ny=13;
   g+=`<g transform="translate(${nx} ${ny}) rotate(${tn.toFixed(2)})"><path class="m-nf" d="M0 -9L-3.2 -1.5H3.2Z"/><line class="m-n" x1="0" y1="-2" x2="0" y2="8"/></g><text class="m-t ink" x="${nx-6}" y="${ny-2}" text-anchor="end">S</text>`;
   if(s.az)g+=`<g transform="translate(${nx-30} ${ny}) rotate(${s.az})"><line x1="0" y1="8" x2="0" y2="-5" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M0 -9L-2.4 -4H2.4Z" fill="var(--muted)"/></g><text class="m-t" x="${nx-40}" y="${ny+3}" text-anchor="end">mreža ${azTxt(s.az)}</text>`;
   return g+'</svg>';}
-function featCard(s){const fs=feats(s);
-  return `<div class="card"><div class="card-h"><h3>Objekti i orijentiri</h3><button class="btn sm" type="button" data-rs="featNew">+ Dodaj</button></div>
-    ${fs.length?`<ul class="rows">${fs.map(f=>`<li><span>${featSwatch(FK[f.kind]?f.kind:'put')}</span><span class="grow"><b>${esc(fkOf(f).n)}</b>${f.name?' · '+esc(f.name):''}<br><span class="sub">${fkOf(f).lin?tacke(f.pts.length):'tačka'} · ${f.buf>0?'Schonstedt do '+nm(f.buf)+' m':'bez pojasa za Schonstedt'}</span></span><button class="btn sm" type="button" data-rs="featEdit" data-id="${esc(f.id)}">Uredi</button></li>`).join('')}</ul>`
+function featCard(s){const fs=feats(s),ro=isK(s);
+  return `<div class="card"><div class="card-h"><h3>Objekti i orijentiri</h3>${ro?'<span class="sub">podaci izvođača</span>':'<button class="btn sm" type="button" data-rs="featNew">+ Dodaj</button>'}</div>
+    ${fs.length?`<ul class="rows">${fs.map(f=>`<li><span>${featSwatch(FK[f.kind]?f.kind:'put')}</span><span class="grow"><b>${esc(fkOf(f).n)}</b>${f.name?' · '+esc(f.name):''}<br><span class="sub">${fkOf(f).lin?tacke(f.pts.length):'tačka'} · ${f.buf>0?'Schonstedt do '+nm(f.buf)+' m':'bez pojasa za Schonstedt'}</span></span>${ro?'':`<button class="btn sm" type="button" data-rs="featEdit" data-id="${esc(f.id)}">Uredi</button>`}</li>`).join('')}</ul>`
       :'<p class="sub" style="margin:0">Pruga, put, dalekovod, kanal, potok, reper ili stub. Crtaju se na mapi i na skici; uz objekat se može tražiti i Schonstedt.</p>'}</div>`;}
 function renderMapaB(){
-  const s=site(),st=s.boxes.map(boxStat),dn=st.filter(x=>x==='d').length,pt=st.filter(x=>x==='p').length,xn=st.filter(x=>x==='x').length,ax=axisTxt(s),bt=bufTxt(s);
+  const s=site(),st=s.boxes.map(boxStat),dn=st.filter(x=>x==='d').length,pt=st.filter(x=>x==='p').length,xn=st.filter(x=>x==='x').length,rn=st.filter(x=>x==='r'||x==='k').length,ax=axisTxt(s),bt=bufTxt(s),K=isK(s),qv=K?qaOpen(s):null;
   const kinds=[...new Set(feats(s).map(f=>f.kind))].filter(k=>FK[k]),msel=mergeSel&&mergeSel.site===s.id?mergeSel.ids:null;
   $('#v-mapa').innerHTML=`<div><div class="label">${esc(s.msp.id)} · ${esc(s.msp.naziv)} · ${esc(s.ci.oznaka)}</div><h2>Boksovi</h2></div>
-    <div class="legend"><span><i style="background:var(--haz-soft)"></i>Nije pregledano</span><span><i style="background:var(--work-soft)"></i>Delimično (čeka Schonstedt)</span><span><i style="background:var(--cleared)"></i>Završeno</span><span><i style="background:repeating-linear-gradient(-45deg,var(--muted) 0 1.5px,var(--surface) 1.5px 4px)"></i>Isključeno</span><span><i style="background:var(--surface-2);outline:2px solid var(--work);outline-offset:-2px"></i>U radu</span>${kinds.map(k=>`<span>${featSwatch(k)}${FK[k].n}</span>`).join('')}${bt?'<span><i style="background:rgba(140,154,46,.32)"></i>Pojas za Schonstedt</span>':''}</div>
+    <div class="legend"><span><i style="background:var(--haz-soft)"></i>Nije pregledano</span><span><i style="background:var(--work-soft)"></i>Delimično (čeka Schonstedt)</span><span><i style="background:var(--cleared)"></i>Završeno</span><span><i style="background:repeating-linear-gradient(-45deg,var(--muted) 0 1.5px,var(--surface) 1.5px 4px)"></i>Isključeno</span><span><i style="background:var(--surface-2);outline:2px solid var(--work);outline-offset:-2px"></i>U radu</span>${st.includes('r')?'<span><i style="background:repeating-linear-gradient(-45deg,var(--hazard) 0 2px,var(--haz-soft) 2px 5px)"></i>Vraćeno na ponovni tretman</span>':''}${st.includes('k')?'<span><i style="background:repeating-linear-gradient(-45deg,var(--work) 0 2px,var(--work-soft) 2px 5px)"></i>Čeka ponovnu kontrolu CZRS</span>':''}${qv?'<span><i style="background:var(--surface-2);outline:3px solid var(--accent);outline-offset:-3px"></i>U uzorku '+esc(qv.id)+'</span>':''}${kinds.map(k=>`<span>${featSwatch(k)}${FK[k].n}</span>`).join('')}${bt?'<span><i style="background:rgba(140,154,46,.32)"></i>Pojas za Schonstedt</span>':''}</div>
     ${msel?`<div class="notice" role="status"><b>Spajanje boksova.</b> Dodirni susedne boksove na mapi. Izabrano: ${msel.map(esc).join(', ')}.<div class="btnrow" style="margin-top:8px"><button class="btn sm primary" type="button" data-rs="mergeOk" ${msel.length<2?'disabled':''}>Spoji izabrane (${msel.length})</button><button class="btn sm" type="button" data-rs="mergeCancel">Odustani</button></div></div>`:''}
+    ${K?`<div class="notice" role="status">${qv?'Kontrola '+esc(qv.id)+': dodirni završeni boks da ga dodaš u uzorak ili ukloniš iz njega.':'Uloga: kontrolor CZRS. Podaci izvođača su samo za pregled; uzorak se bira u poseti (Kontrola).'}</div>`:''}
     <div class="mapwrap${mapZoom?' zoom':''}" id="mapWrap">${boxMapSVG(s)}</div>
     <div class="maptools"><button class="btn sm" type="button" data-act="mapZoom" aria-pressed="${mapZoom}">${mapZoom?'Cijela mapa':'Uvećaj (boks ≥ 52 px)'}</button>
-      <label class="field">Otvori boks<select id="boxPick" aria-label="Izaberi boks"><option value="">— boks —</option>${s.boxes.slice().sort((a,b)=>a.id.localeCompare(b.id)).map(b=>`<option value="${esc(b.id)}">Boks ${esc(b.id)}${b.excl?' · isključen':boxDone(b)?' · završen':''}</option>`).join('')}</select></label></div>
-    <div class="sub">Dodirni boks za pregled, podelu, spajanje ili isključenje. Mreža ${s.grid}×${s.grid} m${s.az?', zaokrenuta '+azTxt(s.az)+' od severa':''}; mapa je okrenuta ka severu.${bt?' Schonstedt se traži i uz '+bt+'.':''} <button class="linkbtn" type="button" data-rs="ids">${showIds?'Sakrij oznake boksova':'Prikaži oznake boksova'}</button></div>
+      <label class="field">Otvori boks<select id="boxPick" aria-label="Izaberi boks"><option value="">— boks —</option>${s.boxes.slice().sort((a,b)=>a.id.localeCompare(b.id)).map(b=>`<option value="${esc(b.id)}">Boks ${esc(b.id)}${b.excl?' · isključen':b.ret?' · vraćen':boxDone(b)?' · završen':''}</option>`).join('')}</select></label></div>
+    <div class="sub">${K?'Dodirni boks za podatke izvođača i uzorkovanje.':'Dodirni boks za pregled, podelu, spajanje ili isključenje.'} Mreža ${s.grid}×${s.grid} m${s.az?', zaokrenuta '+azTxt(s.az)+' od severa':''}; mapa je okrenuta ka severu.${bt?' Schonstedt se traži i uz '+bt+'.':''} <button class="linkbtn" type="button" data-rs="ids">${showIds?'Sakrij oznake boksova':'Prikaži oznake boksova'}</button></div>
     <div class="card"><dl class="kv"><dt>Ishodište</dt><dd class="mono">${crsHtml(s,s.nt)}</dd><dt>Koord. sistem</dt><dd>${crsName()}</dd>
       ${s.az?`<dt>Zaokret mreže</dt><dd>${azTxt(s.az)} (ose ${ax.U} i ${ax.V})</dd>`:''}
-      <dt>Površina</dt><dd>${num(polyArea(s.poly))} m²${xn?' · za pretragu '+num(totalArea(s))+' m²':''}</dd><dt>Boksovi</dt><dd>${dn} završeno · ${pt} delimično${xn?' · '+xn+' isključeno':''} · ${s.boxes.length} ukupno</dd>
+      <dt>Površina</dt><dd>${num(polyArea(s.poly))} m²${xn?' · za pretragu '+num(totalArea(s))+' m²':''}</dd><dt>Boksovi</dt><dd>${dn} završeno · ${pt} delimično${rn?' · '+rn+' vraćeno na ponovni tretman':''}${xn?' · '+xn+' isključeno':''} · ${s.boxes.length} ukupno</dd>
       <dt>CEIA ukupno</dt><dd>${num(methodM2(s,'CEIA'))} m²</dd><dt>Schonstedt ukupno</dt><dd>${num(methodM2(s,'SCH'))} m²</dd></dl></div>
     ${featCard(s)}
     <button class="btn primary" type="button" data-act="doc" data-k="sk">Otvori skicu napredovanja</button>`;
 }
 function openBoxB(id){
-  const s=site(),bx=boxById(s,id);if(!bx)return;
+  const s=site(),bx=boxById(s,id);if(!bx)return;if(isK(s))return openBoxK(id);
   if(mergeSel&&mergeSel.site===s.id){const i=mergeSel.ids.indexOf(id);if(i<0)mergeSel.ids.push(id);else if(i>0)mergeSel.ids.splice(i,1);renderMapaB();return;}
   selBox=id;renderMapaB();
   const fs=s.finds.filter(f=>f.box===id),opts=TEAM.map(t=>`<option value="${t.id}">${t.id} · ${esc(t.n)}</option>`).join(''),ax=axisTxt(s),ex=bx.excl,single=bx.rects.length===1,near=schFeats(s,bx),q=esc(id);
   const mrow=m=>{const d=bx.done[m];return `<div class="packrow"><span><b>${esc(P.methods[m])}</b><br><span class="sub">${d?'očišćeno '+fmtD(d.day).slice(0,6)+' · '+esc(d.by):(m==='SCH'&&!bx.done.CEIA?'posle CEIA':'nije pregledano')}</span></span>${d?(d.day===today()?`<button class="btn sm" type="button" data-act="unmarkM" data-id="${q}" data-m="${m}">Poništi</button>`:'<span class="chip ok">✓</span>'):`<button class="btn sm primary" type="button" data-act="markM" data-id="${q}" data-m="${m}" ${m==='SCH'&&!bx.done.CEIA?'disabled':''}>Očišćeno</button>`}</div>`;};
   openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · ${num(bx.area)} m²${single?'':' · spojeni boks'}</div><h2>Boks ${q}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
-    ${ex?`<div class="notice">Isključeno iz pretrage: <b>${esc(exclTxt(ex))}</b>. Ne računa se u površinu za pretragu.</div>`:''}
+    ${ex?`<div class="notice">Isključeno iz pretrage: <b>${esc(exclTxt(ex))}</b>. Ne računa se u površinu za pretragu.</div>`:''}${qaRetNotice(s,bx)}
     <dl class="kv"><dt>${ax.Corner}</dt><dd class="mono">${crsHtml(s,toGK(s,bx.x0,bx.y0))}</dd><dt>Veličina</dt><dd>${nm(bx.w)} × ${nm(bx.h)} m${s.az?' ('+ax.U+' × '+ax.V+')':''}</dd>${near.length?`<dt>Schonstedt</dt><dd>uz ${near.map(f=>esc(fkOf(f).acc)).join(', ')}</dd>`:''}<dt>Nalazi</dt><dd>${fs.length?fs.map(f=>esc(f.type)).join(', '):'nema'}</dd></dl>
-    ${ex?'':`<label class="field">Deminer<select id="mWho">${opts}</select></label><div class="packs">${bx.need.map(mrow).join('')}</div>
+    ${ex?'':`<label class="field">Deminer<select id="mWho">${opts}</select></label><div class="packs">${bx.need.map(mrow).join('')}</div>${bx.ret&&!bx.ret.redo?`<button class="btn primary" type="button" data-qa="redo" data-id="${q}">Ponovni tretman završen (izabrani deminer)</button>`:''}
     <button class="btn" type="button" data-act="findBox" data-id="${q}">Dodaj nalaz u boksu ${q}</button>`}
     <details class="bxed"><summary>Uredi boks: podela, spajanje, naziv, isključenje</summary><div class="bxed-in">
       <div class="label">Podela</div>
@@ -2269,6 +2287,7 @@ function skicaSVG(s){
   const ink='#1d2a33',ex=s.boxes.filter(x=>x.excl),kinds=[...new Set(feats(s).map(f=>f.kind))].filter(x=>FK[x]);
   const rows=[[`<rect width="5" height="3.2" fill="url(#skC)" stroke="${ink}" stroke-width="0.15"/>`,'očišćeno CEIA detektorom'],[`<rect width="5" height="3.2" fill="url(#skS)" stroke="${ink}" stroke-width="0.15"/>`,'očišćeno Schonstedtom']];
   if(ex.length)rows.push([`<rect width="5" height="3.2" fill="url(#skX)" stroke="${ink}" stroke-width="0.15"/>`,'isključeno iz pretrage']);
+  const rt=s.boxes.filter(x=>x.ret&&!x.excl);if(rt.length)rows.push([`<rect width="5" height="3.2" fill="url(#skR)" stroke="${ink}" stroke-width="0.15"/>`,'vraćeno na ponovni tretman (CZRS)']);
   rows.push([`<circle cx="2.5" cy="1.6" r="0.75" fill="none" stroke="${ink}" stroke-width="0.22"/><circle cx="2.5" cy="1.6" r="0.25" fill="${ink}"/>`,'pronalasci (NUS)']);
   kinds.forEach(kd=>rows.push([featSVG({kind:kd,pts:FK[kd].lin?[[0,1.6],[5,1.6]]:[[2.5,1.9]]},q=>q,true,ink),FK[kd].n.toLowerCase()]));
   rows.push([`<line x1="0" y1="1.6" x2="5" y2="1.6" stroke="${ink}" stroke-width="0.4"/>`,'granica radilišta (T1–T'+s.poly.length+')']);
@@ -2278,6 +2297,7 @@ function skicaSVG(s){
   <pattern id="skCm" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0V10H0" fill="none" stroke="#a9c6d8" stroke-width="0.16"/></pattern>
   <pattern id="skS" width="1.4" height="1.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="1.4" stroke="${ink}" stroke-width="0.16"/></pattern>
   <pattern id="skC" width="1.8" height="1.8" patternUnits="userSpaceOnUse"><path d="M1.8 0V1.8H0" fill="none" stroke="${ink}" stroke-width="0.12"/></pattern>
+  <pattern id="skR" width="1.6" height="1.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.6" height="1.6" fill="#f6dcc8"/><path d="M0 0V1.6M0 0H1.6" stroke="#8e1f14" stroke-width="0.28"/></pattern>
   <pattern id="skX" width="2.2" height="2.2" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="2.2" height="2.2" fill="#eef1f3"/><line x1="0" y1="0" x2="0" y2="2.2" stroke="#7d8a93" stroke-width="0.55"/></pattern>
   <clipPath id="skClip"><rect x="${f2(L-1.5)}" y="${f2(top-1.5)}" width="${f2(mapW+3)}" height="${f2(mapH+3)}"/></clipPath></defs>
   <rect width="${PW}" height="${PH}" fill="#fbfdfe"/><rect width="${PW}" height="${PH}" fill="url(#skMm)"/><rect width="${PW}" height="${PH}" fill="url(#skCm)"/>
@@ -2288,10 +2308,11 @@ function skicaSVG(s){
   const step=k>=1?20:(k>=0.5?50:100),E0=s.nt.Y+b.x0,N0=s.nt.X+b.y0;
   for(let e=Math.ceil(E0/step)*step;e<=s.nt.Y+b.x1;e+=step){const x=X(e-s.nt.Y);g+=`<line x1="${f2(x)}" y1="${f2(top+mapH+0.5)}" x2="${f2(x)}" y2="${f2(top+mapH+2.2)}" stroke="${ink}" stroke-width="0.2"/><text class="sk-c" x="${f2(x)}" y="${f2(top+mapH+5)}" text-anchor="middle">${gkn(e).split(',')[0]}</text>`;}
   for(let n=Math.ceil(N0/step)*step;n<=s.nt.X+b.y1;n+=step){const y=Y(n-s.nt.X);g+=`<line x1="${L-2.2}" y1="${f2(y)}" x2="${L-0.5}" y2="${f2(y)}" stroke="${ink}" stroke-width="0.2"/><text class="sk-c" x="${L-2.8}" y="${f2(y+0.7)}" text-anchor="end">${gkn(n).split(',')[0]}</text>`;}
-  s.boxes.forEach(bx=>{const d=boxRings(bx).map(pth).join('');if(bx.excl)g+=`<path d="${d}" fill="url(#skX)" fill-rule="evenodd"/>`;else{if(bx.done.SCH)g+=`<path d="${d}" fill="url(#skS)" fill-rule="evenodd"/>`;if(bx.done.CEIA)g+=`<path d="${d}" fill="url(#skC)" fill-rule="evenodd"/>`;}
+  s.boxes.forEach(bx=>{const d=boxRings(bx).map(pth).join('');if(bx.excl)g+=`<path d="${d}" fill="url(#skX)" fill-rule="evenodd"/>`;else if(bx.ret)g+=`<path d="${d}" fill="url(#skR)" fill-rule="evenodd"/>`;else{if(bx.done.SCH)g+=`<path d="${d}" fill="url(#skS)" fill-rule="evenodd"/>`;if(bx.done.CEIA)g+=`<path d="${d}" fill="url(#skC)" fill-rule="evenodd"/>`;}
     g+=`<path d="${d}" fill="none" stroke="#4a5b66" stroke-width="${bx.excl?0.2:0.1}"/>`;});
   s.boxes.forEach(bx=>{if(bx.w*k<6||bx.h*k<4.5)return;const c=P([bx.cx,bx.cy]);g+=`<text class="sk-b" x="${f2(c[0])}" y="${f2(c[1]+(bx.excl?-0.2:0.55))}" text-anchor="middle">${esc(bx.id)}</text>`;
-    if(bx.excl)g+=`<text class="sk-b" x="${f2(c[0])}" y="${f2(c[1]+1.8)}" text-anchor="middle" style="font-weight:700">${esc((EXCL[bx.excl.why]||bx.excl.why).split(' ')[0])}</text>`;});
+    if(bx.excl)g+=`<text class="sk-b" x="${f2(c[0])}" y="${f2(c[1]+1.8)}" text-anchor="middle" style="font-weight:700">${esc((EXCL[bx.excl.why]||bx.excl.why).split(' ')[0])}</text>`;
+    else if(bx.ret)g+=`<text class="sk-b" x="${f2(c[0])}" y="${f2(c[1]+1.8)}" text-anchor="middle" style="font-weight:700">vraćeno</text>`;});
   g+=`<path d="${pth(s.poly)}" fill="none" stroke="${ink}" stroke-width="0.4"/>`;
   const cx=s.poly.reduce((a,p)=>a+p[0],0)/s.poly.length,cy=s.poly.reduce((a,p)=>a+p[1],0)/s.poly.length,C=P([cx,cy]);
   g+=`<g clip-path="url(#skClip)">${feats(s).filter(f=>f.pts.length).map(f=>featSVG(f,P,true,ink,C)).join('')}</g>`;
@@ -2304,7 +2325,7 @@ function skicaSVG(s){
   g+=`<text class="sk-s" x="${gx}" y="${legendTop+2}" style="font-weight:700">LEGENDA:</text>`+rows.map((r,i)=>`<g transform="translate(${gx} ${f2(legendTop+7+i*5.2)})">${r[0]}<text class="sk-l" x="7" y="2.4">${r[1]}</text></g>`).join('');
   const ceM=methodM2(s,'CEIA'),scM=methodM2(s,'SCH'),why=[...new Set(ex.map(x=>EXCL[x.excl.why]||x.excl.why))].join(', ');
   g+=`<text class="sk-l" x="${L}" y="${legendTop+4}">Pregledano CEIA: ${num(ceM)} m²</text><text class="sk-l" x="${L}" y="${legendTop+8.5}">Pregledano Schonstedtom: ${num(scM)} m²</text>
-    <text class="sk-l" x="${L}" y="${legendTop+13}">Završeno: ${num(clearedM2(s))} od ${num(totalArea(s))} m² · nalaza: ${s.finds.length}</text>
+    <text class="sk-l" x="${L}" y="${legendTop+13}">Završeno: ${num(clearedM2(s))} od ${num(totalArea(s))} m² · nalaza: ${s.finds.length}${rt.length?' · vraćeno na ponovni tretman: '+rt.length+' boks. ('+num(rt.reduce((a,b)=>a+b.area,0))+' m²)':''}</text>
     ${ex.length?`<text class="sk-l" x="${L}" y="${legendTop+17.5}">Isključeno iz pretrage: ${num(exclM2(s))} m² (${esc(why)})</text>`:''}
     <text class="sk-l" x="${L}" y="${legendTop+22}">Koordinate: SRB_ETRS89 / UTM 34N · boksovi ${s.grid}×${s.grid} m${s.az?', mreža zaokrenuta '+azTxt(s.az):''}</text>
     <text class="sk-s" x="${L}" y="${legendTop+32}">Skicu izradio:</text><line x1="${L+22}" y1="${legendTop+32.6}" x2="${L+80}" y2="${legendTop+32.6}" stroke="${ink}" stroke-width="0.15" stroke-dasharray="0.6 0.6"/>
@@ -2319,6 +2340,8 @@ const DOCS_RS=[
   {k:'rsn',pn:'NUS',t:'Zapisnik o pronađenim NUS',d:()=>site().finds.length+' nalaza sa koordinatama'},
   {k:'rsp',pn:'PR',t:'Zapisnik o predaji očišćene površine',d:()=>'Nacrt · osnova za uverenje CZRS'},
   {k:'foto',pn:'FOTO',t:'Fotodokumentacija nalaza',d:()=>photoCount(site())},
+  {k:'kk',pn:'KK',t:'Zapisnik o kontroli kvaliteta (CZRS)',d:()=>{const v=qa(site()).visits;return v.length?v.length+' kontroln'+(v.length===1?'a poseta':'e posete')+' · poslednja '+fmtD(v[v.length-1].d):'Još nema kontrolnih poseta';}},
+  {k:'zk',pn:'ZK',t:'Završna kontrola i predlog za uverenje',d:()=>{const c=certCheck(site());return c.ok?'Uslovi za predlog uverenja ispunjeni':'Predlog još nije moguć · '+qaPl(c.why.length,'prepreka','prepreke','prepreka');}},
   {k:'rsexp',pn:'GIS',t:'Izvoz podataka: KML, CSV i GeoJSON',d:()=>'Google Earth, Excel, QGIS · SRB_ETRS89 / UTM 34N'}];
 function rsDoc(s,k){
   const head=`<table><tr><td class="k">Izvođač</td><td>${esc(ORG.replace('primjer','primer'))}</td></tr><tr><td class="k">Projekat</td><td>${esc(s.msp.id)} · ${esc(s.msp.naziv)}, ${esc(s.msp.opcina)} · ${esc(s.ci.oznaka)}</td></tr></table>`;
@@ -2330,7 +2353,7 @@ function rsDoc(s,k){
       <table><thead><tr><th>Deminer</th><th>Metoda</th><th>Boksovi</th><th>m²</th><th>Napomena</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nema unetog učinka.</td></tr>'}</tbody>
       <tfoot><tr><td colspan="3">Ukupno CEIA / Schonstedt</td><td class="n">${num(tot.CEIA)} / ${num(tot.SCH)}</td><td></td></tr></tfoot></table>
       <div class="sec">Tok rada</div><table>${log.map(l=>`<tr><td class="mono" style="width:56px">${esc(l.t)}</td><td>${esc(l.e)}</td></tr>`).join('')||'<tr><td>Nema zapisa za ovaj dan.</td></tr>'}</table>
-      <div class="sec">Pronađena NUS tog dana</div><table>${ft.length?ft.map(f=>`<tr><td>${esc(f.id)}</td><td>${esc(f.type)}</td><td>boks ${esc(f.box)}</td><td>${f.depth} cm</td><td>${esc(f.act)}</td></tr>`).join(''):'<tr><td>Nema.</td></tr>'}</table>
+      ${qaRedoDay(s,day)}<div class="sec">Pronađena NUS tog dana</div><table>${ft.length?ft.map(f=>`<tr><td>${esc(f.id)}</td><td>${esc(f.type)}</td><td>boks ${esc(f.box)}</td><td>${f.depth} cm</td><td>${esc(f.act)}</td></tr>`).join(''):'<tr><td>Nema.</td></tr>'}</table>
       <div class="sig"><div>Rukovodilac radilišta</div><div>Kontrolor CZRS</div></div>
       <p class="note">Oblik je napravljen po Uredbi 70/2013 i praksi CZRS-a (dnevna evidencija učinka po demineru). Kad dobijemo zvanični obrazac CZRS-a, menja se samo ovaj šablon.</p>`};}
   if(k==='rsn'){return {cls:'wide',h:`<h4>ZAPISNIK O PRONAĐENIM NUS</h4><div class="dsub">stanje na dan ${fmtD(today())} · koordinate SRB_ETRS89 / UTM 34N</div>${head}
@@ -2344,13 +2367,15 @@ function rsDoc(s,k){
       ['Površina projekta',num(polyArea(s.poly))+' m²'],['Isključeno iz pretrage',ex.length?num(exclM2(s))+' m² · '+ex.map(b=>esc(b.id+': '+exclTxt(b.excl))).join('; '):'nema'],['Površina za pretragu',num(totalArea(s))+' m²'],
       ['Pregledano CEIA detektorom',num(methodM2(s,'CEIA'))+' m²'],['Pregledano Schonstedtom',num(methodM2(s,'SCH'))+' m²'],
       ['Dubina pretrage (zahtev projekta)',P.rules.minDepth+' cm (CEIA)'+(bt?'; dubinska pretraga Schonstedtom uz '+esc(bt):'')],['Koordinatni sistem','SRB_ETRS89 / UTM 34N'],
-      ['Pronađena NUS',Object.entries(by).map(([t,n])=>esc(t)+' ×'+n).join(', ')||'nema'],['Budući korisnik zemljišta',''],['Broj uverenja o očišćenosti','']];
+      ['Pronađena NUS',Object.entries(by).map(([t,n])=>esc(t)+' ×'+n).join(', ')||'nema'],...qaPredaja(s),['Budući korisnik zemljišta',''],['Broj uverenja o očišćenosti','']];
     return {h:`<h4>ZAPISNIK O PREDAJI OČIŠĆENE POVRŠINE</h4><div class="dsub">nacrt · osnova za uverenje o očišćenosti (Uredba 70/2013, čl. 22)</div>
       <table>${F.map((x,i)=>`<tr><td style="width:24px">${i+1}.</td><td class="k">${x[0]}</td><td>${x[1]||'<span class="miss">nedostaje</span>'}</td></tr>`).join('')}</table>
       <div class="sec">Granica očišćene površine</div><table><thead><tr><th>Tačka</th><th>E</th><th>N</th></tr></thead><tbody>${pts}</tbody></table>
       <div class="sec">Prilozi</div><table><tr><td>a)</td><td>Skica napredovanja R 1:${skScale(s)}</td><td><b>spremno</b></td></tr><tr><td>b)</td><td>Zapisnik o pronađenim NUS (${s.finds.length})</td><td><b>spremno</b></td></tr>
-      <tr><td>c)</td><td>Dnevne evidencije učinka</td><td><b>spremno</b></td></tr><tr><td>d)</td><td>Zapisnik sa budućim korisnicima o granicama</td><td><span class="miss">nedostaje</span></td></tr></table>
+      <tr><td>c)</td><td>Dnevne evidencije učinka</td><td><b>spremno</b></td></tr><tr><td>d)</td><td>Zapisnik sa budućim korisnicima o granicama</td><td><span class="miss">nedostaje</span></td></tr>${qaPrilozi(s)}</table>
       <div class="sig" style="grid-template-columns:1fr 1fr 1fr"><div>Izvođač</div><div>CZRS</div><div>Budući korisnik</div></div>`};}
+  if(k==='kk')return kkDoc(s);
+  if(k==='zk')return zkDoc(s);
   if(k==='rsexp'){const xn=s.boxes.filter(b=>b.excl).length,canFile=!inFrame||(matchMedia('(pointer:coarse)').matches&&!!navigator.canShare);
     return {h:`<h4>IZVOZ PODATAKA</h4><div class="dsub">${esc(s.msp.id)} ${esc(s.ci.oznaka)} · SRB_ETRS89 / UTM 34N i WGS84</div>
       <p>KML se otvara u Google Earth-u: granica, boksovi obojeni po stanju (nije pregledano, delimično, završeno, isključeno), objekti i nalazi sa vrstom, dubinom, metodom i datumom. CSV nalaza se otvara u Excelu, GeoJSON u QGIS-u.</p>
@@ -2360,6 +2385,322 @@ function rsDoc(s,k){
       <div class="btnrow noprint" style="margin-top:8px"><button class="btn" type="button" data-rs="copyKml">Kopiraj KML</button><button class="btn" type="button" data-act="copyCsv">Kopiraj CSV nalaza</button><button class="btn" type="button" data-act="copyGeo">Kopiraj GeoJSON</button></div>`};}
   return null;
 }
+
+/* ================= CZRS inspector (kontrolor CZRS): kontrolne posete, uzorkovanje, nedostaci, završna kontrola =================
+   Same app, other screens: per box-mode site the user picks the role "Izvođač" (contractor) or "Kontrolor CZRS". The inspector never
+   changes the contractor's boxes, finds or log; the inspector's records live in s.qa. Where the inspector finds an item in a sampled
+   box, the box is "vraćeno na ponovni tretman" (b.ret): it does not count as done until the contractor re-treats it AND a later
+   inspection of that box finds nothing. Sampling follows the IMAS 09.20 idea (a random sample of the cleared area, re-searched);
+   CZRS has not published a sampling rate, so the % is set per site and QA_PCT is only a labelled example default. */
+const QA_PCT=10;
+const QA_CHK=[['dok','Dokumentacija na radilištu'],['obel','Obeležavanje'],['test','Test-poligon i provera detektora'],['udalj','Bezbedne udaljenosti'],
+  ['lzo','Lična zaštitna oprema'],['med','Medicinska podrška'],['evid','Dnevna evidencija učinka ažurna']];
+const QA_M={CEIA:'CEIA detektor',SCH:'Schonstedt',KOP:'Iskopavanje / sondiranje'};
+const QA_PICK={r:'nasumično',m:'ručno',p:'ponovna kontrola'};
+const QA_STAT={n:'nije pregledano',p:'delimično (čeka Schonstedt)',d:'završeno',x:'isključeno',r:'vraćeno na ponovni tretman',k:'ponovni tretman urađen, čeka ponovnu kontrolu'};
+const QA_LOCK='Boks je vraćen na ponovni tretman (kontrola CZRS). Ne deli se, ne spaja i ne isključuje dok kontrolor ne zatvori nedostatak.';
+const QA_RO=['markM','unmarkM','boxDone','findBox','adv','moveA','findHere','shift','ev','evSave','brief','start','openSite'];
+const QA_RO_RS=['split','mergeStart','mergeOk','rename','excl','unexcl','featNew','featEdit','featSave','featDel'];
+const QA_RO_MSG='Uloga je „Kontrolor CZRS”: podaci izvođača su samo za pregled.';
+const qaPl=(n,one,few,many)=>n+' '+(n%10===1&&n%100!==11?one:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?few:many);
+function qa(s){if(!isObj(s.qa))s.qa={role:'izv',pct:QA_PCT,insp:'',visits:[],ncs:[]};return s.qa;}
+const isK=s=>!!s&&s.mode==='boxes'&&qa(s).role==='czrs';
+// validator: state from storage, a backup file or an older version gets every inspector field with a safe value
+function fillQa(s){const q=isObj(s.qa)?s.qa:{},rd=x=>isObj(x)?{day:D_(x.day),by:S_(x.by)}:null;
+  const chk=x=>{const o={};if(isObj(x))QA_CHK.forEach(([k])=>{const c=x[k];if(!isObj(c))return;const r={st:c.st==='ok'||c.st==='ned'?c.st:'',note:S_(c.note)},t=safeImg(c.thumb);if(t)r.thumb=t;if(c.ph)r.ph=1;o[k]=r;});return o;};
+  const ids=new Set(),uniq=x=>{if(!x.id||ids.has(x.id))return false;ids.add(x.id);return true;};
+  s.qa={role:q.role==='czrs'?'czrs':'izv',pct:Math.min(100,Math.max(0.1,N_(q.pct,QA_PCT))),insp:S_(q.insp),
+    visits:A_(q.visits).filter(isObj).map(v=>({id:S_(v.id),d:D_(v.d),t:T_(v.t),who:S_(v.who),ann:v.ann?1:0,tim:S_(v.tim),rep:S_(v.rep),checks:chk(v.checks),
+      pct:N_(v.pct,null),seed:fin(v.seed)?Math.abs(Math.round(+v.seed))%1e9:null,base:N_(v.base,null),
+      samples:A_(v.samples).filter(isObj).map(x=>({box:S_(x.box),pick:QA_PICK[x.pick]?x.pick:'m',area:N_(x.area,0),m:QA_M[x.m]?x.m:'CEIA',m2:Math.max(0,N_(x.m2,0)),
+        res:x.res==='ok'||x.res==='nus'?x.res:'',type:S_(x.type),depth:N_(x.depth,null),note:S_(x.note)})).filter(x=>x.box),
+      zak:S_(v.zak),closed:D_(v.closed)})).filter(uniq),
+    ncs:A_(q.ncs).filter(isObj).map(n=>({id:S_(n.id),d:D_(n.d),visit:S_(n.visit),kind:n.kind==='chk'?'chk':'box',box:S_(n.box),chk:S_(n.chk),text:S_(n.text),redo:rd(n.redo),
+      closed:isObj(n.closed)?{d:D_(n.closed.d),visit:S_(n.closed.visit),note:S_(n.closed.note)}:null}))};
+  ids.clear();s.qa.ncs=s.qa.ncs.filter(uniq);return s.qa;}
+const qaOpen=s=>qa(s).visits.find(v=>!v.closed)||null;
+// boxes already sampled in an earlier, closed visit
+const qaSampled=s=>new Set(qa(s).visits.filter(v=>v.closed).flatMap(v=>v.samples.map(x=>x.box)));
+// the pool for the random draw: finished boxes not sampled before (the cleared area since the inspector last looked)
+const qaPool=s=>{const done=qaSampled(s);return s.boxes.filter(b=>boxDone(b)&&!done.has(b.id));};
+// a box may be added by hand when it is finished, or re-treated after a failed sample (re-check)
+const qaCanSample=b=>!!b&&!b.excl&&(boxDone(b)||!!(b.ret&&b.ret.redo));
+// seeded generator (mulberry32): the same seed and the same pool give the same boxes on any device
+function qaRng(seed){let a=(seed>>>0)||1;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
+// boxes sorted by oznaka, shuffled with the seed, then taken in that order until the sampled area reaches pct % of the pool's area
+function qaSample(boxes,pct,seed){const pool=boxes.slice().sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0),base=pool.reduce((a,b)=>a+b.area,0),target=base*Math.max(0,pct)/100,r=qaRng(seed);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(r()*(i+1)),t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  const ids=[];let area=0;for(const b of pool){if(area>=target-1e-9)break;ids.push(b.id);area+=b.area;}
+  return {base,target,area,ids};}
+const qaNewSeed=()=>1+Math.floor(Math.random()*999998);
+const qaRow=(b,pick)=>({box:b.id,pick,area:b.area,m:'CEIA',m2:b.area,res:'',type:'',depth:null,note:''});
+function qaDraw(s,v,pct,seed){if(!v||v.closed)return 'Nema kontrolne posete u toku.';
+  if(v.samples.some(x=>x.pick==='r'&&x.res))return 'Nasumični uzorak već ima unete rezultate; ne izvlači se ponovo.';
+  if(!(pct>=0.1&&pct<=100))return 'Procenat uzorka: od 0,1 do 100.';seed=Math.round(seed);if(!(seed>=1&&seed<1e9))return 'Seme: ceo broj od 1 do 999.999.999.';
+  const r=qaSample(qaPool(s),pct,seed),hand=new Set(v.samples.filter(x=>x.pick!=='r').map(x=>x.box));
+  v.pct=pct;v.seed=seed;v.base=+r.base.toFixed(1);qa(s).pct=pct;
+  v.samples=v.samples.filter(x=>x.pick!=='r').concat(r.ids.filter(id=>!hand.has(id)).map(id=>qaRow(boxById(s,id),'r')));return r;}
+function qaAdd(s,v,id){const b=boxById(s,id);if(!v||v.closed)return 'Nema kontrolne posete u toku.';if(!qaCanSample(b))return 'U uzorak ulaze samo završeni boksovi i boksovi posle ponovnog tretmana.';
+  if(v.samples.some(x=>x.box===id))return 'Boks '+id+' je već u uzorku.';v.samples.push(qaRow(b,b.ret?'p':'m'));return b;}
+const qaNextId=(arr,p)=>{let n=0;arr.forEach(x=>{const m=String(x.id).match(/-(\d+)$/);if(m)n=Math.max(n,+m[1]);});return p+pad(n+1);};
+// closing a visit opens a nonconformity for every check marked "nedostatak" and every sampled box with a find (box goes back to
+// the contractor); a re-checked, re-treated box with no find closes its nonconformity. Returns an error text or {made, shut}.
+function qaClose(s,v){const q=qa(s);if(!v||v.closed)return 'Nema kontrolne posete u toku.';
+  if(!String(v.who).trim())return 'Upiši ime kontrolora.';
+  const miss=v.samples.filter(x=>!x.res);if(miss.length)return 'Upiši rezultat za '+(miss.length>1?'boksove ':'boks ')+miss.map(x=>x.box).join(', ')+'.';
+  const nt=v.samples.filter(x=>x.res==='nus'&&!String(x.type).trim());if(nt.length)return 'Upiši šta je pronađeno u boksu '+nt.map(x=>x.box).join(', ')+'.';
+  const nm2=v.samples.filter(x=>!(x.m2>0));if(nm2.length)return 'Upiši uzorkovanu površinu (m²) za boks '+nm2.map(x=>x.box).join(', ')+'.';
+  const made=[],shut=[],day=v.d||today();
+  QA_CHK.forEach(([k,t])=>{const c=v.checks[k];if(!c||c.st!=='ned')return;const n={id:qaNextId(q.ncs,'NC-'),d:day,visit:v.id,kind:'chk',box:'',chk:k,text:t+(c.note?': '+c.note:''),redo:null,closed:null};q.ncs.push(n);made.push(n.id);});
+  v.samples.forEach(x=>{const b=boxById(s,x.box),nc=b&&b.ret?q.ncs.find(c=>c.id===b.ret.nc&&!c.closed):null,what=x.type+(x.depth!=null?', dubina '+x.depth+' cm':'')+(x.note?' ('+x.note+')':'');
+    if(x.res==='nus'){
+      if(nc){nc.text+='; ponovna kontrola '+v.id+(b.ret.redo?' posle ponovnog tretmana '+fmtD(b.ret.redo.day)+' ('+b.ret.redo.by+')':'')+': pronađeno '+what;b.ret.redo=null;b.ret.day=day;made.push(nc.id);}
+      else{const n={id:qaNextId(q.ncs,'NC-'),d:day,visit:v.id,kind:'box',box:x.box,chk:'',text:'Boks '+x.box+': pronađeno '+what,redo:null,closed:null};q.ncs.push(n);made.push(n.id);if(b)b.ret={nc:n.id,day,redo:null};}}
+    else if(b&&b.ret&&b.ret.redo){if(nc){nc.redo=Object.assign({},b.ret.redo);nc.closed={d:day,visit:v.id,note:'ponovna kontrola posle ponovnog tretmana bez nalaza'};shut.push(nc.id);}delete b.ret;}});
+  v.closed=day;return {made,shut};}
+// a nonconformity from a check is closed by the inspector with a note; one from a box only by a clean re-check
+function qaNcClose(s,id,note,vid){const n=qa(s).ncs.find(x=>x.id===id);if(!n||n.closed)return 'Nedostatak ne postoji ili je već zatvoren.';
+  if(n.kind==='box')return 'Nedostatak u boksu se zatvara samo ponovnom kontrolom tog boksa posle ponovnog tretmana.';
+  note=String(note||'').trim().slice(0,300);if(!note)return 'Upiši kako je nedostatak otklonjen.';n.closed={d:today(),visit:vid||'',note};return n;}
+// contractor: the returned box was searched again
+function qaRedo(s,id,who){const b=boxById(s,id);if(!b||!b.ret)return 'Boks nije vraćen na ponovni tretman.';if(b.ret.redo)return 'Ponovni tretman je već upisan.';if(!who)return 'Izaberi deminera.';
+  b.ret.redo={day:today(),by:String(who)};logAdd(s,{e:'Boks '+id+': ponovni tretman po nalogu kontrole CZRS ('+b.ret.nc+') završen ('+who+')'});addQ('Ponovni tretman boksa '+id);return b;}
+function qaRename(s,id,nid){if(!s.qa)return;s.qa.visits.forEach(v=>v.samples.forEach(x=>{if(x.box===id)x.box=nid;}));s.qa.ncs.forEach(n=>{if(n.box===id)n.box=nid;});}
+function qaTotals(s){const o={n:0,m2:0,boxes:0,ok:0,nus:0};qa(s).visits.filter(v=>v.closed).forEach(v=>{o.n++;v.samples.forEach(x=>{o.boxes++;o.m2+=x.m2;if(x.res==='nus')o.nus++;else o.ok++;});});return o;}
+const qaFinds=s=>qa(s).visits.filter(v=>v.closed).flatMap(v=>v.samples.filter(x=>x.res==='nus').map(x=>({v,x})));
+// per deminer and day from the box records; above the CZRS figure of 150 m² per deminer a day the day is flagged for a check
+function qaOutput(s){const days=new Set();s.boxes.forEach(b=>Object.values(b.done).forEach(d=>{if(d.day)days.add(d.day);}));const rows=[];
+  [...days].sort().reverse().forEach(d=>{const pd=perDeminer(s,d);Object.keys(pd).sort().forEach(w=>{const r=pd[w];rows.push({d,w,ce:r.m2.CEIA,sch:r.m2.SCH,n:r.CEIA.length+r.SCH.length,flag:r.m2.CEIA>P.rules.normaM2});});});return rows;}
+// "Predlog za izdavanje uverenja o očišćenosti" only when nothing is open and every box is finished or excluded with a reason
+function certCheck(s){const q=qa(s),why=[],ids=a=>a.slice(0,12).map(b=>b.id).join(', ')+(a.length>12?' …':'');
+  if(!s.boxes.length)why.push('radilište nema boksova');
+  q.ncs.filter(n=>!n.closed).forEach(n=>why.push('otvoren nedostatak '+n.id+': '+n.text));
+  const rb=s.boxes.filter(b=>b.ret&&!q.ncs.some(n=>n.id===b.ret.nc&&!n.closed));if(rb.length)why.push('vraćeno na ponovni tretman: '+ids(rb));
+  const nd=s.boxes.filter(b=>!b.excl&&!b.ret&&!boxDone(b));if(nd.length)why.push('nije završeno '+qaPl(nd.length,'boks','boksa','boksova')+': '+ids(nd));
+  const nx=s.boxes.filter(b=>b.excl&&!String(b.excl.why).trim());if(nx.length)why.push('isključeno bez razloga: '+ids(nx));
+  q.visits.filter(v=>!v.closed).forEach(v=>why.push('kontrolna poseta '+v.id+' nije zaključena'));
+  if(!q.visits.some(v=>v.closed&&v.samples.length))why.push('nema zaključene kontrolne posete sa uzorkovanjem');
+  const mup=s.finds.filter(f=>f.act===PACKS.RS.actions[0]);if(mup.length)why.push('NUS još nije preuzeo MUP: '+mup.map(f=>f.id).join(', '));
+  return {ok:!why.length,why};}
+const qaAnn=v=>v.ann?'najavljena':'nenajavljena';
+function qaNcState(s,n){if(n.closed)return 'zatvoreno '+fmtD(n.closed.d)+(n.closed.visit?' ('+esc(n.closed.visit)+')':'')+(n.closed.note?': '+esc(n.closed.note):'');
+  if(n.kind==='chk')return 'otvoreno · otklanja izvođač, zatvara kontrolor';const b=boxById(s,n.box);
+  return b&&b.ret&&b.ret.redo?'ponovni tretman upisan '+fmtD(b.ret.redo.day)+' ('+esc(b.ret.redo.by)+') · čeka ponovnu kontrolu':'boks '+esc(n.box)+' vraćen na ponovni tretman · čeka izvođača';}
+
+/* ---------- screens ---------- */
+function roleBar(s){const k=isK(s),b=(v,t,on)=>`<button class="btn sm${on?' primary':''}" type="button" role="radio" aria-checked="${on}" data-qa="role" data-role="${v}">${t}</button>`;
+  return `<div class="rolebar" role="radiogroup" aria-label="Uloga na ovom radilištu"><span class="sub">Uloga</span>${b('izv','Izvođač',!k)}${b('czrs','Kontrolor CZRS',k)}</div>`;}
+// contractor's Danas: what the inspector left open
+function qaCardIzv(s){const q=qa(s),open=q.ncs.filter(n=>!n.closed),last=q.visits.filter(v=>v.closed).slice(-1)[0];if(!open.length&&!last)return '';
+  return `<div class="card"><div class="card-h"><h3>Kontrola CZRS</h3><span class="chip ${open.length?'haz':'ok'}">${open.length?qaPl(open.length,'otvoren nedostatak','otvorena nedostatka','otvorenih nedostataka'):'bez otvorenih nedostataka'}</span></div>
+    ${last?`<p class="sub" style="margin:0 0 6px">Poslednja poseta ${esc(last.id)} · ${fmtD(last.d)} · ${qaAnn(last)} · uzorak ${qaPl(last.samples.length,'boks','boksa','boksova')}</p>`:''}
+    ${open.length?`<ul class="rows">${open.map(n=>{const b=n.kind==='box'?boxById(s,n.box):null;return `<li><span class="grow"><b>${esc(n.id)}</b> · ${esc(n.text)}<br><span class="sub">${qaNcState(s,n)}</span></span>${b?`<button class="btn sm" type="button" data-act="box" data-id="${esc(b.id)}">Boks ${esc(b.id)}</button>`:''}</li>`;}).join('')}</ul>
+    <p class="fine">Vraćen boks se ne računa kao završen dok se ponovo ne pretraži („Ponovni tretman završen” u boksu) i dok ponovna kontrola CZRS ne prođe bez nalaza.</p>`:''}</div>`;}
+function qaRetNotice(s,b){if(!b.ret)return '';const n=qa(s).ncs.find(x=>x.id===b.ret.nc);
+  return `<div class="notice haz"><b>Vraćeno na ponovni tretman</b> (kontrola CZRS ${esc(b.ret.nc)}, ${fmtD(b.ret.day)})${n?': '+esc(n.text):''}. ${b.ret.redo?'Ponovni tretman upisan '+fmtD(b.ret.redo.day)+' ('+esc(b.ret.redo.by)+'); boks se računa kao završen tek kad ponovna kontrola prođe bez nalaza.':'Boks se ne računa kao završen dok se ponovo ne pretraži i ne prođe ponovnu kontrolu.'}</div>`;}
+
+function renderPregledK(){
+  const s=site(),q=qa(s),st=s.boxes.map(boxStat),cnt=c=>st.filter(x=>x===c).length,cl=clearedM2(s),tot=totalArea(s),ov=qaOpen(s),open=q.ncs.filter(n=>!n.closed),t=qaTotals(s),c=certCheck(s),out=qaOutput(s),qf=qaFinds(s);
+  let h=roleBar(s)+`<div class="card"><div class="label">Kontrola CZRS · ${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div><div class="big">${num(cl)}<span class="unit">/ ${num(tot)} m²</span></div>
+    <div class="sub">završeno (vraćeni boksovi se ne računaju) · ${tot?num(cl/tot*100,1):'0'} %</div>
+    <div class="bar" role="img" aria-label="${tot?Math.round(cl/tot*100):0}% površine završeno"><span style="width:${tot?Math.min(100,cl/tot*100):0}%"></span></div>
+    <dl class="kv3"><div><dt>Završeno</dt><dd>${cnt('d')} boks.</dd></div><div><dt>Delimično</dt><dd>${cnt('p')}</dd></div><div><dt>Nije pregledano</dt><dd>${cnt('n')}</dd></div>
+      <div><dt>Vraćeno</dt><dd>${cnt('r')}${cnt('k')?' + '+cnt('k')+' čeka kontrolu':''}</dd></div><div><dt>Isključeno</dt><dd>${cnt('x')}</dd></div><div><dt>Uzorkovano</dt><dd>${num(t.m2)} m²${cl?' · '+num(t.m2/cl*100,1)+' %':''}</dd></div></dl></div>`;
+  h+=`<div class="card"><div class="card-h"><h3>Završna kontrola</h3><span class="chip ${c.ok?'ok':'work'}">${c.ok?'predlog za uverenje moguć':qaPl(c.why.length,'prepreka','prepreke','prepreka')}</span></div>
+    ${c.ok?'<p class="sub" style="margin:0">Nema otvorenih nedostataka, svi boksovi su završeni ili isključeni sa razlogom.</p>':`<ul class="missing">${c.why.slice(0,5).map(x=>`<li>${esc(x)}</li>`).join('')}${c.why.length>5?'<li>…</li>':''}</ul>`}
+    <button class="btn block" type="button" data-act="doc" data-k="zk" style="margin-top:8px">Otvori završnu kontrolu</button></div>`;
+  h+=`<div class="card"><div class="card-h"><h3>Kontrolne posete</h3><span class="sub">${q.visits.length}</span></div>
+    ${ov?`<div class="notice">Poseta ${esc(ov.id)} od ${fmtD(ov.d)} je u toku.</div><button class="btn primary block" type="button" data-act="tab" data-tab="nalaz">Nastavi kontrolu ${esc(ov.id)}</button>`
+      :'<button class="btn primary block" type="button" data-act="tab" data-tab="nalaz">Nova kontrolna poseta</button>'}
+    ${q.visits.length?`<ul class="rows">${q.visits.slice().reverse().map(v=>{const nus=v.samples.filter(x=>x.res==='nus').length,ned=QA_CHK.filter(([k])=>v.checks[k]&&v.checks[k].st==='ned').length;
+      return `<li><span class="grow"><b>${esc(v.id)}</b> · ${fmtD(v.d)} · ${qaAnn(v)}<br><span class="sub">${esc(v.who)} · uzorak ${qaPl(v.samples.length,'boks','boksa','boksova')}, ${num(v.samples.reduce((a,x)=>a+x.m2,0))} m²${nus?' · sa nalazom: '+nus:''}${ned?' · nedostataka u proverama: '+ned:''}</span></span>${v.closed?`<button class="btn sm" type="button" data-act="doc" data-k="kk" data-visit="${esc(v.id)}">Zapisnik</button>`:'<span class="chip work">u toku</span>'}</li>`;}).join('')}</ul>`:''}</div>`;
+  h+=`<div class="card"><div class="card-h"><h3>Otvoreni nedostaci</h3><span class="chip ${open.length?'haz':'ok'}">${open.length}</span></div>
+    ${open.length?`<ul class="rows">${open.map(n=>`<li><span class="grow"><b>${esc(n.id)}</b> · ${fmtD(n.d)} · ${esc(n.text)}<br><span class="sub">${qaNcState(s,n)}</span></span>${n.kind==='chk'?`<button class="btn sm" type="button" data-qa="ncClose" data-id="${esc(n.id)}">Zatvori</button>`:`<button class="btn sm" type="button" data-act="box" data-id="${esc(n.box)}">Boks</button>`}</li>`).join('')}</ul>`:'<p class="sub" style="margin:0">Nema otvorenih nedostataka.</p>'}
+    ${q.ncs.length>open.length?`<details class="legacy"><summary>Zatvoreni nedostaci (${q.ncs.length-open.length})</summary><ul class="rows">${q.ncs.filter(n=>n.closed).map(n=>`<li><span class="grow"><b>${esc(n.id)}</b> · ${esc(n.text)}<br><span class="sub">${qaNcState(s,n)}</span></span></li>`).join('')}</ul></details>`:''}</div>`;
+  h+=`<div class="card"><div class="card-h"><h3>Učinak po demineru</h3><span class="sub">CEIA do ${P.rules.normaM2} m² dnevno (CZRS)</span></div>
+    ${out.length?`${(()=>{const tb=rs=>`<div class="tbl"><table class="qt"><thead><tr><th>Dan</th><th>Deminer</th><th>CEIA m²</th><th>Schonstedt m²</th><th></th></tr></thead><tbody>${rs.map(r=>`<tr><td>${fmtD(r.d).slice(0,6)}</td><td class="mono">${esc(r.w)}</td><td class="n">${r.ce?num(r.ce):'—'}</td><td class="n">${r.sch?num(r.sch):'—'}</td><td>${r.flag?'<span class="chip work">proveriti</span>':''}</td></tr>`).join('')}</tbody></table></div>`,fl=out.filter(r=>r.flag);
+        return (fl.length?tb(fl):'<p class="sub" style="margin:0">Nijedan dan iznad '+P.rules.normaM2+' m² po demineru.</p>')+`<details class="legacy"><summary>Svi dani i demineri (${out.length})</summary>${tb(out)}</details>`;})()}
+      <p class="fine">„Proveriti”: više od ${P.rules.normaM2} m² CEIA dnevno po demineru. To nije prekršaj, nego znak da se taj rad uzorkuje pažljivije.</p>`:'<p class="sub" style="margin:0">Još nema upisanog učinka.</p>'}</div>`;
+  h+=`<div class="card"><div class="card-h"><h3>Nalazi</h3><span class="sub">izvođač ${s.finds.length}${qf.length?' · kontrola '+qf.length:''}</span></div>
+    ${s.finds.length||qf.length?`<div class="tbl"><table class="qt"><thead><tr><th>ID</th><th>Vrsta</th><th>Boks</th><th>cm</th><th>Postupak</th></tr></thead><tbody>${s.finds.map(f=>`<tr><td class="mono nw">${esc(f.id)}</td><td>${esc(f.type)}<br><span class="sub">${fmtD(f.day).slice(0,6)}</span></td><td class="nw">${esc(f.box)}</td><td class="n">${f.depth}</td><td>${esc(f.act)}</td></tr>`).join('')}
+      ${qf.map(o=>`<tr><td class="mono nw">${esc(o.v.id)}</td><td>${esc(o.x.type)}<br><span class="sub">${fmtD(o.v.d).slice(0,6)} · kontrola CZRS</span></td><td class="nw">${esc(o.x.box)}</td><td class="n">${o.x.depth!=null?o.x.depth:'—'}</td><td>vraćeno na ponovni tretman</td></tr>`).join('')}</tbody></table></div>`:'<p class="sub" style="margin:0">Nema nalaza.</p>'}</div>`;
+  $('#v-danas').innerHTML=h;}
+
+function renderKontrola(){
+  const s=site(),q=qa(s),v=qaOpen(s),el=$('#v-nalaz'),head=`<div><div class="label">Kontrola CZRS · ${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</div>`;
+  if(!v){el.innerHTML=head+`<h2>Nova kontrolna poseta</h2></div>
+    <div class="card"><div class="grid2"><label class="field">Datum<input id="kvD" type="date" value="${esc(today())}" max="${esc(today())}"></label><label class="field">Vreme<input id="kvT" type="time" value="${esc(hm(Date.now()))}"></label></div>
+      <label class="field" style="margin-top:10px">Kontrolor CZRS (ime i prezime)<input id="kvWho" maxlength="80" value="${esc(q.insp)}" autocomplete="off"></label>
+      <fieldset style="margin-top:10px"><legend>Vrsta posete</legend><div class="chips"><label><input type="radio" name="kvAnn" value="0" checked><span>Nenajavljena</span></label><label><input type="radio" name="kvAnn" value="1"><span>Najavljena</span></label></div></fieldset>
+      <label class="field" style="margin-top:10px">Prisutni tim izvođača<textarea id="kvTim" maxlength="300" style="font-family:var(--font-body);min-height:64px" placeholder="npr. D-01 … D-05, rukovodilac radilišta"></textarea></label>
+      <button class="linkbtn" type="button" data-qa="timFill">Upiši deminere koji danas rade na radilištu</button>
+      <label class="field">Predstavnik izvođača<input id="kvRep" maxlength="80" autocomplete="off"></label>
+      <button class="btn primary block" type="button" data-qa="vNew" style="margin-top:12px">Započni kontrolnu posetu</button></div>
+    <p class="fine">Poseta se upisuje u zapisnik o kontroli kvaliteta. Podaci izvođača (boksovi, nalazi, dnevnik) ostaju nepromenjeni.</p>`;return;}
+  const pool=qaPool(s),poolA=pool.reduce((a,b)=>a+b.area,0),rnd=v.samples.filter(x=>x.pick==='r'),locked=rnd.some(x=>x.res),inS=new Set(v.samples.map(x=>x.box));
+  const addable=s.boxes.filter(b=>qaCanSample(b)&&!inS.has(b.id)).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0),types=[...new Set([].concat(...Object.values(PACKS.RS.items)))];
+  const chk=([k,t])=>{const c=v.checks[k]||{st:'',note:''},r=(val,lbl)=>`<label><input type="radio" name="qck_${k}" value="${val}" data-qck="${k}" ${c.st===val?'checked':''}><span>${lbl}</span></label>`;
+    return `<div class="qitem"><div class="qitem-h"><b>${esc(t)}</b><div class="chips">${r('ok','U redu')}${r('ned','Nedostatak')}</div></div>
+      <div class="qrow"><input class="grow" data-qcn="${k}" maxlength="200" value="${esc(c.note)}" placeholder="Napomena" aria-label="Napomena: ${esc(t)}" style="min-height:44px;flex:1 1 160px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)">
+      <label class="btn sm">${c.thumb?'Nova foto':'Foto'}<input type="file" accept="image/*" capture="environment" data-qph="${k}" style="position:absolute;opacity:0;width:1px;height:1px"></label>${c.thumb?`<img class="qth" alt="Fotografija: ${esc(t)}" src="${esc(safeImg(c.thumb))}">`:''}</div></div>`;};
+  const smp=(x,i)=>{const r=(val,lbl)=>`<label><input type="radio" name="qsr${i}" value="${val}" data-qs="${i}" data-f="res" ${x.res===val?'checked':''}><span>${lbl}</span></label>`,tl=types.includes(x.type)||!x.type?types:[x.type].concat(types);
+    return `<div class="qitem"><div class="qitem-h"><span><b>Boks ${esc(x.box)}</b> <span class="sub">${num(x.area)} m² · ${QA_PICK[x.pick]}</span></span>${x.pick==='r'?'':`<button class="btn sm" type="button" data-qa="sDel" data-i="${i}">Ukloni</button>`}</div>
+      <div class="grid2"><label class="field">Metoda ponovne pretrage<select data-qs="${i}" data-f="m">${Object.keys(QA_M).map(m=>`<option value="${m}" ${x.m===m?'selected':''}>${QA_M[m]}</option>`).join('')}</select></label>
+        <label class="field">Uzorkovano (m²)<input type="number" min="0" max="${esc(x.area)}" step="0.5" inputmode="decimal" data-qs="${i}" data-f="m2" value="${esc(x.m2)}"></label></div>
+      <div class="chips">${r('ok','Bez nalaza')}${r('nus','Pronađeno NUS')}</div>
+      ${x.res==='nus'?`<div class="notice haz" style="margin:0">Boks se vraća izvođaču na ponovni tretman kad se poseta zaključi.</div>
+        <div class="grid2"><label class="field">Šta je pronađeno<select data-qs="${i}" data-f="type"><option value="">— izaberi —</option>${tl.map(t=>`<option ${x.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+        <label class="field">Dubina (cm)<input type="number" min="0" max="300" inputmode="numeric" data-qs="${i}" data-f="depth" value="${x.depth!=null?esc(x.depth):''}"></label></div>
+        <label class="field">Opis nalaza<input maxlength="200" data-qs="${i}" data-f="note" value="${esc(x.note)}" placeholder="npr. pronađeno CEIA detektorom, predato MUP-u"></label>`:''}</div>`;};
+  const drawn=v.seed!=null?`<p class="sub" style="margin:0">Seme <b class="mono">${esc(v.seed)}</b> · ${nm(v.pct)} % od ${num(v.base)} m² = cilj ${num(v.base*v.pct/100)} m² · izvučeno ${rnd.length?rnd.map(x=>esc(x.box)).join(', ')+' ('+num(rnd.reduce((a,x)=>a+x.area,0))+' m²)':'ništa (nema završenih neuzorkovanih boksova)'}</p>`:'';
+  el.innerHTML=head+`<h2>Kontrolna poseta ${esc(v.id)}</h2><div class="sub">${fmtD(v.d)} u ${esc(v.t)} · ${qaAnn(v)} · u toku</div></div>
+    <div class="card"><div class="card-h"><h3>Podaci o poseti</h3></div>
+      <label class="field">Kontrolor CZRS<input data-qv="who" maxlength="80" value="${esc(v.who)}" autocomplete="off"></label>
+      <fieldset style="margin-top:10px"><legend>Vrsta posete</legend><div class="chips"><label><input type="radio" name="qvAnn" value="0" data-qv="ann" ${v.ann?'':'checked'}><span>Nenajavljena</span></label><label><input type="radio" name="qvAnn" value="1" data-qv="ann" ${v.ann?'checked':''}><span>Najavljena</span></label></div></fieldset>
+      <label class="field" style="margin-top:10px">Prisutni tim izvođača<textarea data-qv="tim" maxlength="300" style="font-family:var(--font-body);min-height:56px">${esc(v.tim)}</textarea></label>
+      <label class="field" style="margin-top:10px">Predstavnik izvođača<input data-qv="rep" maxlength="80" value="${esc(v.rep)}" autocomplete="off"></label></div>
+    <div class="card"><div class="card-h"><h3>Provere na radilištu</h3><span class="sub">${QA_CHK.filter(([k])=>v.checks[k]&&v.checks[k].st).length}/${QA_CHK.length}</span></div>${QA_CHK.map(chk).join('')}</div>
+    <div class="card"><div class="card-h"><h3>Uzorkovanje</h3><span class="sub">${qaPl(v.samples.length,'boks','boksa','boksova')}</span></div>
+      <p class="sub" style="margin:0 0 8px">Završeno, a još neuzorkovano: ${qaPl(pool.length,'boks','boksa','boksova')}, ${num(poolA)} m². Nasumični izbor sa semenom se može ponoviti na bilo kom uređaju.</p>
+      <div class="grid2"><label class="field">Uzorak (% površine)<input id="kvPct" type="number" min="0.1" max="100" step="0.5" inputmode="decimal" value="${esc(v.pct!=null?v.pct:q.pct)}"><small>Primer: ${QA_PCT} %. CZRS nije objavio stopu; podesiti po projektu.</small></label>
+        <label class="field">Seme<input id="kvSeed" type="number" min="1" max="999999999" inputmode="numeric" value="${v.seed!=null?esc(v.seed):''}" placeholder="novo"><small>Prazno = novo nasumično seme.</small></label></div>
+      <div class="btnrow" style="margin-top:8px"><button class="btn primary" type="button" data-qa="draw" ${locked?'disabled':''}>${rnd.length?'Izvuci ponovo':'Izvuci uzorak'}</button><button class="btn" type="button" data-qa="reseed" ${locked?'disabled':''}>Novo seme</button></div>
+      ${locked?'<p class="fine">Nasumični uzorak ima unete rezultate i više se ne menja.</p>':''}${drawn}
+      <div class="grid2" style="margin-top:8px;align-items:end"><label class="field">Dodaj boks ručno<select id="kvAdd"><option value="">— boks —</option>${addable.map(b=>`<option value="${esc(b.id)}">Boks ${esc(b.id)} · ${num(b.area)} m²${b.ret?' · ponovna kontrola':''}</option>`).join('')}</select></label>
+        <button class="btn" type="button" data-qa="addBox">Dodaj</button></div>
+      <button class="linkbtn" type="button" data-act="tab" data-tab="mapa">ili izaberi boks na mapi</button>
+      ${v.samples.map(smp).join('')}</div>
+    <div class="card"><div class="card-h"><h3>Zaključak</h3></div><label class="field">Zaključak kontrolora<textarea data-qv="zak" maxlength="2000" style="font-family:var(--font-body);min-height:80px" placeholder="npr. Radovi se izvode prema projektu i SOP-u.">${esc(v.zak)}</textarea></label></div>
+    <div class="btnrow"><button class="btn primary" type="button" data-qa="vClose">Zaključi posetu</button><button class="btn" type="button" data-act="doc" data-k="kk" data-visit="${esc(v.id)}">Nacrt zapisnika</button></div>
+    <button class="linkbtn" type="button" data-qa="vDel">Odbaci posetu ${esc(v.id)}</button>`;}
+
+function openBoxK(id){const s=site(),bx=boxById(s,id);if(!bx)return;selBox=id;renderMapaB();
+  const v=qaOpen(s),inS=v&&v.samples.find(x=>x.box===id),fs=s.finds.filter(f=>f.box===id),hist=qa(s).visits.flatMap(x=>x.samples.filter(y=>y.box===id).map(y=>({v:x,y}))),q=esc(id);
+  openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.ci.oznaka)} · ${num(bx.area)} m² · podaci izvođača</div><h2>Boks ${q}</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+    ${bx.excl?`<div class="notice">Isključeno iz pretrage: <b>${esc(exclTxt(bx.excl))}</b></div>`:''}${qaRetNotice(s,bx)}
+    <dl class="kv"><dt>Stanje</dt><dd>${QA_STAT[boxStat(bx)]}</dd>${bx.need.map(m=>`<dt>${esc(P.methods[m])}</dt><dd>${bx.done[m]?fmtD(bx.done[m].day)+' · '+esc(bx.done[m].by):'nije pregledano'}</dd>`).join('')}
+      <dt>Nalazi izvođača</dt><dd>${fs.length?fs.map(f=>esc(f.id+' '+f.type+', '+f.depth+' cm')).join('; '):'nema'}</dd>
+      <dt>Kontrole</dt><dd>${hist.length?hist.map(o=>esc(o.v.id)+' '+fmtD(o.v.d).slice(0,6)+': '+(o.y.res==='nus'?'pronađeno '+esc(o.y.type):o.y.res==='ok'?'bez nalaza':'u toku')).join('; '):'nije uzorkovan'}</dd></dl>
+    ${v?(inS?(inS.pick==='r'?`<p class="sub" style="margin:0">Boks je nasumično izabran u uzorak ${esc(v.id)}.</p>`:`<button class="btn block" type="button" data-qa="smp" data-id="${q}">Ukloni iz uzorka ${esc(v.id)}</button>`)
+      :qaCanSample(bx)?`<button class="btn primary block" type="button" data-qa="smp" data-id="${q}">Dodaj u uzorak ${esc(v.id)}${bx.ret?' (ponovna kontrola)':''}</button>`:'<p class="sub" style="margin:0">U uzorak ulaze samo završeni boksovi i boksovi posle ponovnog tretmana.</p>')
+      :'<p class="sub" style="margin:0">Za uzorkovanje prvo započni kontrolnu posetu (ekran Kontrola).</p>'}`);}
+
+function qaPhoto(s,v,inp){const k=inp.dataset.qph,file=inp.files&&inp.files[0];if(!v||!file)return;const img=new Image(),url=URL.createObjectURL(file),vid=v.id;
+  img.onload=()=>{URL.revokeObjectURL(url);const c=(v.checks[k]=v.checks[k]||{st:'',note:''});c.thumb=scaled(img,220).toDataURL('image/jpeg',.7);delete c.ph;
+    if(ST.db){c.ph=1;scaled(img,1600).toBlob(b=>{(b?idbPut('photos',s.id+'/'+vid+'/'+k,b):Promise.reject()).catch(()=>{c.ph=0;save();toast('Fotografija je sačuvana samo kao umanjena slika.');});},'image/jpeg',.82);}
+    save();if(tab==='nalaz'&&isK(site()))renderKontrola();};
+  img.onerror=()=>{URL.revokeObjectURL(url);toast('Fotografija se ne može pročitati.');};img.src=url;}
+
+/* ---------- inspector documents ---------- */
+const qaOrg=()=>esc(ORG.replace('primjer','primer'));
+function qaHead(s){return `<table><tr><td class="k">Projekat (broj CZRS)</td><td>${esc(s.msp.id)} · ${esc(s.ci.oznaka)}</td></tr><tr><td class="k">Lokacija</td><td>${esc([s.msp.naziv,s.msp.opcina].filter(Boolean).join(', '))||DOP}</td></tr><tr><td class="k">Izvođač</td><td>${qaOrg()}</td></tr></table>`;}
+let docVisit=null;
+function kkDoc(s){const q=qa(s),vs=q.visits,v=vs.find(x=>x.id===docVisit)||vs[vs.length-1]||null,V=x=>String(x||'').trim()?esc(x):DOP;
+  const pick=vs.length>1?`<label class="field noprint daypick">Kontrolna poseta<select id="docVisit">${vs.slice().reverse().map(x=>`<option value="${esc(x.id)}" ${x===v?'selected':''}>${esc(x.id)} · ${fmtD(x.d)}${x.closed?'':' (u toku)'}</option>`).join('')}</select></label>`:'';
+  const top=`<h4>ZAPISNIK O KONTROLI KVALITETA</h4><div class="dsub">kontrola CZRS na radilištu${v?' · '+esc(v.id)+(v.closed?'':' · <b>NACRT, poseta nije zaključena</b>'):''}</div>`+qaHead(s);
+  const sig=v?`<div class="sig"><div>Kontrolor CZRS: ${V(v.who)}</div><div>Predstavnik izvođača: ${V(v.rep)}</div></div>`:'<div class="sig"><div>Kontrolor CZRS</div><div>Predstavnik izvođača</div></div>';
+  const note=`<p class="note">Oblik nije zvanični obrazac CZRS-a. Uzorkovanje po principu IMAS 09.20 (nasumični uzorak očišćene površine, ponovna pretraga); procenat uzorka određuje CZRS po projektu, u aplikaciji je ${QA_PCT} % samo primer.</p>`;
+  if(!v)return {h:top+`<table><tr><td class="k">Kontrolna poseta</td><td>${DOP}</td></tr></table><p>Na ovom radilištu još nema kontrolnih poseta. Poseta se upisuje u ulozi „Kontrolor CZRS”, ekran Kontrola.</p>`+sig+note};
+  const rows=QA_CHK.map(([k,t],i)=>{const c=v.checks[k]||{st:'',note:''};return `<tr><td>${i+1}.</td><td>${esc(t)}</td><td>${c.st==='ok'?'u redu':c.st==='ned'?'<b>nedostatak</b>':'<span class="miss">nije provereno</span>'}</td><td>${esc(c.note)}</td><td>${c.thumb?'da':'—'}</td></tr>`;}).join('');
+  const rnd=v.samples.filter(x=>x.pick==='r'),sm2=v.samples.reduce((a,x)=>a+x.m2,0),nus=v.samples.filter(x=>x.res==='nus');
+  const rule=v.seed!=null?`Nasumični izbor: ${nm(v.pct)} % površine završenih boksova koji ranije nisu uzorkovani (osnova ${num(v.base)} m², cilj ${num(v.base*v.pct/100)} m²), seme ${esc(v.seed)}. Boksovi se poređaju po oznaci, promešaju generatorom sa tim semenom i uzimaju redom dok se ne dostigne cilj; izbor se može ponoviti. Izvučeno: ${rnd.length?rnd.map(x=>esc(x.box)).join(', '):'ništa'}.`:'Nasumični izbor nije rađen.';
+  const smRows=v.samples.map((x,i)=>`<tr><td>${i+1}.</td><td>${esc(x.box)}</td><td>${QA_PICK[x.pick]}</td><td>${esc(QA_M[x.m])}</td><td class="n">${num(x.area)}</td><td class="n">${num(x.m2)}</td><td>${x.res==='ok'?'bez nalaza':x.res==='nus'?'<b>pronađeno NUS</b>, vraćeno na ponovni tretman':DOP}</td><td>${x.res==='nus'?esc(x.type)+(x.depth!=null?', '+esc(x.depth)+' cm':'')+(x.note?'; '+esc(x.note):''):''}</td></tr>`).join('');
+  const opened=q.ncs.filter(n=>n.visit===v.id||(v.closed&&(n.text.includes('ponovna kontrola '+v.id+':')||n.text.includes('ponovna kontrola '+v.id+' posle')))),shut=q.ncs.filter(n=>n.closed&&n.closed.visit===v.id);
+  const ned=QA_CHK.filter(([k])=>v.checks[k]&&v.checks[k].st==='ned').length,ph=QA_CHK.filter(([k])=>v.checks[k]&&v.checks[k].thumb);
+  const sum=`Provera: ${QA_CHK.length}, sa nedostatkom: ${ned}${QA_CHK.some(([k])=>!(v.checks[k]&&v.checks[k].st))?', neproverenih: '+QA_CHK.filter(([k])=>!(v.checks[k]&&v.checks[k].st)).length:''}. Uzorkovano ${num(sm2)} m² u ${qaPl(v.samples.length,'boksu','boksa','boksova')}; sa nalazom: ${nus.length}${nus.length?' ('+nus.map(x=>esc(x.box)).join(', ')+')':''}.`;
+  return {pre:pick,cls:'wide',h:top+`<table><tr><td class="k">Datum i vreme posete</td><td>${fmtD(v.d)}${v.t?' u '+esc(v.t):''}</td></tr><tr><td class="k">Kontrolor CZRS</td><td>${V(v.who)}</td></tr>
+      <tr><td class="k">Vrsta posete</td><td>${qaAnn(v)}</td></tr><tr><td class="k">Prisutni tim izvođača</td><td>${V(v.tim)}</td></tr><tr><td class="k">Predstavnik izvođača</td><td>${V(v.rep)}</td></tr></table>
+    <div class="sec">1. Provere na radilištu</div><table><thead><tr><th>R.br.</th><th>Provera</th><th>Ocena</th><th>Napomena</th><th>Foto</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="sec">2. Uzorkovanje završenih boksova</div><p class="pre">${rule}</p>
+    <table><thead><tr><th>R.br.</th><th>Boks</th><th>Izbor</th><th>Metoda</th><th>Boks m²</th><th>Uzorak m²</th><th>Rezultat</th><th>Nalaz, dubina</th></tr></thead><tbody>${smRows||'<tr><td colspan="8">Uzorkovanje nije rađeno na ovoj poseti.</td></tr>'}</tbody>
+      ${v.samples.length?`<tfoot><tr><td colspan="5">Ukupno uzorkovano</td><td class="n">${num(sm2)}</td><td colspan="2"></td></tr></tfoot>`:''}</table>
+    <div class="sec">3. Nedostaci</div><table>${opened.length||shut.length?opened.map(n=>`<tr><td>${esc(n.id)}</td><td>${esc(n.text)}</td><td>${n.closed?'zatvoren':'otvoren'}</td></tr>`).join('')+shut.filter(n=>!opened.includes(n)).map(n=>`<tr><td>${esc(n.id)}</td><td>${esc(n.text)}</td><td>zatvoren na ovoj poseti</td></tr>`).join('')
+      :`<tr><td>${v.closed?'Nema.':'Otvaraju se kad se poseta zaključi.'}</td></tr>`}</table>
+    <div class="sec">4. Zaključak</div><p class="pre">${sum}</p><p>${String(v.zak).trim()?esc(v.zak):DOP}</p>
+    ${ph.length?`<div class="sec">Fotografije</div><div class="phgrid">${ph.map(([k,t])=>`<figure class="phf"><img alt="${esc(t)}" src="${esc(v.checks[k].thumb)}" ${v.checks[k].ph?`data-ph="${esc(s.id+'/'+v.id+'/'+k)}"`:''}><figcaption>${esc(t)}${v.checks[k].note?': '+esc(v.checks[k].note):''}</figcaption></figure>`).join('')}</div>`:''}`+sig+note};}
+function zkDoc(s){const q=qa(s),t=qaTotals(s),c=certCheck(s),st=s.boxes.map(boxStat),cnt=x=>st.filter(y=>y===x).length,ex=s.boxes.filter(b=>b.excl),A=PACKS.RS.actions;
+  const last=s.boxes.flatMap(b=>Object.values(b.done).map(d=>d.day)).filter(Boolean).sort().pop(),by=(fs)=>{const o={};fs.forEach(f=>o[f.type]=(o[f.type]||0)+f.qty);return Object.entries(o).map(([k,n])=>esc(k)+' ×'+n).join(', ');};
+  const mup=s.finds.filter(f=>f.act===A[1]||f.act===A[2]),wait=s.finds.filter(f=>f.act===A[0]),qf=qaFinds(s),open=q.ncs.filter(n=>!n.closed),cv=q.visits.filter(v=>v.closed);
+  const F=[['Projekat (broj CZRS)',esc(s.msp.id)+' · '+esc(s.ci.oznaka)],['Lokacija',esc([s.msp.naziv,s.msp.opcina].filter(Boolean).join(', '))],['Izvođač',qaOrg()],
+    ['Period radova',s.start?fmtD(s.start)+' – '+(last?fmtD(last):''):''],['Ukupna površina projekta',num(polyArea(s.poly))+' m²'],
+    ['Isključeno iz pretrage',ex.length?num(exclM2(s))+' m² · '+ex.map(b=>esc(b.id+': '+(exclTxt(b.excl)||'bez razloga'))).join('; '):'nema'],['Površina za pretragu',num(totalArea(s))+' m²'],
+    ['Pregledano CEIA detektorom',num(methodM2(s,'CEIA'))+' m²'],['Pregledano Schonstedtom',num(methodM2(s,'SCH'))+' m²'],
+    ['Završeno (bez vraćenih boksova)',num(clearedM2(s))+' od '+num(totalArea(s))+' m²'],
+    ['Stanje boksova',`završeno ${cnt('d')} · delimično ${cnt('p')} · nije pregledano ${cnt('n')} · vraćeno ${cnt('r')+cnt('k')} · isključeno ${cnt('x')} · ukupno ${s.boxes.length}`],
+    ['Kontrolne posete CZRS',cv.length?qaPl(cv.length,'zaključena','zaključene','zaključenih')+' (nenajavljenih: '+cv.filter(v=>!v.ann).length+') · '+cv.map(v=>esc(v.id)+' '+fmtD(v.d).slice(0,6)).join(', '):''],
+    ['Uzorkovano',t.boxes?num(t.m2)+' m² u '+qaPl(t.boxes,'boksu','boksa','boksova')+(clearedM2(s)?' ('+num(t.m2/clearedM2(s)*100,1)+' % završene površine)':''):''],
+    ['Rezultat uzorkovanja',t.boxes?'bez nalaza: '+t.ok+' · sa nalazom: '+t.nus:''],
+    ['NUS pronađena (izvođač)',s.finds.length?by(s.finds):'nema'],['NUS predata MUP-u (preuzeto / uništeno)',mup.length?by(mup):'nema'],
+    ['NUS čeka MUP',wait.length?wait.map(f=>esc(f.id+' '+f.type)).join(', '):'nema'],
+    ['NUS pronađena pri kontroli CZRS',qf.length?qf.map(o=>esc(o.x.type)+' (boks '+esc(o.x.box)+', '+esc(o.v.id)+')').join(', '):'nema'],
+    ['Otvoreni nedostaci',open.length?open.map(n=>esc(n.id+': '+n.text)).join('; '):'nema']];
+  const prop=c.ok?`<div class="sec">PREDLOG ZA IZDAVANJE UVERENJA O OČIŠĆENOSTI</div><p>Na osnovu ${qaPl(cv.length,'kontrolne posete','kontrolne posete','kontrolnih poseta')}, uzorkovanja (${num(t.m2)} m²) i završne kontrole, bez otvorenih nedostataka, predlaže se izdavanje uverenja o očišćenosti za projekat ${esc(s.msp.id)} (${esc(s.ci.oznaka)}), površina za pretragu ${num(totalArea(s))} m²${ex.length?', isključeno iz pretrage '+num(exclM2(s))+' m²':''}. Uverenje izdaje CZRS na osnovu zapisnika o predaji očišćene površine (Uredba 70/2013, čl. 22).</p>`
+    :`<div class="sec">Predlog za izdavanje uverenja o očišćenosti</div><p><b>Predlog se ne može dati</b> dok postoji:</p><ul class="missing">${c.why.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  return {h:`<h4>ZAVRŠNA KONTROLA</h4><div class="dsub">kontrola CZRS · stanje na dan ${fmtD(today())} · osnova za zapisnik o predaji</div>
+    <table>${F.map((x,i)=>`<tr><td style="width:24px">${i+1}.</td><td class="k">${x[0]}</td><td>${x[1]||DOP}</td></tr>`).join('')}</table>${prop}
+    <div class="sig"><div>Kontrolor CZRS: ${q.insp?esc(q.insp):DOP}</div><div>Rukovodilac radilišta (izvođač)</div></div>
+    <p class="note">Oblik nije zvanični obrazac CZRS-a. Uslovi za predlog: nema otvorenih nedostataka, nema nezaključene posete, bar jedna zaključena poseta sa uzorkovanjem, svi boksovi završeni ili isključeni sa razlogom i sva NUS preuzeo MUP.</p>`};}
+// rows and annexes the inspector adds to the contractor's "Zapisnik o predaji" draft
+function qaPredaja(s){const q=qa(s),t=qaTotals(s),c=certCheck(s),open=q.ncs.filter(n=>!n.closed);
+  return [['Kontrola kvaliteta CZRS',t.n?qaPl(t.n,'zaključena poseta','zaključene posete','zaključenih poseta')+' · uzorkovano '+num(t.m2)+' m² u '+qaPl(t.boxes,'boksu','boksa','boksova')+' · sa nalazom: '+t.nus:''],
+    ['Otvoreni nedostaci (kontrola CZRS)',q.visits.length?(open.length?open.map(n=>esc(n.id+': '+n.text)).join('; '):'nema'):''],
+    ['Završna kontrola: predlog za uverenje',c.ok?'<b>uslovi ispunjeni</b> (Završna kontrola)':(q.visits.length?'još ne: '+qaPl(c.why.length,'prepreka','prepreke','prepreka')+' (Završna kontrola)':'')]];}
+function qaPrilozi(s){const n=qa(s).visits.filter(v=>v.closed).length,c=certCheck(s);
+  return `<tr><td>e)</td><td>Zapisnici o kontroli kvaliteta CZRS (${n})</td><td>${n?'<b>spremno</b>':'<span class="miss">nedostaje</span>'}</td></tr><tr><td>f)</td><td>Završna kontrola i predlog za uverenje</td><td>${c.ok?'<b>spremno</b>':'<span class="miss">uslovi nisu ispunjeni</span>'}</td></tr>`;}
+// contractor's daily record: re-treatment done that day on the inspector's order
+function qaRedoDay(s,day){const r=[];s.boxes.forEach(b=>{if(b.ret&&b.ret.redo&&b.ret.redo.day===day)r.push([b.id,b.ret.nc,b.ret.redo.by,b.area]);});
+  qa(s).ncs.forEach(n=>{if(n.kind==='box'&&n.redo&&n.redo.day===day&&!r.some(x=>x[1]===n.id)){const b=boxById(s,n.box);r.push([n.box,n.id,n.redo.by,b?b.area:null]);}});
+  return r.length?`<div class="sec">Ponovni tretman po nalogu kontrole CZRS</div><table>${r.map(x=>`<tr><td>boks ${esc(x[0])}</td><td>${esc(x[1])}</td><td>${esc(x[2])}</td><td class="n">${x[3]!=null?num(x[3])+' m²':''}</td></tr>`).join('')}</table>`:'';}
+
+/* ---------- demo: one past unannounced visit, random 10 % sample; the last sampled box had a fragment and is back with the contractor ---------- */
+function seedQa(s,vd){const pool=s.boxes.filter(b=>boxDone(b)&&b.need.every(m=>b.done[m].day<=vd)),r=qaSample(pool,QA_PCT,4127);
+  const v={id:'KP-01',d:vd,t:'10:30',who:'M. Primerović (primer)',ann:0,tim:'D-01, D-02, D-03, D-04 (CEIA), D-05 (Schonstedt), rukovodilac radilišta',rep:'P. Izmišljeni (primer)',
+    checks:{},pct:QA_PCT,seed:4127,base:+r.base.toFixed(1),samples:r.ids.map(id=>Object.assign(qaRow(boxById(s,id),'r'),{res:'ok'})),zak:'',closed:''};
+  QA_CHK.forEach(([k])=>{v.checks[k]={st:'ok',note:''};});v.checks.test.note='CEIA i Schonstedt provereni na test-poligonu u prisustvu kontrolora';
+  const f=v.samples.slice().sort((a,b)=>b.area-a.area)[0];if(f&&v.samples.length>1){Object.assign(f,{res:'nus',type:'Fragment',depth:9,note:'pronađeno CEIA detektorom u dubini pretrage'});
+    v.zak='Radovi se izvode prema projektu. Boks '+f.box+' vraćen izvođaču na ponovni tretman (fragment na 9 cm); ponovna kontrola tog boksa na sledećoj poseti.';}
+  else v.zak='Radovi se izvode prema projektu. Uzorak bez nalaza.';
+  s.qa={role:'izv',pct:QA_PCT,insp:v.who,visits:[v],ncs:[]};qaClose(s,v);}
+
+/* ---------- inspector actions (own listeners) ---------- */
+document.addEventListener('click',e=>{const el=e.target.closest('[data-qa]');if(!el||!S||el.disabled)return;const s=site();if(s.mode!=='boxes')return;
+  const a=el.dataset.qa,id=el.dataset.id,q=qa(s),v=qaOpen(s);
+  if(a==='redo'){if(isK(s)){toast(QA_RO_MSG,4000);return;}const r=qaRedo(s,id,($('#mWho')||{}).value||'');if(typeof r==='string'){toast(r,4500);return;}save();openBoxB(id);renderHeader();toast('Boks '+id+': ponovni tretman upisan. Čeka ponovnu kontrolu CZRS.',4500);return;}
+  if(a==='role'){const r=el.dataset.role==='czrs'?'czrs':'izv';if(q.role===r)return;q.role=r;selBox=null;mergeSel=null;docView=null;save();closeSheet();go('danas');
+    toast(r==='czrs'?'Uloga: kontrolor CZRS. Podaci izvođača su samo za pregled.':'Uloga: izvođač.',3500);return;}
+  if(!isK(s))return;
+  switch(a){
+    case 'timFill':{const ids=[...new Set(s.assign.map(x=>x.who).concat(...s.boxes.map(b=>Object.values(b.done).filter(d=>d.day===today()).map(d=>d.by))))].filter(Boolean).sort();
+      const txt=ids.map(w=>{const m=TEAM.find(x=>x.id===w);return w+(m?' '+m.n:'');}).join(', ');const t=$('#kvTim');if(t)t.value=txt;if(!txt)toast('Danas nema upisanog rada ni rasporeda deminera.');break;}
+    case 'vNew':{if(v){toast('Poseta '+v.id+' je već u toku.');break;}const d=D_(($('#kvD')||{}).value),who=String(($('#kvWho')||{}).value||'').trim().slice(0,80);
+      if(!d){toast('Upiši datum posete.');break;}if(d>today()){toast('Datum posete ne može biti u budućnosti.');break;}if(!who){toast('Upiši ime kontrolora.');break;}
+      const nv={id:qaNextId(q.visits,'KP-'),d,t:T_(($('#kvT')||{}).value)||hm(Date.now()),who,ann:(document.querySelector('input[name="kvAnn"]:checked')||{}).value==='1'?1:0,
+        tim:String(($('#kvTim')||{}).value||'').trim().slice(0,300),rep:String(($('#kvRep')||{}).value||'').trim().slice(0,80),checks:{},pct:q.pct,seed:null,base:null,samples:[],zak:'',closed:''};
+      q.visits.push(nv);q.insp=who;addQ('Kontrolna poseta '+nv.id);save();renderKontrola();$('#main').scrollTop=0;toast('Kontrolna poseta '+nv.id+' započeta.');break;}
+    case 'draw':case 'reseed':{if(!v)break;if(a==='reseed'&&$('#kvSeed'))$('#kvSeed').value='';const sd=parseNum(($('#kvSeed')||{}).value),r=qaDraw(s,v,parseNum(($('#kvPct')||{}).value),isFinite(sd)?sd:qaNewSeed());
+      if(typeof r==='string'){toast(r,4500);break;}save();renderKontrola();toast(r.ids.length?'Izvučeno: '+r.ids.join(', ')+' ('+num(r.area)+' m²).':'Nema završenih neuzorkovanih boksova za izbor.',4500);break;}
+    case 'addBox':{const sel=($('#kvAdd')||{}).value;if(!sel){toast('Izaberi boks.');break;}const r=qaAdd(s,v,sel);if(typeof r==='string'){toast(r,4500);break;}save();renderKontrola();break;}
+    case 'smp':{if(!v){toast('Prvo započni kontrolnu posetu.');break;}const i=v.samples.findIndex(x=>x.box===id);
+      if(i>=0){if(v.samples[i].pick==='r'){toast('Nasumično izabran boks ostaje u uzorku.');break;}v.samples.splice(i,1);}else{const r=qaAdd(s,v,id);if(typeof r==='string'){toast(r,4500);break;}}
+      save();openBoxK(id);toast(i>=0?'Boks '+id+' uklonjen iz uzorka.':'Boks '+id+' dodat u uzorak '+v.id+'.');break;}
+    case 'sDel':{if(!v)break;const x=v.samples[+el.dataset.i];if(!x||x.pick==='r')break;v.samples.splice(+el.dataset.i,1);save();renderKontrola();break;}
+    case 'vClose':{const r=qaClose(s,v);if(typeof r==='string'){toast(r,5000);break;}addQ('Kontrolna poseta '+v.id+' zaključena');save();docVisit=v.id;docView='kk';go('izvjestaji');
+      toast('Poseta '+v.id+' zaključena.'+(r.made.length?' Nedostaci: '+r.made.join(', ')+'.':'')+(r.shut.length?' Zatvoreno: '+r.shut.join(', ')+'.':''),6000);break;}
+    case 'vDel':{if(!v)break;if(el.dataset.sure!=='1'){el.dataset.sure='1';el.textContent='Dodirni ponovo: poseta '+v.id+' se briše';break;}q.visits=q.visits.filter(x=>x!==v);save();renderKontrola();toast('Poseta odbačena.');break;}
+    case 'ncClose':{const n=q.ncs.find(x=>x.id===id);if(!n)break;openSheet(`<div class="sheet-h"><div><div class="label">Nedostatak ${esc(n.id)} · ${fmtD(n.d)}</div><h2>Zatvori nedostatak</h2></div><button class="x" type="button" data-act="close" aria-label="Zatvori">×</button></div>
+      <p style="margin:0">${esc(n.text)}</p><label class="field">Kako je otklonjen<textarea id="ncNote" maxlength="300" style="font-family:var(--font-body);min-height:70px"></textarea></label>
+      <button class="btn primary block" type="button" data-qa="ncOk" data-id="${esc(n.id)}">Zatvori ${esc(n.id)}</button>`);break;}
+    case 'ncOk':{const r=qaNcClose(s,id,($('#ncNote')||{}).value,v?v.id:'');if(typeof r==='string'){toast(r,4500);break;}save();closeSheet();rerender();toast('Nedostatak '+id+' zatvoren.');break;}
+  }});
+document.addEventListener('change',e=>{const t=e.target;if(!S||!t||!t.dataset)return;const s=site();if(!isK(s))return;const v=qaOpen(s);if(!v)return;const d=t.dataset;
+  if(d.qph!=null){qaPhoto(s,v,t);return;}
+  if(d.qv){const k=d.qv;if(k==='ann')v.ann=t.value==='1'?1:0;else if(['who','tim','rep','zak'].includes(k)){v[k]=String(t.value).slice(0,k==='zak'?2000:300);if(k==='who'&&v.who.trim())qa(s).insp=v.who.trim();}save();return;}
+  if(d.qck){(v.checks[d.qck]=v.checks[d.qck]||{st:'',note:''}).st=t.value==='ned'?'ned':'ok';save();return;}
+  if(d.qcn){(v.checks[d.qcn]=v.checks[d.qcn]||{st:'',note:''}).note=String(t.value).slice(0,200);save();return;}
+  if(d.qs!=null){const x=v.samples[+d.qs];if(!x)return;const f=d.f,n=parseNum(t.value);
+    if(f==='m')x.m=QA_M[t.value]?t.value:'CEIA';else if(f==='m2')x.m2=isFinite(n)?Math.max(0,Math.min(x.area||n,n)):0;else if(f==='type')x.type=String(t.value).slice(0,80);
+    else if(f==='depth')x.depth=isFinite(n)?Math.max(0,Math.round(n)):null;else if(f==='note')x.note=String(t.value).slice(0,200);
+    else if(f==='res'){x.res=t.value==='nus'?'nus':'ok';save();renderKontrola();return;}save();}});
 
 /* ---------- landmark editor ---------- */
 function openFeat(id){const s=site(),f=id?feats(s).find(x=>x.id===id):null,k=f&&FK[f.kind]?f.kind:'pruga';
@@ -2505,7 +2846,7 @@ function kmlText(s){s=s||site();const w=q=>{const p=planeToWgs(s,toGK(s,q[0],q[1
     return outer.length===1?pg(outer[0]):'<MultiGeometry>'+outer.map(pg).join('')+'</MultiGeometry>';};
   const ed=o=>'<ExtendedData>'+Object.entries(o).map(([k,v])=>`<Data name="${k}"><value>${esc(v==null?'':v)}</value></Data>`).join('')+'</ExtendedData>';
   const desc=a=>'<description><![CDATA['+a.filter(Boolean).map(esc).join('<br>')+']]></description>';
-  const STAT={n:['nije pregledano','80475ae0'],p:['delimično (čeka Schonstedt)','8042b1e7'],d:['završeno','a04a782b'],x:['isključeno','b0998f8a']};
+  const STAT={n:['nije pregledano','80475ae0'],p:['delimično (čeka Schonstedt)','8042b1e7'],d:['završeno','a04a782b'],x:['isključeno','b0998f8a'],r:['vraćeno na ponovni tretman (CZRS)','c01c2abf'],k:['ponovni tretman urađen, čeka ponovnu kontrolu','c00b6fa8']};
   const LC={pruga:['ff332a1d',4],put:['ff456a8a',4],dalekovod:['ffa04f6b',2],kanal:['ffb5742f',3],potok:['ffb5742f',2]};
   const tpE=(q,i)=>{const p=toGK(s,q[0],q[1]);return 'T'+(i+1)+': E '+p.Y.toFixed(2)+', N '+p.X.toFixed(2);};
   let k=`<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${esc(s.msp.id+' · '+s.msp.naziv+' · '+s.ci.oznaka)}</name>`+
@@ -2533,6 +2874,7 @@ async function saveFile(name,text,mime){const blob=new Blob([text],{type:mime});
 
 /* ---------- Serbia actions (own listener so the shared switch stays untouched) ---------- */
 document.addEventListener('click',e=>{const el=e.target.closest('[data-rs]');if(!el||!S||el.disabled)return;const s=site(),a=el.dataset.rs,id=el.dataset.id;
+  if(isK(s)&&QA_RO_RS.includes(a)){toast(QA_RO_MSG,4000);return;}
   const fin=m=>{save();rerender();if(m)toast(m,4000);};
   switch(a){
     case 'split':{const r=splitBox(s,id,el.dataset.mode,parseNum(($('#cutU')||{}).value),parseNum(($('#cutV')||{}).value));if(typeof r==='string'){toast(r,4500);break;}closeSheet();fin('Boks '+id+' podeljen: '+r.map(b=>b.id).join(', ')+'.');break;}
@@ -2540,7 +2882,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-rs]');if(
     case 'mergeOk':{if(!mergeSel)break;const r=mergeBoxes(s,mergeSel.ids);if(typeof r==='string'){toast(r,6500);break;}mergeSel=null;fin('Spojeno u boks '+r.id+' ('+num(r.area)+' m²).');break;}
     case 'mergeCancel':mergeSel=null;renderMapaB();break;
     case 'rename':{const r=renameBox(s,id,$('#bxName').value);if(typeof r==='string'){toast(r);break;}closeSheet();fin('Boks '+id+' je sada '+r.id+'.');break;}
-    case 'excl':exclBox(s,id,$('#exWhy').value,$('#exNote').value);closeSheet();fin('Boks '+id+' isključen iz pretrage.');break;
+    case 'excl':{const r=exclBox(s,id,$('#exWhy').value,$('#exNote').value);if(typeof r==='string'){toast(r,4500);break;}closeSheet();fin('Boks '+id+' isključen iz pretrage.');break;}
     case 'unexcl':exclBox(s,id,null);closeSheet();fin('Boks '+id+' vraćen u pretragu.');break;
     case 'ids':showIds=!showIds;renderMapaB();break;
     case 'featNew':openFeat(null);break;
@@ -2584,6 +2926,7 @@ document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');
   if(!el){if(e.target.id==='scrim')closeSheet();return;}
   const a=el.dataset.act;if(!S&&!['recRetry','recRaw','restoreOk','close','swUpdate'].includes(a))return;const s=S?site():null;
+  if(s&&isK(s)&&QA_RO.includes(a)){toast(QA_RO_MSG,4000);return;}
   switch(a){
     case 'tab':closeSheet();go(el.dataset.tab);break;
     case 'close':closeSheet();break;
@@ -2613,7 +2956,7 @@ document.addEventListener('click',e=>{
     case 'start':{const di=dayInfo(s);if(!briefItems(s).every((x,i)=>di.brief[i]))break;di.started=true;logAdd(s,{e:'Brifing završen; početak rada'});save();renderDanas();break;}
     case 'crs':S.crs=el.value;save();break;
     case 'p11w':p11Cur=el.value==='1';renderDoc(docView);break;
-    case 'doc':if(docView!==el.dataset.k){docDay=null;docZ=1;}docView=el.dataset.k;if(tab!=='izvjestaji'){tab='izvjestaji';document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-izvjestaji');document.querySelectorAll('.tab').forEach(b=>{if(b.dataset.tab==='izvjestaji')b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});}renderDoc(docView);$('#main').scrollTop=0;break;
+    case 'doc':if(docView!==el.dataset.k){docDay=null;docZ=1;}if(el.dataset.visit)docVisit=el.dataset.visit;docView=el.dataset.k;if(tab!=='izvjestaji'){tab='izvjestaji';document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-izvjestaji');document.querySelectorAll('.tab').forEach(b=>{if(b.dataset.tab==='izvjestaji')b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});}renderDoc(docView);$('#main').scrollTop=0;break;
     case 'docBack':docView=null;docZ=1;renderIzvjestaji();break;
     case 'docZoom':docZ=docZ%3+1;renderDoc(docView);break;
     case 'print':try{window.print();}catch(err){}break;
@@ -2641,7 +2984,7 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('input',e=>{const t=e.target;if(!S||!S.incident)return;if(t.dataset.v){S.incident.v[t.dataset.v]=Math.max(0,+t.value||0);save();}if(t.dataset.ic){S.incident[t.dataset.ic]=t.value;save();}});
-document.addEventListener('change',e=>{const t=e.target;if(S&&t.id==='lanePick'&&t.value){openLane(+t.value);return;}if(S&&t.id==='boxPick'&&t.value){openBoxB(t.value);return;}if(t.id==='rsFile'&&t.files&&t.files[0]){onRestoreFile(t.files[0]);t.value='';return;}if(!S)return;if(t.id==='docDay'){docDay=t.value===today()?null:t.value;if(docView)renderDoc(docView);return;}if(S.incident&&t.dataset.ic==='cat'){S.incident.cat=t.value;save();}});
+document.addEventListener('change',e=>{const t=e.target;if(S&&t.id==='lanePick'&&t.value){openLane(+t.value);return;}if(S&&t.id==='boxPick'&&t.value){openBoxB(t.value);return;}if(t.id==='rsFile'&&t.files&&t.files[0]){onRestoreFile(t.files[0]);t.value='';return;}if(!S)return;if(t.id==='docDay'){docDay=t.value===today()?null:t.value;if(docView)renderDoc(docView);return;}if(t.id==='docVisit'){docVisit=t.value;if(docView)renderDoc(docView);return;}if(S.incident&&t.dataset.ic==='cat'){S.incident.cat=t.value;save();}});
 document.addEventListener('keydown',e=>{const open=!$('#scrim').hidden;if(e.key==='Escape'&&open){closeSheet();return;}
   // Tab stays inside an open sheet
   if(e.key==='Tab'&&open){const f=[...$('#sheet').querySelectorAll('button,input,select,textarea,summary,[tabindex="0"]')].filter(x=>!x.disabled&&x.offsetParent!==null);if(f.length){const a=f[0],z=f[f.length-1];
