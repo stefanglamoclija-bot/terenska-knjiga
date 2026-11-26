@@ -2,7 +2,7 @@
 <html lang="bs" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-HQjLt9C8a0MGbSP9HyeQ/TxNBmeVDyuDyEVEGwO+c1g='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-JtrgfRW9rlBKAt7raDQr5svufqiNFTK8Xui5RwXn9lU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
@@ -419,6 +419,7 @@ legend,.flabel{font-size:13px;font-weight:600;margin-bottom:6px;padding:0;displa
 .tpbtn{display:flex;gap:6px}.tpbtn .btn{flex:1 1 0}
 .doc .pl{white-space:pre-line}
 .doc img.sgimg{height:26px;width:auto;border:0;margin:0;display:inline-block;vertical-align:middle;background:none}
+.lcrow{flex-wrap:wrap}.lcf{flex:1 1 100%;display:flex;flex-direction:column;gap:8px;padding:8px 0 4px}
 </style>
 </head>
 <body>
@@ -4151,6 +4152,9 @@ Object.assign(I18N.en,{
 "dr.v.add":"Record the visitor","dr.v.bg":"Blood group","dr.v.n":"Number","dr.v.name":"Visitor","dr.v.org":"Organisation","dr.v.out":"Departure","dr.v.prat":"Escort","dr.v.title":"Visitors briefed on safety ({n})",
 "dr.wx.cloud":"cloudy","dr.wx.cold":"cold","dr.wx.heat":"heat, water and longer breaks","dr.wx.rain":"rain","dr.wx.sun":"sunny","dr.wx.wind":"wind",
 "rep.d.zbD":"today's briefing in progress","rep.d.zbN":"no briefing yet today","rep.d.zbS":"opening, confirmations, closing the day","rep.d.zbZ":"briefing closed at {t}","rep.g.zb":"Daily briefing and checks record","rsd.doc.zb":"Zapisnik o dnevnom brifingu i proverama (Daily briefing and checks record)"});
+Object.assign(I18N.bs,{"dr.lc.btn":"NUS i MUP ({n})","dr.lc.closeWarn":"Nalazi dana bez potvrde da su obilježeni, obezbijeđeni i prijavljeni: {ids}.","dr.lc.done":"Uništeno ({n})","dr.lc.ek":"MUP ekipa / ime","dr.lc.ekPh":"npr. EOD tim SVS, Beograd","dr.lc.errEk":"Upiši MUP ekipu ili ime.","dr.lc.errGde":"Upiši mjesto skladišta.","dr.lc.gdeSkl":"Mjesto privremenog skladišta","dr.lc.gdeUn":"Mjesto uništenja (nije obavezno)","dr.lc.label":"pronađen → obilježen → predat MUP-u → uništen","dr.lc.mup":"Predato MUP-u","dr.lc.none":"Nema nalaza koji čekaju MUP.","dr.lc.note":"U Srbiji izvođač ne uništava NUS: obilježava, obezbjeđuje i prijavljuje (112 / policija), a MUP preuzima i uništava. Završna kontrola čeka dok sve ne bude uništeno.","dr.lc.obz":"Obilježeno i obezbijeđeno","dr.lc.saved":"{id}: upisano.","dr.lc.skl":"Privremeno skladište","dr.lc.st.mup":"predato MUP-u, čeka uništenje","dr.lc.st.nov":"pronađeno","dr.lc.st.obz":"obilježeno, prijavljeno, čeka MUP","dr.lc.st.skl":"u privremenom skladištu, čeka MUP","dr.lc.st.un":"uništeno (MUP)","dr.lc.title":"Nalazi i predaja MUP-u","dr.lc.un":"Uništeno (MUP)","dr.lc.why":"NUS preuzeo MUP, uništenje nije upisano: {ids}"});
+Object.assign(I18N.sr,{"dr.lc.btn":"NUS i MUP ({n})","dr.lc.closeWarn":"Nalazi dana bez potvrde da su obeleženi, obezbeđeni i prijavljeni: {ids}.","dr.lc.done":"Uništeno ({n})","dr.lc.ek":"MUP ekipa / ime","dr.lc.ekPh":"npr. EOD tim SVS, Beograd","dr.lc.errEk":"Upiši MUP ekipu ili ime.","dr.lc.errGde":"Upiši mesto skladišta.","dr.lc.gdeSkl":"Mesto privremenog skladišta","dr.lc.gdeUn":"Mesto uništenja (nije obavezno)","dr.lc.label":"pronađen → obeležen → predat MUP-u → uništen","dr.lc.mup":"Predato MUP-u","dr.lc.none":"Nema nalaza koji čekaju MUP.","dr.lc.note":"U Srbiji izvođač ne uništava NUS: obeležava, obezbeđuje i prijavljuje (112 / policija), a MUP preuzima i uništava. Završna kontrola čeka dok sve ne bude uništeno.","dr.lc.obz":"Obeleženo i obezbeđeno","dr.lc.saved":"{id}: upisano.","dr.lc.skl":"Privremeno skladište","dr.lc.st.mup":"predato MUP-u, čeka uništenje","dr.lc.st.nov":"pronađeno","dr.lc.st.obz":"obeleženo, prijavljeno, čeka MUP","dr.lc.st.skl":"u privremenom skladištu, čeka MUP","dr.lc.st.un":"uništeno (MUP)","dr.lc.title":"Nalazi i predaja MUP-u","dr.lc.un":"Uništeno (MUP)","dr.lc.why":"NUS preuzeo MUP, uništenje nije upisano: {ids}"});
+Object.assign(I18N.en,{"dr.lc.btn":"UXO and MUP ({n})","dr.lc.closeWarn":"Finds of the day not yet confirmed as marked, secured and reported: {ids}.","dr.lc.done":"Destroyed ({n})","dr.lc.ek":"MUP team / name","dr.lc.ekPh":"e.g. EOD team, Belgrade","dr.lc.errEk":"Enter the MUP team or name.","dr.lc.errGde":"Enter where it is stored.","dr.lc.gdeSkl":"Temporary storage place","dr.lc.gdeUn":"Place of destruction (optional)","dr.lc.label":"found → marked → handed to MUP → destroyed","dr.lc.mup":"Handed to MUP","dr.lc.none":"No finds waiting for MUP.","dr.lc.note":"In Serbia the contractor never destroys UXO: it marks, secures and reports it (112 / police); MUP (police) takes it over and destroys it. The final control waits until everything is destroyed.","dr.lc.obz":"Marked and secured","dr.lc.saved":"{id}: recorded.","dr.lc.skl":"Temporary storage","dr.lc.st.mup":"handed to MUP, awaiting destruction","dr.lc.st.nov":"found","dr.lc.st.obz":"marked, reported, waiting for MUP","dr.lc.st.skl":"in temporary storage, waiting for MUP","dr.lc.st.un":"destroyed (MUP)","dr.lc.title":"Finds and handover to MUP","dr.lc.un":"Destroyed (MUP)","dr.lc.why":"UXO taken by MUP, destruction not recorded: {ids}"});
 const LANGS=['bs','sr','en'],UI_OPTS=['auto','bs','sr','en'];
 const KEY_UI='terenska-knjiga-ui'; // mirror of an explicit choice, so the recovery screen (no state loaded) speaks it too
 let DOCLANG=null;
@@ -6130,19 +6134,19 @@ const DOCS_RS=[
 function rsDoc(s,k){
   const head=`<table><tr><td class="k">Izvođač</td><td>${esc(ORG.replace('primjer','primer'))}</td></tr><tr><td class="k">Projekat</td><td>${esc(s.msp.id)} · ${esc(s.msp.naziv)}, ${esc(s.msp.opcina)} · ${esc(s.ci.oznaka)}</td></tr></table>`;
   if(k==='sk')return {h:`${skicaSVG(s)}<p class="note noprint">${inUi(()=>t('rsd.sk.note',{sc:skScale(s),rot:s.az?t('rsd.sk.rot',{a:azTxt(s.az)}):''}))}</p>`,cls:'skdoc'};
-  if(k==='rsd'){const day=docDay||today(),pd=perDeminer(s,day),log=dayLog(s,day),ft=s.finds.filter(f=>f.day===day);let rows='',tot={CEIA:0,SCH:0};
-    Object.keys(pd).sort().forEach(w=>['CEIA','SCH'].forEach(m=>{if(!pd[w][m].length)return;tot[m]+=pd[w].m2[m];const over=m==='CEIA'&&pd[w].m2[m]>P.rules.normaM2;
-      rows+=`<tr><td>${esc(w)} · ${esc((TEAM.find(t=>t.id===w)||{}).n||'')}</td><td>${P.methods[m]}</td><td>${esc(pd[w][m].join(', '))}</td><td class="n">${num(pd[w].m2[m])}</td><td>${over?'<span class="miss">iznad norme '+P.rules.normaM2+' m²</span>':''}</td></tr>`;}));
+  if(k==='rsd'){const day=docDay||today(),pd=perDeminer(s,day),log=dayLog(s,day),ft=s.finds.filter(f=>f.day===day),rc=recOf(s,day),cl=rc&&rc.close,dem=cl&&cl.dem||{};let rows='',tot={CEIA:0,SCH:0};
+    Object.keys(pd).sort().forEach(w=>['CEIA','SCH'].forEach(m=>{if(!pd[w][m].length)return;tot[m]+=pd[w].m2[m];const over=m==='CEIA'&&pd[w].m2[m]>P.rules.normaM2,fs=ft.filter(f=>pd[w][m].includes(f.box)&&(f.method||'CEIA')===m);
+      rows+=`<tr><td>${esc(w)} · ${esc((TEAM.find(t=>t.id===w)||{}).n||'')}</td><td>${P.methods[m]}</td><td>${esc(pd[w][m].join(', '))}</td><td class="n">${num(pd[w].m2[m])}</td><td>${m==='CEIA'?P.rules.minDepth+' cm':'dubinski'}</td><td>${fs.length?esc(fs.map(f=>f.id).join(', ')):'—'}</td><td>${over?'<span class="miss">iznad orijentira CZRS ('+P.rules.normaM2+' m²) – proveriti</span>':''}</td><td>${dem[w]?esc(dem[w].at):''}</td></tr>`;}));
     return {pre:inUi(()=>dayPick(s)),h:`<h4>DNEVNA EVIDENCIJA UČINKA I NAPRETKA</h4><div class="dsub">${fmtD(day)}</div>${head}
-      <table><thead><tr><th>Deminer</th><th>Metoda</th><th>Boksovi</th><th>m²</th><th>Napomena</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nema unetog učinka.</td></tr>'}</tbody>
-      <tfoot><tr><td colspan="3">Ukupno CEIA / Schonstedt</td><td class="n">${num(tot.CEIA)} / ${num(tot.SCH)}</td><td></td></tr></tfoot></table>
+      <table><thead><tr><th>Deminer</th><th>Metoda</th><th>Boksovi</th><th>m²</th><th>Dubina</th><th>Nalazi</th><th>Napomena</th><th>Potvrdio</th></tr></thead><tbody>${rows||'<tr><td colspan="8">Nema unetog učinka.</td></tr>'}</tbody>
+      <tfoot><tr><td colspan="3">Ukupno CEIA / Schonstedt</td><td class="n">${num(tot.CEIA)} / ${num(tot.SCH)}</td><td colspan="4"></td></tr></tfoot></table>
       <div class="sec">Tok rada</div><table>${log.map(l=>`<tr><td class="mono" style="width:56px">${esc(l.t)}</td><td>${esc(l.e)}</td></tr>`).join('')||'<tr><td>Nema zapisa za ovaj dan.</td></tr>'}</table>
       ${qaRedoDay(s,day)}${drRef(s,day)}<div class="sec">Pronađena NUS tog dana</div><table>${ft.length?ft.map(f=>`<tr><td>${esc(f.id)}</td><td>${esc(f.type)}</td><td>boks ${esc(f.box)}</td><td>${f.depth} cm</td><td>${esc(f.act)}</td></tr>`).join(''):'<tr><td>Nema.</td></tr>'}</table>
       <div class="sig"><div>Rukovodilac radilišta</div><div>Kontrolor CZRS</div></div>
       <p class="note">Oblik je napravljen po Uredbi 70/2013 i praksi CZRS-a (dnevna evidencija učinka po demineru). Kad dobijemo zvanični obrazac CZRS-a, menja se samo ovaj šablon.</p>`};}
   if(k==='rsn'){return {cls:'wide',h:`<h4>ZAPISNIK O PRONAĐENIM NUS</h4><div class="dsub">stanje na dan ${fmtD(today())} · koordinate SRB_ETRS89 / UTM 34N</div>${head}
       <table><thead><tr><th>R.br.</th><th>ID</th><th>Vrsta</th><th>Kom</th><th>Boks</th><th>E</th><th>N</th><th>Dub. cm</th><th>Metoda</th><th>Datum</th><th>Postupak</th></tr></thead>
-      <tbody>${s.finds.map((f,i)=>{const p=findPos(s,f);return `<tr><td>${i+1}.</td><td>${esc(f.id)}</td><td>${esc(f.type)}</td><td class="n">${f.qty}</td><td>${esc(f.box)}</td><td class="n mono">${gkn(p.Y)}</td><td class="n mono">${gkn(p.X)}</td><td class="n">${f.depth}</td><td>${esc(P.methods[f.method]||'')}</td><td>${fmtD(f.day)}</td><td>${esc(f.act)}</td></tr>`;}).join('')}</tbody></table>
+      <tbody>${s.finds.map((f,i)=>{const p=findPos(s,f);return `<tr><td>${i+1}.</td><td>${esc(f.id)}</td><td>${esc(f.type)}</td><td class="n">${f.qty}</td><td>${esc(f.box)}</td><td class="n mono">${gkn(p.Y)}</td><td class="n mono">${gkn(p.X)}</td><td class="n">${f.depth}</td><td>${esc(P.methods[f.method]||'')}</td><td>${fmtD(f.day)}</td><td>${esc(f.act)}${f.lc?'<br><small>'+lcTxt(s,f)+'</small>':''}</td></tr>`;}).join('')}</tbody></table>
       <p class="note">Uklanjanje i uništavanje NUS obavlja MUP (Zakon o smanjenju rizika od katastrofa, čl. 73); zapisnik o uništavanju dostavlja se CZRS-u i MUP-u (Uredba, čl. 17).</p>
       <div class="sig"><div>Rukovodilac radilišta</div><div>Predstavnik MUP-a</div></div>`};}
   if(k==='rsp'){const by={};s.finds.forEach(f=>by[f.type]=(by[f.type]||0)+f.qty);const pts=s.poly.map((p,i)=>{const q=toGK(s,p[0],p[1]);return `<tr><td>T${i+1}</td><td class="n mono">${gkn(q.Y)}</td><td class="n mono">${gkn(q.X)}</td></tr>`;}).join('');
@@ -6277,6 +6281,7 @@ function certCheck(s){const q=qa(s),why=[],ids=a=>a.slice(0,12).map(b=>b.id).joi
   q.visits.filter(v=>!v.closed).forEach(v=>why.push(t('qa.why.visitOpen',{id:v.id})));
   if(!q.visits.some(v=>v.closed&&v.samples.length))why.push(t('qa.why.noVisit'));
   const mup=s.finds.filter(f=>f.act===PACKS.RS.actions[0]);if(mup.length)why.push(t('qa.why.mup',{ids:mup.map(f=>f.id).join(', ')}));
+  const nm=s.finds.filter(f=>f.act===PACKS.RS.actions[1]&&!(f.lc&&f.lc.un));if(nm.length)why.push(t('dr.lc.why',{ids:nm.map(f=>f.id).join(', ')}));
   return {ok:!why.length,why};}
 const qaAnn=v=>v.ann?t('qa.ann.1'):t('qa.ann.0');
 function qaNcState(s,n){if(n.closed)return t('qa.nc.closed',{d:fmtD(n.closed.d)})+(n.closed.visit?' ('+esc(n.closed.visit)+')':'')+(n.closed.note?': '+esc(n.closed.note):'');
@@ -6840,6 +6845,7 @@ function fillRec(s){const R=isObj(s.rec)?s.rec:{},o={};
     if(isObj(r.ack))Object.keys(r.ack).forEach(k=>{const x=r.ack[k];if(okKey(k)&&isObj(x))ack[k]={t:S_(x.t),v:S_(x.v),why:S_(x.why),by:S_(x.by),at:T_(x.at)};});
     o[d]={brief:fBrief(r.brief),open:fChk(r.open),close:fChk(r.close,1),att:fChk(r.att),ack,vis:A_(r.vis).filter(isObj).map(fVis)};});
   s.rec=o;const ids=new Set();
+  A_(s.finds).forEach(f=>{if(f.lc!=null){const l=fLc(f.lc);if(l)f.lc=l;else delete f.lc;}});
   s.issues=A_(s.issues).filter(isObj).map(i=>({id:S_(i.id),d:D_(i.d),t:T_(i.t),src:['att','open','close','brief','det'].includes(i.src)?i.src:'att',item:S_(i.item),text:S_(i.text),by:S_(i.by),
     re:A_(i.re).map(x=>S_(x)).filter(Boolean).slice(0,200),closed:isObj(i.closed)?{d:D_(i.closed.d),t:T_(i.closed.t),by:S_(i.closed.by),note:S_(i.closed.note)}:null})).filter(i=>i.id&&!ids.has(i.id)&&ids.add(i.id));
   s.dlog=A_(s.dlog).filter(isObj).map(x=>({d:D_(x.d),t:T_(x.t),sn:S_(x.sn),tip:S_(x.tip),piece:S_(x.piece),cm:N_(x.cm,null),res:x.res==='no'?'no':'ok',why:['start','restart','battery','periodic','out'].includes(x.why)?x.why:'start',user:S_(x.user),by:S_(x.by),note:S_(x.note),iss:S_(x.iss)})).filter(x=>x.d&&x.sn);
@@ -6952,6 +6958,40 @@ function detAdd(s,o){const sn=String(o.sn||'').trim().slice(0,40);if(!sn)return 
 const reSearch=s=>(s.issues||[]).filter(i=>!i.closed&&i.re&&i.re.length);
 const reNotice=s=>{const r=reSearch(s);return r.length?`<div class="notice haz" role="alert"><b>${t('dr.det.reT')}</b> ${r.map(i=>esc(i.id)+': '+esc(i.re.join(', '))).join(' · ')}</div>`:'';};
 
+/* ---------- Serbia: every find from the ground to its destruction by MUP (Zakon 87/2018 čl. 73–74, Uredba 70/2013 čl. 14) ----------
+   pronađen → obeležen i obezbeđen, prijavljen (112 / policija) → [privremeno skladište na radilištu] → predat MUP-u (datum, vreme,
+   ekipa) → uništen (MUP; datum, mesto). The contractor never destroys in Serbia; the final control waits until every find is destroyed. */
+const LC=['obz','skl','mup','un'];
+function fLc(x){if(!isObj(x))return null;const o={};LC.forEach(k=>{const v=x[k];if(isObj(v)&&D_(v.d))o[k]={d:D_(v.d),t:T_(v.t),by:S_(v.by),gde:S_(v.gde),ek:S_(v.ek)};});return o;}
+const lcStage=f=>{const l=f.lc||{},A=PACKS.RS.actions;return l.un||f.act===A[2]?'un':l.mup||f.act===A[1]?'mup':l.skl?'skl':l.obz||f.act===A[0]?'obz':'nov';};
+function lcSet(s,id,k,o){const f=s.finds.find(x=>x.id===id),A=PACKS.RS.actions;if(!f||s.pack!=='RS'||!LC.includes(k))return t('dr.err.gone');o=o||{};
+  const d=D_(o.d)||today(),tt=T_(o.t)||hm(Date.now()),by=String(o.by||'').trim().slice(0,80),ek=String(o.ek||'').trim().slice(0,120),gde=String(o.gde||'').trim().slice(0,120);
+  if(d>today())return t('qa.t.future');if(k==='mup'&&!ek)return t('dr.lc.errEk');if((k==='obz'||k==='skl')&&!by)return t('dr.err.who');if(k==='skl'&&!gde)return t('dr.lc.errGde');
+  f.lc=f.lc||{};f.lc[k]={d,t:tt,by,gde,ek};
+  if(k==='obz'&&lcStage(f)!=='mup'&&lcStage(f)!=='un')f.act=A[0];
+  if(k==='mup'&&f.act!==A[2]){f.act=A[1];f.actDay=d;}
+  if(k==='un'){f.act=A[2];f.actDay=d;}
+  logAdd(s,{t:k==='obz'?tt:hm(Date.now()),e:'NUS '+id+' ('+f.type+'): '+({obz:'obeleženo i obezbeđeno, prijavljeno (112 / policija)',skl:'u privremenom skladištu na radilištu ('+gde+')',
+    mup:'predato MUP-u '+fmtD(d)+' u '+tt+' ('+ek+')',un:'uništeno (MUP) '+fmtD(d)+(gde?', '+gde:'')})[k]+(by?' – '+by:''),k:'mup'});addQ('NUS '+id+' · '+k);return f;}
+const lcTxt=(s,f)=>{const l=f.lc||{},x=[];if(l.obz)x.push('obeleženo i prijavljeno '+fmtD(l.obz.d)+' '+esc(l.obz.t));if(l.skl)x.push('privremeno skladište: '+esc(l.skl.gde));
+  if(l.mup)x.push('predato MUP-u '+fmtD(l.mup.d)+' '+esc(l.mup.t)+' ('+esc(l.mup.ek)+')');if(l.un)x.push('uništeno '+fmtD(l.un.d)+(l.un.gde?', '+esc(l.un.gde):''));return x.join('; ');};
+const lcOpen=s=>s.pack==='RS'?s.finds.filter(f=>lcStage(f)!=='un'):[];
+let lcForm=null;
+function openMup(){const s=site(),K=isK(s),open=lcOpen(s),done=s.finds.filter(f=>lcStage(f)==='un');
+  const nxt=f=>{const st=lcStage(f),b=(k,l,p)=>`<button class="btn sm${p?' primary':''}" type="button" data-dr="lc" data-id="${esc(f.id)}" data-k="${k}">${l}</button>`;
+    return st==='nov'?b('obz',t('dr.lc.obz'),1):st==='obz'?b('mup',t('dr.lc.mup'),1)+b('skl',t('dr.lc.skl')):st==='skl'?b('mup',t('dr.lc.mup'),1):b('un',t('dr.lc.un'),1);};
+  const form=f=>lcForm&&lcForm.id===f.id?`<div class="lcf">${lcForm.k==='mup'?`<label class="field">${t('dr.lc.ek')}<input id="lcEk" maxlength="120" autocomplete="off" placeholder="${t('dr.lc.ekPh')}"></label>`:''}
+    ${lcForm.k==='skl'||lcForm.k==='un'?`<label class="field">${lcForm.k==='skl'?t('dr.lc.gdeSkl'):t('dr.lc.gdeUn')}<input id="lcGde" maxlength="120" autocomplete="off"></label>`:''}
+    ${lcForm.k==='mup'||lcForm.k==='un'?`<div class="grid2"><label class="field">${t('qa.f.date')}<input id="lcD" type="date" value="${esc(today())}" max="${esc(today())}"></label><label class="field">${t('qa.f.time')}<input id="lcT" type="time" value="${esc(hm(Date.now()))}"></label></div>`:''}
+    <label class="field">${t('dr.it.who')}<select id="lcBy">${nameOpts(roleWho('vt'))}</select></label>
+    <div class="btnrow"><button class="btn primary" type="button" data-dr="lcOk" data-id="${esc(f.id)}" data-k="${lcForm.k}">${t('c.save')}</button><button class="btn" type="button" data-dr="lcNo">${t('c.cancel')}</button></div></div>`:'';
+  openSheet(`<div class="sheet-h"><div><div class="label">${esc(s.msp.id)} · ${t('dr.lc.label')}</div><h2>${t('dr.lc.title')}</h2></div>${xBtn()}</div>
+    <p class="sub" style="margin:0">${t('dr.lc.note')}</p>
+    <ul class="rows">${open.map(f=>`<li class="lcrow"><span class="grow"><b>${esc(f.id)}</b> · ${esc(tv(f.type))} · ${t('bx.box')} ${esc(f.box)} · ${fmtDS(f.day)} ${esc(f.time)}<br><span class="sub">${t('dr.lc.st.'+lcStage(f))}${f.lc&&f.lc.mup?' · '+esc(f.lc.mup.ek):''}</span></span>${K?'':`<span class="ibtn">${nxt(f)}</span>`}${form(f)}</li>`).join('')||`<li class="sub">${t('dr.lc.none')}</li>`}</ul>
+    ${done.length?`<details class="legacy"><summary>${t('dr.lc.done',{n:done.length})}</summary><ul class="rows">${done.map(f=>`<li><span class="grow"><b>${esc(f.id)}</b> · ${esc(tv(f.type))}<br><span class="sub">${t('dr.lc.st.un')}${f.lc&&f.lc.un?' · '+fmtD(f.lc.un.d):''}</span></span></li>`).join('')}</ul></details>`:''}`);}
+// finds of the day whose marking, securing and report nobody has confirmed yet (closing item: every find of the day)
+function lcToday(s,d){return s.pack==='RS'?s.finds.filter(f=>f.day===d&&!(f.lc&&f.lc.obz)&&lcStage(f)!=='un'):[];}
+
 /* ---------- screens: cards on Danas ---------- */
 function briefCard(){const s=site(),di=dayInfo(s),d=today(),b=brOf(s,d),K=isK(s);
   const st=!b?'none':b.st==='z'?'z':'d',pr=b?b.ppl.filter(p=>p.pr):[],ak=pr.filter(p=>p.ack).length,tp=b?b.T.items.filter(x=>b.top[x.id]).length:0;
@@ -6966,7 +7006,7 @@ function dayCard(s){const d=today(),K=isK(s),o=chkOf(s,d,'open'),c=chkOf(s,d,'cl
     return `<li><span class="grow"><b>${t('dr.kind.'+kind)}</b><br><span class="sub">${x&&x.z?t('dr.c.doneAt',{t:esc(x.z),by:esc(x.zBy)}):t('dr.c.prog',{n,m:T.length})}${no?' · '+t('dr.c.noN',{n:no}):''}</span></span>${K&&!x?'':`<button class="btn sm${x&&x.z?'':' primary'}" type="button" data-dr="chk" data-k="${kind}">${x&&x.z||K?t('dr.c.view'):btn}</button>`}</li>`;};
   return `<div class="card"><div class="card-h"><h3>${t('dr.day.title')}</h3><span class="sub">${fmtDS(d)}</span></div><ul class="rows">${line('open',o,t('dr.c.openBtn'))}${line('close',c,t('dr.c.closeBtn'))}</ul>
     ${c&&c.z&&c.sum?`<p class="sub" style="margin:6px 0 0">${sumScreen(s,c.sum)}</p>`:''}
-    <div class="btnrow" style="margin-top:8px"><button class="btn sm" type="button" data-dr="det">${t('dr.det.btn')}</button><button class="btn sm" type="button" data-act="doc" data-k="zb">${t('dr.doc.open')}</button></div></div>`;}
+    <div class="btnrow" style="margin-top:8px"><button class="btn sm" type="button" data-dr="det">${t('dr.det.btn')}</button>${s.pack==='RS'?`<button class="btn sm${lcOpen(s).length?' primary':''}" type="button" data-dr="mup">${t('dr.lc.btn',{n:lcOpen(s).length})}</button>`:''}<button class="btn sm" type="button" data-act="doc" data-k="zb">${t('dr.doc.open')}</button></div></div>`;}
 function cmpCard(s){const d=today(),K=isK(s),r=recOf(s,d),ack=r?r.ack:{},A=chkOf(s,d,'att'),items=A?A.T.items:tSnap(s.pack,'att').items;
   const auto=autoChecks(s).map(c=>{const k=ack[c.k];return `<li class="${c.st}"><span class="ic" aria-hidden="true">${c.st==='ok'?'✓':c.st==='info'?'i':'!'}</span><span>${esc(c.t)}${k?`<br><span class="sub">${t('dr.ack.line',{why:esc(k.why),by:esc(k.by),t:esc(k.at)})}</span>`:''}${(c.st==='bad'||c.st==='warn')&&!k&&!K?`<br><button class="linkbtn" type="button" data-dr="ack" data-k="${esc(c.k)}">${t('dr.ack.btn')}</button>`:''}</span><span class="v">${esc(c.v)}</span></li>`;}).join('');
   const man=items.map(it=>{const a=A&&A.a[it.id],st=a?(a.ok===1?'ok':a.ok===2?'info':'bad'):'warn';
@@ -7042,7 +7082,7 @@ function openChk(kind){const s=site(),d=today(),K=isK(s);let c=chkOf(s,d,kind);i
   const demRows=dem.length?`<div class="label" style="margin-top:8px">${t('dr.dem.title')}</div><ul class="tlist">${dem.map(id=>{const p=org().ljudi.find(x=>x.id===id),x=c.dem&&c.dem[id];
     return `<li>${tglB(!!x,`data-dr="dem" data-id="${esc(id)}"`,esc(id)+(p?' '+esc(p.ime):'')+(x?' · '+esc(x.at):''),z)}</li>`;}).join('')}</ul>`:'';
   openSheet(`<div class="sheet-h"><div><div class="label">${fmtD(d)} · ${t('dr.tplV',{v:c.T.v})}</div><h2>${t('dr.kind.'+kind)}</h2></div>${xBtn()}</div>
-    <div id="ckList">${c.z?`<div class="notice">${t('dr.c.doneAt',{t:esc(c.z),by:esc(c.zBy)})}</div>`:''}<ul class="chk">${rows}</ul>${demRows}
+    <div id="ckList">${c.z?`<div class="notice">${t('dr.c.doneAt',{t:esc(c.z),by:esc(c.zBy)})}</div>`:''}${kind==='close'&&lcToday(s,d).length?`<div class="notice haz">${t('dr.lc.closeWarn',{ids:esc(lcToday(s,d).map(f=>f.id).join(', '))})} <button class="linkbtn" type="button" data-dr="mup">${t('dr.lc.title')}</button></div>`:''}<ul class="chk">${rows}</ul>${demRows}
     ${kind==='close'&&c.z&&c.sum?`<p class="sub">${sumScreen(s,c.sum)}</p>`:''}
     ${z?'':`<label class="field" style="margin-top:10px">${t('dr.c.by')}<select id="ckBy">${nameOpts(roleWho('vt'))}</select></label>
       ${miss?`<p class="fine">${t('dr.miss.req',{n:miss})}</p>`:''}<button class="btn primary block" type="button" data-dr="ckClose" data-k="${kind}"${miss?' disabled':''}>${kind==='close'?t('dr.c.closeDay'):t('dr.c.openDay')}</button>`}
@@ -7233,7 +7273,7 @@ function seedDr(st){const L=defaultOrg().ljudi,TP={BA:tplNew('BA'),RS:tplNew('RS
       s.rec[td].vis.push({ime:'M. Primerović',org:'CZRS (primer)',n:1,bg:'0+',prat:who('vt'),ppe:1,by:who('vt'),at:'11:00',out:''});}});}
 
 /* ---------- actions ---------- */
-const DR_K_OK=['brief','chk','item','flag','flagOk','tpl','tpPack','tpList','tpAdd','tpMv','tpOff','tpReq','tpSave','tpUndo','det'];
+const DR_K_OK=['mup','brief','chk','item','flag','flagOk','tpl','tpPack','tpList','tpAdd','tpMv','tpOff','tpReq','tpSave','tpUndo','det'];
 function drDo(a,ds){if(!S)return;const s=site(),d=today(),K=isK(s),id=ds.id,k=ds.k;
   if(K&&!DR_K_OK.includes(a)){toast(roMsg(),4000);return;}
   const err=r=>{if(typeof r==='string'){toast(r,5000);return true;}return false;};
@@ -7270,6 +7310,10 @@ function drDo(a,ds){if(!S)return;const s=site(),d=today(),K=isK(s),id=ds.id,k=ds
     case 'issClose':openIss(id);break;
     case 'issOk':{const r=issClose(s,id,val('#issNote'),val('#issBy'));if(err(r))break;save();closeSheet();rerender();toast(t('dr.iss.closedT',{id}));break;}
     case 'det':openDet();break;
+    case 'mup':lcForm=null;openMup();break;
+    case 'lc':{if(!LC.includes(k))break;if(k==='obz'){if(err(lcSet(s,id,'obz',{by:roleWho('vt')})))break;save();openMup();break;}lcForm={id,k};openMup();break;}
+    case 'lcNo':lcForm=null;openMup();break;
+    case 'lcOk':{const r=lcSet(s,id,k,{ek:val('#lcEk'),gde:val('#lcGde'),d:val('#lcD'),t:val('#lcT'),by:val('#lcBy')});if(err(r))break;lcForm=null;save();openMup();rerender();toast(t('dr.lc.saved',{id}));break;}
     case 'detSave':{const sn=val('#dtSn')||val('#dtSnX');const r=detAdd(s,{sn,piece:val('#dtPiece'),cm:parseNum(val('#dtCm')),why:val('#dtWhy'),user:val('#dtUser'),by:val('#dtBy'),note:val('#dtNote'),res:ds.v});if(err(r))break;
       addQ('Test detektora '+r.sn);save();openDet();rerender();toast(r.res==='ok'?t('dr.det.okT',{sn:r.sn}):t('dr.det.noT',{sn:r.sn,id:r.iss}),r.res==='ok'?2800:6000);break;}
     case 'flag':if(s.mode==='boxes'&&DAYRE.test(ds.day||''))openFlag(ds.day);break;

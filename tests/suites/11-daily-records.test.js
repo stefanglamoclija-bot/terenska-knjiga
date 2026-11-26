@@ -326,7 +326,7 @@ test('i18n: every dynamic key of the daily records exists in bs, sr and en; Engl
   const bad = [];
   for (const id of ['s1', 'r1', 's2']) {
     a.run(`S.active="${id}";syncPack();closeSheet()`);
-    for (const x of ['drDo("brief",{})', 'drDo("chk",{k:"open"})', 'drDo("chk",{k:"close"})', 'drDo("det",{})', 'drDo("tpl",{})', 'drDo("item",{k:"att",id:"a02"})', 'openAck("det")', 'openIss("NS-01")']) {
+    for (const x of ['drDo("brief",{})', 'drDo("chk",{k:"open"})', 'drDo("chk",{k:"close"})', 'drDo("det",{})', 'drDo("tpl",{})', 'drDo("item",{k:"att",id:"a02"})', 'openAck("det")', 'openIss("NS-01")', 'drDo("mup",{})']) {
       a.run(x);
       const v = a.html('#sheet').replace(/<(textarea|option)[^>]*>[\s\S]*?<\/\1>/g, ' ').replace(/value="[^"]*"/g, '').replace(/<[^>]+>/g, m => ' ' + [...m.matchAll(/(?:aria-label|placeholder)="([^"]*)"/g)].map(y => y[1]).join(' ') + ' ');
       // stored text (template items, names, notes) stays national by design: take it out first
@@ -339,4 +339,50 @@ test('i18n: every dynamic key of the daily records exists in bs, sr and en; Engl
     }
   }
   assert.deepStrictEqual(bad, []);
+});
+
+test('Serbia: a find goes marked → handed to MUP → destroyed; the final control waits for destruction; closing warns about unconfirmed finds', async () => {
+  const a = await fresh({ idb: makeIndexedDB() });
+  a.run('S.active="r1";S.ui="sr";syncPack()');
+  const id = a.run('site().finds.find(f=>f.day===today()).id');
+  assert.strictEqual(a.run(`lcStage(site().finds.find(f=>f.id==="${id}"))`), 'obz', 'reported to MUP in the seed');
+  a.run('drDo("chk",{k:"close"})');
+  assert.ok(a.html('#sheet').includes('bez potvrde da su obeleženi') && a.html('#sheet').includes(id), 'closing sheet names the unconfirmed find');
+  a.run(`drDo("lc",{id:"${id}",k:"obz"})`);
+  assert.ok(a.run(`!!site().finds.find(f=>f.id==="${id}").lc.obz.by`));
+  a.run(`drDo("lc",{id:"${id}",k:"mup"})`);
+  val(a, '#lcEk', ''); a.run(`drDo("lcOk",{id:"${id}",k:"mup"})`);
+  assert.ok(/MUP ekipu/.test(a.toastText()), 'team required');
+  val(a, '#lcEk', PAYLOAD + ' EOD tim'); val(a, '#lcD', '2026-11-11'); val(a, '#lcT', '12:30'); a.run(`drDo("lcOk",{id:"${id}",k:"mup"})`);
+  const f = a.json(`site().finds.find(f=>f.id==="${id}")`);
+  assert.strictEqual(f.act, 'Preuzeo MUP'); assert.strictEqual(f.lc.mup.t, '12:30');
+  // the final control (everything else done) is blocked until MUP has destroyed it
+  a.run(`(()=>{const s=site();s.boxes.forEach(b=>{if(b.excl)return;delete b.ret;b.need.forEach(m=>{if(!b.done[m])b.done[m]={day:'2026-11-10',by:'D-01'};});});
+    s.finds.forEach(x=>{if(x.id!=="${id}")x.act=PACKS.RS.actions[2];});const q=qa(s);q.ncs=[];q.visits=[{id:'KP-01',d:'2026-11-10',t:'10:00',who:'K',ann:0,tim:'',rep:'',checks:{},pct:10,seed:7,base:100,samples:[{box:s.boxes.find(b=>boxDone(b)).id,pick:'r',area:100,m:'CEIA',m2:100,res:'ok',type:'',depth:null,note:''}],zak:'',closed:'2026-11-10'}];})()`);
+  const c = a.json('certCheck(site())');
+  assert.ok(!c.ok && c.why.some(x => x.includes(id) && /uništenje nije upisano/.test(x)), c.why.join('; '));
+  a.run(`drDo("lc",{id:"${id}",k:"un"})`); val(a, '#lcGde', 'poligon MUP'); a.run(`drDo("lcOk",{id:"${id}",k:"un"})`);
+  assert.ok(a.json('certCheck(site())').ok, a.json('certCheck(site()).why').join('; '));
+  a.run('docView="rsn";renderDoc("rsn")');
+  const h = a.html('#v-izvjestaji');
+  assert.ok(/predato MUP-u 11\.11\.2026\. 12:30/.test(h) && /uništeno 11\.11\.2026\., poligon MUP/.test(h), 'lifecycle in the finds record');
+  assert.ok(!RAW.test(h), 'escaped');
+  a.run('drDo("mup",{})'); assert.ok(!RAW.test(a.html('#sheet')));
+  assert.ok(/NUS [^:]+: predato MUP-u/.test(a.run('site().log.map(l=>l.e).join("|")')), 'log entries');
+  // reload: the lifecycle is kept
+  await a.run('saveQ');
+  const b = await fresh({ idb: a.idb, storage: a.storage });
+  assert.strictEqual(b.run(`S.sites.find(s=>s.id==="r1").finds.find(f=>f.id==="${id}").lc.un.gde`), 'poligon MUP');
+});
+
+test('Serbia: per-deminer daily record shows boxes, m², depth, finds, the 150 m² benchmark as a flag and the deminer\'s own confirmation', async () => {
+  const a = await fresh();
+  a.run('S.active="r1";S.ui="sr";syncPack()');
+  const d = a.run('Object.keys(site().rec).sort()[0]');
+  a.run(`docDay=${JSON.stringify(d)};docView="rsd";renderDoc("rsd")`);
+  const h = a.html('#v-izvjestaji');
+  assert.ok(/<th>Dubina<\/th><th>Nalazi<\/th><th>Napomena<\/th><th>Potvrdio<\/th>/.test(h));
+  assert.ok(/20 cm/.test(h), 'search depth');
+  assert.ok(/<td>14:5\d<\/td><\/tr>/.test(h), 'deminer confirmation time from the closing');
+  assert.ok(!/iznad norme/.test(h));
 });
