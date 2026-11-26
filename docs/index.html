@@ -2,7 +2,7 @@
 <html lang="bs" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-cCwl/FD9VRXHO1BgfZX06dT9SHGuvs/hFbvQ+krvLbs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-Hnik5GKXiJN46kFbtoUzxyz8Ypqyef7l822o+CKUarI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
@@ -6996,7 +6996,7 @@ const lcOpen=s=>s.pack==='RS'?s.finds.filter(f=>lcStage(f)!=='un'):[];
 let lcForm=null;
 function openMup(){const s=site(),K=isK(s),open=lcOpen(s),done=s.finds.filter(f=>lcStage(f)==='un');
   const nxt=f=>{const st=lcStage(f),b=(k,l,p)=>`<button class="btn sm${p?' primary':''}" type="button" data-dr="lc" data-id="${esc(f.id)}" data-k="${k}">${l}</button>`;
-    return st==='nov'?b('obz',t('dr.lc.obz'),1):st==='obz'?b('mup',t('dr.lc.mup'),1)+b('skl',t('dr.lc.skl')):st==='skl'?b('mup',t('dr.lc.mup'),1):b('un',t('dr.lc.un'),1);};
+    return st==='nov'?b('obz',t('dr.lc.obz'),1):(f.lc&&f.lc.obz?'':b('obz',t('dr.lc.obz')))+(st==='obz'?b('mup',t('dr.lc.mup'),1)+b('skl',t('dr.lc.skl')):st==='skl'?b('mup',t('dr.lc.mup'),1):b('un',t('dr.lc.un'),1));};
   const form=f=>lcForm&&lcForm.id===f.id?`<div class="lcf">${lcForm.k==='mup'?`<label class="field">${t('dr.lc.ek')}<input id="lcEk" maxlength="120" autocomplete="off" placeholder="${t('dr.lc.ekPh')}"></label>`:''}
     ${lcForm.k==='skl'||lcForm.k==='un'?`<label class="field">${lcForm.k==='skl'?t('dr.lc.gdeSkl'):t('dr.lc.gdeUn')}<input id="lcGde" maxlength="120" autocomplete="off"></label>`:''}
     ${lcForm.k==='mup'||lcForm.k==='un'?`<div class="grid2"><label class="field">${t('qa.f.date')}<input id="lcD" type="date" value="${esc(today())}" max="${esc(today())}"></label><label class="field">${t('qa.f.time')}<input id="lcT" type="time" value="${esc(hm(Date.now()))}"></label></div>`:''}
