@@ -6809,7 +6809,7 @@ function fAns(x){const o={ok:x.ok===2?2:x.ok?1:0,by:S_(x.by),at:T_(x.at),note:S_
   if(Array.isArray(x.h))o.h=x.h.filter(isObj).slice(-10).map(y=>({ok:y.ok===2?2:y.ok?1:0,by:S_(y.by),at:T_(y.at),note:S_(y.note)}));return o;}
 function fChk(c,close){if(!isObj(c))return null;const a={};if(isObj(c.a))Object.keys(c.a).forEach(k=>{if(okKey(k)&&isObj(c.a[k]))a[k]=fAns(c.a[k]);});
   const o={T:fT(c.T),a,z:T_(c.z),zBy:S_(c.zBy)};
-  if(close){if(isObj(c.sum)){o.sum={};Object.keys(c.sum).forEach(k=>{const v=c.sum[k];if(okKey(k)&&(typeof v==='string'||fin(v)))o.sum[k]=typeof v==='string'?v.slice(0,300):+v;});}
+  if(close){if(isObj(c.sum)){o.sum={};Object.keys(c.sum).forEach(k=>{const v=c.sum[k];if(okKey(k)&&(k==='fids'?typeof v==='string':fin(v)))o.sum[k]=k==='fids'?v.slice(0,300):+v;});}
     if(isObj(c.dem)){o.dem={};Object.keys(c.dem).forEach(k=>{const v=c.dem[k];if(okKey(k)&&isObj(v)&&T_(v.at))o.dem[k]={at:T_(v.at),n:S_(v.n)};});}}
   return o;}
 function fBrief(b){if(!isObj(b))return null;const top={},cv={},cvOk={},c0=isObj(b.cv)?b.cv:{},k0=isObj(b.cvOk)?b.cvOk:{};
