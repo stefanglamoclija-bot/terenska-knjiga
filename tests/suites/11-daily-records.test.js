@@ -386,3 +386,43 @@ test('Serbia: per-deminer daily record shows boxes, m², depth, finds, the 150 m
   assert.ok(/<td>14:5\d<\/td><\/tr>/.test(h), 'deminer confirmation time from the closing');
   assert.ok(!/iznad norme/.test(h));
 });
+
+test('Serbia: project phases with their own depth and "uvođenje u posao"; the critical-error criterion; NC severity and measures; a monitoring organisation visit', async () => {
+  const a = await fresh();
+  a.run('S.active="r1";S.ui="sr";syncPack()');
+  a.run('drDo("proj",{})'); a.run('drDo("pjAdd",{})'); a.run('drDo("pjAdd",{})');
+  const ch = (k, v) => { const el = Object.assign(a.dom.makeEl('input'), { value: v, dataset: { pj: k } }); a.dom.listeners.change.forEach(fn => fn({ target: el })); };
+  ch('krit', PAYLOAD + ' predmet mase u granicama kritične greške');
+  ch('0.naziv', 'Faza I'); ch('0.dub', '50'); ch('0.uvod.d', '2026-11-01'); ch('0.uvod.zah', '2026-10-27'); ch('0.uvod.czrs', PAYLOAD);
+  ch('1.naziv', 'Faza II'); ch('1.dub', '300'); ch('1.uvod.d', '2026-11-12');
+  a.run('drDo("pjT",{i:"0",k:"med"})');
+  assert.ok(/samo 5 dana ranije/.test(a.html('#sheet')), '10-day rule warned');
+  assert.strictEqual(a.run('phaseDepth(site(),"2026-11-11")'), 50); assert.strictEqual(a.run('phaseDepth(site(),"2026-11-12")'), 300);
+  assert.ok(/Dubina pretrage CEIA 50 cm/.test((a.run('go("danas")'), a.html('#v-danas'))), 'phase depth on the compliance card');
+  a.run('docDay=null;docView="rsd";renderDoc("rsd")'); assert.ok(/<td>50 cm<\/td>/.test(a.html('#v-izvjestaji')));
+  a.run('docView="rsp";renderDoc("rsp")');
+  const rsp = a.html('#v-izvjestaji');
+  assert.ok(/Faza 1 – Faza I, dubina 50 cm/.test(rsp) && /medevac uvežban: da/.test(rsp) && /Predstavnik lokalne zajednice/.test(rsp));
+  // a monitoring organisation's visit with a critical nonconformity, measures from the contractor
+  a.run('qa(site()).role="czrs";syncPack();go("nalaz")');
+  val(a, '#kvOrg', 'mon'); val(a, '#kvOrgN', 'Monitoring ITF (primer)'); val(a, '#kvWho', 'M. Monitor');
+  a.click(undefined, { qa: 'vNew' });
+  const v = a.json('qaOpen(site())'); assert.strictEqual(v.org, 'mon'); assert.strictEqual(v.orgN, 'Monitoring ITF (primer)');
+  a.run(`drDo("flag",{day:today()})`); val(a, '#flRef', 'att'); val(a, '#flTxt', 'radio veza nije proverena ponovo'); a.run('drDo("flagOk",{day:today()})');
+  const id = a.run('qa(site()).ncs[qa(site()).ncs.length-1].id');
+  a.run(`drDo("ncEdit",{id:"${id}"})`); val(a, '#ncSev', 'krit'); a.run(`drDo("ncSave",{id:"${id}"})`);
+  a.run('qa(site()).role="izv";syncPack()');
+  a.run(`drDo("ncEdit",{id:"${id}"})`); val(a, '#ncSev', 'min'); val(a, '#ncKor', 'radio provera svakog sata'); val(a, '#ncPrev', PAYLOAD); a.run(`drDo("ncSave",{id:"${id}"})`);
+  const n = a.json(`qa(site()).ncs.find(x=>x.id==="${id}")`);
+  assert.strictEqual(n.sev, 'krit', 'only the controller sets severity'); assert.strictEqual(n.kor, 'radio provera svakog sata');
+  a.run(`qa(site()).role="czrs";syncPack();(()=>{const v=qaOpen(site());v.samples=[];})()`);
+  a.click(undefined, { qa: 'vClose' });
+  a.run(`docVisit=${JSON.stringify(v.id)};docView="kk";renderDoc("kk")`);
+  const kk = a.html('#v-izvjestaji');
+  assert.ok(/Monitoring ITF \(primer\)/.test(kk) && /\(kritična\)/.test(kk) && /korektivna mera: radio provera svakog sata/.test(kk), 'minutes');
+  assert.ok(new RegExp('Utvrđene kritične greške definisane Projektom: ' + id).test(kk));
+  for (const h of [kk, rsp, (a.run('drDo("proj",{})'), a.html('#sheet'))]) assert.ok(!RAW.test(h), 'escaped');
+  // the earlier, clean visit says so in the project's own words
+  a.run('docVisit="KP-01";renderDoc("kk")');
+  assert.ok(/Nisu utvrđene kritične greške definisane Projektom/.test(a.html('#v-izvjestaji')));
+});
