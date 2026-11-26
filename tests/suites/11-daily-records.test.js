@@ -326,7 +326,7 @@ test('i18n: every dynamic key of the daily records exists in bs, sr and en; Engl
   const bad = [];
   for (const id of ['s1', 'r1', 's2']) {
     a.run(`S.active="${id}";syncPack();closeSheet()`);
-    for (const x of ['drDo("brief",{})', 'drDo("chk",{k:"open"})', 'drDo("chk",{k:"close"})', 'drDo("det",{})', 'drDo("tpl",{})', 'drDo("item",{k:"att",id:"a02"})', 'openAck("det")', 'openIss("NS-01")', 'drDo("mup",{})']) {
+    for (const x of ['drDo("brief",{})', 'drDo("chk",{k:"open"})', 'drDo("chk",{k:"close"})', 'drDo("det",{})', 'drDo("tpl",{})', 'drDo("item",{k:"att",id:"a02"})', 'openAck("det")', 'openIss("NS-01")', 'drDo("mup",{})', 'drDo("drill",{})', 'drDo("proj",{})']) {
       a.run(x);
       const v = a.html('#sheet').replace(/<(textarea|option)[^>]*>[\s\S]*?<\/\1>/g, ' ').replace(/value="[^"]*"/g, '').replace(/<[^>]+>/g, m => ' ' + [...m.matchAll(/(?:aria-label|placeholder)="([^"]*)"/g)].map(y => y[1]).join(' ') + ' ');
       // stored text (template items, names, notes) stays national by design: take it out first
@@ -425,4 +425,25 @@ test('Serbia: project phases with their own depth and "uvođenje u posao"; the c
   // the earlier, clean visit says so in the project's own words
   a.run('docVisit="KP-01";renderDoc("kk")');
   assert.ok(/Nisu utvrđene kritične greške definisane Projektom/.test(a.html('#v-izvjestaji')));
+});
+
+test('CASEVAC drill and near miss: named, timed, the last-drill date follows, both in the day record and the BiH P9', async () => {
+  const a = await fresh();
+  a.run('S.active="s1";S.ui="bs";syncPack()');
+  a.run('drDo("drill",{})');
+  assert.ok(/Posljednja CASEVAC vježba/.test(a.html('#sheet')));
+  a.run('drDo("dlAdd",{})'); assert.ok(/scenarij/.test(a.toastText()), 'scenario required');
+  val(a, '#dlScen', PAYLOAD + ' povreda u stazi 12'); val(a, '#dlMed', '2,5'); val(a, '#dlVeh', '6'); val(a, '#dlGap', 'nosila daleko od KT'); val(a, '#dlBy', 'L. Omerović');
+  a.run('drDo("dlAdd",{})');
+  const d = a.json('site().drills[0]');
+  assert.deepStrictEqual([d.med, d.veh, d.by], [2.5, 6, 'L. Omerović']);
+  assert.strictEqual(a.run('site().casevac'), a.run('today()'), 'last drill date');
+  val(a, '#nmOpis', 'deminer zakoračio van staze'); val(a, '#nmMera', 'ponovljena obuka'); val(a, '#nmBy', 'A. Delić');
+  a.run('drDo("nmAdd",{})');
+  assert.strictEqual(a.run('site().nm.length'), 1);
+  const h = zb(a);
+  assert.ok(/CASEVAC vježbe i skoro-nesreće/.test(h) && /medicinar 2,5 min/.test(h) && /zakoračio van staze/.test(h) && !RAW.test(h));
+  a.run('docView="p9";renderDoc("p9")');
+  assert.ok(/CASEVAC vježba izvedena/.test(a.html('#v-izvjestaji')) && /Skoro-nesreća/.test(a.html('#v-izvjestaji')));
+  a.run('drDo("drill",{})'); assert.ok(!RAW.test(a.html('#sheet')));
 });
