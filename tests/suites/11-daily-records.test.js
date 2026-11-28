@@ -447,3 +447,20 @@ test('CASEVAC drill and near miss: named, timed, the last-drill date follows, bo
   assert.ok(/CASEVAC vježba izvedena/.test(a.html('#v-izvjestaji')) && /Skoro-nesreća/.test(a.html('#v-izvjestaji')));
   a.run('drDo("drill",{})'); assert.ok(!RAW.test(a.html('#sheet')));
 });
+
+test('Danas opens with the day line: Otvaranje, Brifing, Rad, Zatvaranje with their state', async () => {
+  const a = await loadApp({ now: '2026-11-11T10:00:00' });
+  a.run("S.ui='bs'");
+  for (const id of ['s1', 'r1']) {
+    a.run(`S.active="${id}";syncPack();go("danas")`);
+    const h = a.html('#v-danas');
+    const i = h.indexOf('<ol class="dayline"');
+    assert.ok(i >= 0, id + ': no day line');
+    const dl = h.slice(i, h.indexOf('</ol>', i));
+    for (const w of ['Otvaranje', 'Brifing', 'Rad', 'Zatvaranje']) assert.ok(dl.includes(w), id + ' ' + w);
+    assert.strictEqual((dl.match(/aria-current="step"/g) || []).length <= 1, true);
+    assert.ok(/data-dr="brief"/.test(dl) && /data-dr="chk" data-k="open"/.test(dl), id + ' steps open their records');
+  }
+  a.run('qa(site()).role="czrs";go("danas")');
+  assert.ok(/<ol class="dayline"/.test(a.html('#v-danas')), 'inspector overview');
+});
