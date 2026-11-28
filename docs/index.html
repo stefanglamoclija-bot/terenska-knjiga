@@ -2,7 +2,7 @@
 <html lang="bs" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-wUYAeb7jDU+BI9a0AXKnFIZK7Qy/FbMZqSjMeOtIyEo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-Jf/PMrTn7KDE46DLTE2lmMlf0t9/Q4wVKwCtTHDyY5A='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
@@ -117,12 +117,18 @@ b,strong{font-weight:650}
 
 .app{position:relative;max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;overflow:clip;box-shadow:var(--e2)}
 
-/* ---------- header: site switcher, role, sync ---------- */
+/* ---------- header: logo, site switcher, role, sync ---------- */
 .top{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);min-height:64px}
+.hdr-logo{width:38px;height:38px;flex:none;object-fit:contain;border-radius:var(--r-sm);background:#fff;border:1px solid var(--line);padding:3px}
 .site-btn{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:3px;border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:var(--r-md);text-align:left;min-width:0;min-height:48px;justify-content:center}
 .site-btn:hover{background:var(--surface-3)}
 .site-code{font-family:var(--font-display);font-weight:700;font-size:21px;letter-spacing:.01em;line-height:1.02;display:flex;align-items:center;gap:6px;max-width:100%}
 .site-code #hdrSite{min-width:0}
+.top.has-logo{gap:8px;padding-left:12px;padding-right:10px}
+.top.has-logo .site-code{font-size:19px}
+.top.has-logo .sync{padding:4px 8px 4px 7px;gap:6px}
+.top.has-logo .sync #syncLabel{font-size:10.5px}
+@media (max-width:420px){.top.has-logo .site-meta .pack:not(.role){display:none}}
 .site-code svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;
   border:1px solid var(--line);border-radius:6px;padding:1px;box-sizing:content-box}
 .site-meta{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.35}
@@ -356,6 +362,18 @@ legend,.flabel{font-size:13px;font-weight:650;color:var(--ink-2);margin-bottom:8
 .photo .ph{width:56px;height:56px;border-radius:var(--r-sm);background:var(--surface-3);display:grid;place-items:center;flex:none}
 .photo .ph svg{width:26px;height:26px;stroke:var(--ink-2);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 
+/* ---------- organisation logo ---------- */
+.logo-up{display:grid;grid-template-columns:88px minmax(0,1fr);gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
+.logo-pv{width:88px;height:88px;border-radius:var(--r-md);background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.logo-pv img{max-width:80px;max-height:80px;object-fit:contain}
+.logo-pv.empty{border:1.5px dashed var(--line-2);background:var(--surface-2);color:var(--muted)}
+.logo-pv.empty svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.logo-up .lt{font-size:14px;font-weight:650;color:var(--ink)}
+.logo-up .btnrow{margin-top:8px}
+.logo-up .btnrow .btn{flex:0 1 auto}
+.logo-up label.btn{position:relative}
+.logo-up input[type=file]{position:absolute;left:0;top:0;opacity:0;width:1px;height:1px}
+.logo-up label.btn:focus-within{outline:3px solid var(--accent);outline-offset:2px}
 
 /* ---------- reports list ---------- */
 .doclist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -368,6 +386,8 @@ legend,.flabel{font-size:13px;font-weight:650;color:var(--ink-2);margin-bottom:8
 
 /* ---------- paper document (official look: unchanged rules, light polish of the sheet only) ---------- */
 .doc{--ink:#111511;--muted:#4c544c;--surface-2:#fff;--hazard:#BF2A1C;--haz-soft:#F1D5CE;--cleared:#2B784A;--clr-soft:#C8E2D0;--work:#A86F0B;--work-soft:#F4DFAF;background:var(--paper);color:var(--paper-ink);border:1px solid var(--line);border-radius:var(--r-xs);padding:20px 18px;font-size:12.5px;line-height:1.4;box-shadow:var(--e1),0 6px 18px rgba(18,24,19,.06)}
+.doc .dlogo{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:-6px 0 10px;min-height:0}
+.doc .dlogo img{display:block;max-height:46px;max-width:170px;width:auto;height:auto;object-fit:contain;border:0;margin:0;background:none}
 .doc h4{font-family:var(--font-body);font-size:14px;font-weight:700;text-align:center;margin:6px 0 2px;letter-spacing:.04em}
 .doc .dsub{text-align:center;font-size:11.5px;margin-bottom:12px}
 .doc .dorg{border-bottom:1px dotted #111511;padding-bottom:2px;text-align:center;font-weight:600}
@@ -499,6 +519,7 @@ main .sticky{box-shadow:0 -14px 14px -4px var(--surface),0 0 0 6px var(--surface
   .view{display:block}
   .tbl{overflow:visible}
   .doc{border:0;box-shadow:none;padding:0;font-size:10.5pt;border-radius:0}
+  .doc .dlogo{margin:0 0 3mm}.doc .dlogo img{max-height:15mm;max-width:55mm}
   .doc.wide,.doc.z2,.doc.z3,.docs.z2,.docs.z3{min-width:0}
   .doc.p11{page:land}
   .docs{display:block}
@@ -587,6 +608,7 @@ main .sticky{box-shadow:0 -14px 14px -4px var(--surface),0 0 0 6px var(--surface
 
 <div class="app" id="app">
   <header class="top">
+    <img class="hdr-logo" id="hdrLogo" alt="" hidden>
     <button class="site-btn" type="button" data-act="sites" aria-label="Promijeni radilište i paket zemlje">
       <span class="site-code"><span id="hdrSite">MSP</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></span>
       <span class="site-meta" id="hdrMeta">…</span>
@@ -4328,10 +4350,19 @@ Object.assign(I18N.en,{"dr.mon.mon":"Monitoring organisation","dr.mon.org":"Insp
 Object.assign(I18N.bs,{"dr.dl.btn":"CASEVAC vježbe","dr.dl.errNm":"Opiši šta se skoro dogodilo.","dr.dl.errScen":"Upiši scenarij vježbe.","dr.dl.gap":"Uočeni propusti","dr.dl.last":"Posljednja CASEVAC vježba: {d} (prije {n} dana). Najmanje jednom mjesečno.","dr.dl.med":"Do medicinara (min)","dr.dl.medV":"medicinar {n} min","dr.dl.mera":"Mjera","dr.dl.never":"Na ovom radilištu još nema CASEVAC vježbe. Prva se izvodi prije početka rada.","dr.dl.new":"Nova vježba","dr.dl.nm":"Šta se skoro dogodilo","dr.dl.nmNote":"Skoro-nesreća se prijavljuje bez kazne (IMAS 10.60).","dr.dl.nmSave":"Upiši skoro-nesreću","dr.dl.nmT":"Skoro-nesreće (near miss)","dr.dl.save":"Upiši vježbu","dr.dl.saved":"Upisano.","dr.dl.scen":"Scenarij","dr.dl.scenPh":"npr. povreda u stazi 12, izvlačenje sigurnom stazom","dr.dl.title":"CASEVAC vježbe i skoro-nesreće","dr.dl.veh":"Do vozila (min)","dr.dl.vehV":"vozilo {n} min","dr.dl.who":"Učesnici"});
 Object.assign(I18N.sr,{"dr.dl.btn":"CASEVAC vežbe","dr.dl.errNm":"Opiši šta se skoro dogodilo.","dr.dl.errScen":"Upiši scenario vežbe.","dr.dl.gap":"Uočeni propusti","dr.dl.last":"Poslednja CASEVAC vežba: {d} (pre {n} dana). Najmanje jednom mesečno.","dr.dl.med":"Do medicinara (min)","dr.dl.medV":"medicinar {n} min","dr.dl.mera":"Mera","dr.dl.never":"Na ovom radilištu još nema CASEVAC vežbe. Prva se izvodi pre početka rada.","dr.dl.new":"Nova vežba","dr.dl.nm":"Šta se skoro dogodilo","dr.dl.nmNote":"Skoro-nesreća se prijavljuje bez kazne (IMAS 10.60).","dr.dl.nmSave":"Upiši skoro-nesreću","dr.dl.nmT":"Skoro-nesreće (near miss)","dr.dl.save":"Upiši vežbu","dr.dl.saved":"Upisano.","dr.dl.scen":"Scenario","dr.dl.scenPh":"npr. povreda u boksu E-05, izvlačenje očišćenim boksom","dr.dl.title":"CASEVAC vežbe i skoro-nesreće","dr.dl.veh":"Do vozila (min)","dr.dl.vehV":"vozilo {n} min","dr.dl.who":"Učesnici"});
 Object.assign(I18N.en,{"dr.dl.btn":"CASEVAC drills","dr.dl.errNm":"Describe what nearly happened.","dr.dl.errScen":"Enter the drill scenario.","dr.dl.gap":"Shortcomings seen","dr.dl.last":"Last CASEVAC drill: {d} ({n} days ago). At least once a month.","dr.dl.med":"To the medic (min)","dr.dl.medV":"medic {n} min","dr.dl.mera":"Measure","dr.dl.never":"No CASEVAC drill on this site yet. The first one is done before work starts.","dr.dl.new":"New drill","dr.dl.nm":"What nearly happened","dr.dl.nmNote":"Near misses are reported without blame (IMAS 10.60).","dr.dl.nmSave":"Record the near miss","dr.dl.nmT":"Near misses","dr.dl.save":"Record the drill","dr.dl.saved":"Recorded.","dr.dl.scen":"Scenario","dr.dl.scenPh":"e.g. casualty in lane 12, extraction along the safe lane","dr.dl.title":"CASEVAC drills and near misses","dr.dl.veh":"To the vehicle (min)","dr.dl.vehV":"vehicle {n} min","dr.dl.who":"Participants"});
-// day line on Danas
-Object.assign(I18N.bs,{"ui.dl.aria":"Tok radnog dana","ui.dl.open":"Otvaranje","ui.dl.brief":"Brifing","ui.dl.work":"Rad","ui.dl.close":"Zatvaranje","ui.dl.todo":"nije počelo","ui.dl.wait":"čeka brifing","ui.dl.prog":"{n} od {m}","ui.dl.draft":"u pripremi","ui.dl.since":"od {t}","ui.dl.on":"u toku","ui.dl.noN":"{n} nije u redu"});
-Object.assign(I18N.sr,{"ui.dl.aria":"Tok radnog dana","ui.dl.open":"Otvaranje","ui.dl.brief":"Brifing","ui.dl.work":"Rad","ui.dl.close":"Zatvaranje","ui.dl.todo":"nije počelo","ui.dl.wait":"čeka brifing","ui.dl.prog":"{n} od {m}","ui.dl.draft":"u pripremi","ui.dl.since":"od {t}","ui.dl.on":"u toku","ui.dl.noN":"{n} nije u redu"});
-Object.assign(I18N.en,{"ui.dl.aria":"Work day progress","ui.dl.open":"Opening","ui.dl.brief":"Briefing","ui.dl.work":"Work","ui.dl.close":"Closing","ui.dl.todo":"not started","ui.dl.wait":"after briefing","ui.dl.prog":"{n} of {m}","ui.dl.draft":"in progress","ui.dl.since":"since {t}","ui.dl.on":"under way","ui.dl.noN":"{n} not OK"});
+// day line on Danas and the organisation logos
+Object.assign(I18N.bs,{"ui.dl.aria":"Tok radnog dana","ui.dl.open":"Otvaranje","ui.dl.brief":"Brifing","ui.dl.work":"Rad","ui.dl.close":"Zatvaranje","ui.dl.todo":"nije počelo","ui.dl.wait":"čeka brifing","ui.dl.prog":"{n} od {m}","ui.dl.draft":"u pripremi","ui.dl.since":"od {t}","ui.dl.on":"u toku","ui.dl.noN":"{n} nije u redu",
+  "logo.title":"Logotipi","logo.org":"Logo organizacije","logo.insp":"Logo kontrolne institucije","logo.none":"Nije dodan. PNG, JPG ili SVG; čuva se kao slika do 512 px.","logo.hasOrg":"U zaglavlju i na dokumentima izvođača.","logo.hasInsp":"U zaglavlju kontrolora i na zapisnicima KK i ZK.",
+  "logo.add":"Dodaj logo","logo.replace":"Zamijeni","logo.remove":"Ukloni","logo.removed":"Logo uklonjen.","logo.savedOrg":"Logo organizacije sačuvan.","logo.savedInsp":"Logo kontrolne institucije sačuvan.",
+  "logo.errType":"Izaberi sliku: PNG, JPG ili SVG.","logo.errSize":"Datoteka je veća od 8 MB.","logo.errRead":"Slika se ne može pročitati. Pokušaj s PNG ili JPG.","logo.alt.org":"Logo organizacije","logo.alt.insp":"Logo kontrolne institucije"});
+Object.assign(I18N.sr,{"ui.dl.aria":"Tok radnog dana","ui.dl.open":"Otvaranje","ui.dl.brief":"Brifing","ui.dl.work":"Rad","ui.dl.close":"Zatvaranje","ui.dl.todo":"nije počelo","ui.dl.wait":"čeka brifing","ui.dl.prog":"{n} od {m}","ui.dl.draft":"u pripremi","ui.dl.since":"od {t}","ui.dl.on":"u toku","ui.dl.noN":"{n} nije u redu",
+  "logo.title":"Logotipi","logo.org":"Logo organizacije","logo.insp":"Logo kontrolne institucije","logo.none":"Nije dodat. PNG, JPG ili SVG; čuva se kao slika do 512 px.","logo.hasOrg":"U zaglavlju i na dokumentima izvođača.","logo.hasInsp":"U zaglavlju kontrolora i na zapisnicima KK i ZK.",
+  "logo.add":"Dodaj logo","logo.replace":"Zameni","logo.remove":"Ukloni","logo.removed":"Logo uklonjen.","logo.savedOrg":"Logo organizacije sačuvan.","logo.savedInsp":"Logo kontrolne institucije sačuvan.",
+  "logo.errType":"Izaberi sliku: PNG, JPG ili SVG.","logo.errSize":"Datoteka je veća od 8 MB.","logo.errRead":"Slika ne može da se pročita. Pokušaj sa PNG ili JPG.","logo.alt.org":"Logo organizacije","logo.alt.insp":"Logo kontrolne institucije"});
+Object.assign(I18N.en,{"ui.dl.aria":"Work day progress","ui.dl.open":"Opening","ui.dl.brief":"Briefing","ui.dl.work":"Work","ui.dl.close":"Closing","ui.dl.todo":"not started","ui.dl.wait":"after briefing","ui.dl.prog":"{n} of {m}","ui.dl.draft":"in progress","ui.dl.since":"since {t}","ui.dl.on":"under way","ui.dl.noN":"{n} not OK",
+  "logo.title":"Logos","logo.org":"Organisation logo","logo.insp":"Inspection body logo","logo.none":"None yet. PNG, JPG or SVG; stored as an image up to 512 px.","logo.hasOrg":"In the header and on the contractor's documents.","logo.hasInsp":"In the inspector header and on the KK and ZK records.",
+  "logo.add":"Add logo","logo.replace":"Replace","logo.remove":"Remove","logo.removed":"Logo removed.","logo.savedOrg":"Organisation logo saved.","logo.savedInsp":"Inspection body logo saved.",
+  "logo.errType":"Choose an image: PNG, JPG or SVG.","logo.errSize":"The file is larger than 8 MB.","logo.errRead":"The image cannot be read. Try a PNG or JPG.","logo.alt.org":"Organisation logo","logo.alt.insp":"Inspection body logo"});
 const LANGS=['bs','sr','en'],UI_OPTS=['auto','bs','sr','en'];
 const KEY_UI='terenska-knjiga-ui'; // mirror of an explicit choice, so the recovery screen (no state loaded) speaks it too
 let DOCLANG=null;
@@ -4580,6 +4611,11 @@ const D_=x=>typeof x==='string'&&DAYRE.test(x)?x:'';
 const T_=x=>typeof x==='string'&&/^\d\d?:\d\d$/.test(x)?x:'';
 const IMG=/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/;
 const safeImg=u=>typeof u==='string'&&IMG.test(u)?u:'';
+// organisation logos (S.logos.org = contractor, S.logos.insp = inspection institution): only a PNG data URL made by our own
+// canvas is ever kept or shown, never the picked file's markup; long side at most 512 px, string at most LOGO_CAP
+const LOGO_MAX=512,LOGO_CAP=350000,LOGO_KINDS=['org','insp'];
+const LOGO_TYPES=/^image\/(png|jpeg|svg\+xml)$/,LOGO_EXT=/\.(png|jpe?g|svg)$/i,PNG_RE=/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/;
+const logoOk=u=>typeof u==='string'&&u.length<=LOGO_CAP&&PNG_RE.test(u)?u:'';
 const isObj=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
 function checkState(raw){
   if(!isObj(raw)||!Array.isArray(raw.sites))throw new StateError(t('st.noList'));
@@ -4646,6 +4682,7 @@ function fillTop(st){if(!st.sites.some(x=>x.id===st.active))st.active=st.sites[0
     o.ljudi=A_(o.ljudi).filter(isObj).map(p=>Object.assign(p,{id:S_(p.id),ime:S_(p.ime),fn:S_(p.fn,'Deminer')},p.nap!=null?{nap:String(p.nap)}:{}));
     o.oprema=A_(o.oprema).filter(isObj).map(q=>({kat:EQK[q.kat]?q.kat:'ost',tip:S_(q.tip),sn:S_(q.sn),kom:Math.max(0,Math.round(N_(q.kom,0)))}));}
   fillTpl(st);
+  if(st.logos!=null){const L={};if(isObj(st.logos))LOGO_KINDS.forEach(k=>{const u=logoOk(st.logos[k]);if(u)L[k]=u;});st.logos=L;}
   st.csvSep=st.csvSep===','?',':';';
   st.ui=UI_OPTS.includes(st.ui)?st.ui:'auto'; // interface language of this device (documents stay national)
   st.lastBackup=typeof st.lastBackup==='string'&&isFinite(Date.parse(st.lastBackup))?st.lastBackup:null;
@@ -4772,6 +4809,9 @@ function renderHeader(){
   const nav=document.querySelector('nav.tabs');if(nav)nav.setAttribute('aria-label',t('hdr.nav'));
   const sb=document.querySelector('.site-btn');if(sb)sb.setAttribute('aria-label',t('hdr.siteBtn'));
   if(nav)nav.setAttribute('data-mode',s.mode==='boxes'?'boxes':'lanes');
+  const lk=k&&s.pack==='RS'?'insp':'org',lg=logoOf(lk),im=$('#hdrLogo');
+  const top=document.querySelector('.top');if(top)top.classList.toggle('has-logo',!!lg);
+  if(im){if(lg){im.src=lg;im.alt=t('logo.alt.'+lk);im.hidden=false;}else{im.hidden=true;im.removeAttribute('src');}}
   // the code wraps only between its two parts (never inside "Sektor 1")
   const nb=x=>String(x).replace(/ /g,'\u00a0');$('#hdrSite').textContent=nb(s.msp.id)+' · '+nb(s.ci.oznaka);
   $('#hdrMeta').innerHTML=(k?'<span class="pack role">'+t('hdr.inspector')+'</span> ':'')+esc([s.msp.naziv,s.msp.ru].filter(Boolean).join(' · '))+(k?'':' <span class="pack">'+esc(P.kratko)+'</span>');
@@ -5036,7 +5076,7 @@ const natNote=k=>inUi(()=>uiLang()==='en'&&k!=='exp'?'<p class="fine noprint nat
 const docBar=k=>inUi(()=>`<div class="btnrow noprint"><button class="btn sm" type="button" data-act="docBack">${t('rep.allDocs')}</button>${zoomBtn()}${inFrame?'':'<button class="btn sm primary" type="button" data-act="print">'+t('rep.print')+'</button>'}<button class="btn sm" type="button" data-act="copyDoc" data-k="${k}">${t('rep.copyText')}</button></div>`)+natNote(k);
 function docShell(inner,k){
   return `${docBar(k)}
-    <pre class="out noprint" id="copyOut" hidden></pre><div class="tbl"><article class="doc${docZ>1?' z'+docZ:''}" id="docEl">${inner}</article></div>`;
+    <pre class="out noprint" id="copyOut" hidden></pre><div class="tbl"><article class="doc${docZ>1?' z'+docZ:''}" id="docEl">${docLogo(site(),k)}${inner}</article></div>`;
 }
 const mspNo=s=>s.msp.id.replace(/^MSP\s*/i,'');
 const box=on=>`<span class="box">${on?'×':''}</span>`;
@@ -5080,6 +5120,34 @@ function defaultOrg(){
     tim:'Tim 1',radnoVrijeme:'07:00–15:00',odmori:'smjena u stazi najviše 30 min; odmor tima 12:00–12:30',ljudi:ppl,oprema:eq};
 }
 function org(){if(!S.org)S.org=defaultOrg();const o=S.org;['ljudi','oprema'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});o.odgovorna=o.odgovorna||{};o.sastavio=o.sastavio||{};return o;}
+/* ---------- organisation logos: contractor (org) and inspection institution (insp, Serbian sites in the inspector role) ---------- */
+function logos(){if(!isObj(S.logos))S.logos={};return S.logos;}
+const logoOf=k=>S&&isObj(S.logos)?logoOk(S.logos[k]):'';
+// file -> <img> (from a blob: URL, so an SVG cannot run anything) -> canvas -> PNG data URL; smaller steps until it fits the cap
+function rasterLogo(file){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file),svg=/svg/i.test(file.type||'')||/\.svg$/i.test(file.name||'');
+  img.onload=()=>{try{URL.revokeObjectURL(url);const w=img.naturalWidth||img.width||LOGO_MAX,h=img.naturalHeight||img.height||LOGO_MAX;
+    for(const m of [LOGO_MAX,384,256,192,128]){const sc=svg?m/Math.max(w,h):Math.min(1,m/Math.max(w,h)),c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(w*sc));c.height=Math.max(1,Math.round(h*sc));c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const u=c.toDataURL('image/png');if(logoOk(u)){res(u);return;}}
+    rej(new Error('too big'));}catch(e){rej(e);}};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('decode'));};img.src=url;});}
+async function logoFromFile(file){
+  if(!file||!(LOGO_TYPES.test(file.type||'')||(!file.type&&LOGO_EXT.test(file.name||''))))return {err:t('logo.errType')};
+  if(+file.size>8*1048576)return {err:t('logo.errSize')};
+  let u;try{u=await rasterLogo(file);}catch(e){return {err:t('logo.errRead')};}
+  u=logoOk(u);return u?{url:u}:{err:t('logo.errRead')};}
+async function onLogoFile(kind,input){const file=input&&input.files&&input.files[0];try{input.value='';}catch(e){}if(!LOGO_KINDS.includes(kind)||!file)return null;
+  const r=await logoFromFile(file);if(r.err){toast(r.err,5000);return r;}
+  logos()[kind]=r.url;save();renderHeader();toast(t(kind==='org'?'logo.savedOrg':'logo.savedInsp'));if(!$('#scrim').hidden&&$('#orgForm'))openOrg();if(docView)renderDoc(docView);return r;}
+const LOGO_PH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5h17M6 20.5V9.5L12 5l6 4.5v11"/><path d="M10 20.5v-5h4v5M9 11.5h1.5M13.5 11.5H15"/></svg>';
+function logoBlock(k){const u=logoOf(k),id='logo_'+k;
+  return `<div class="logo-up"><div class="logo-pv${u?'':' empty'}">${u?`<img src="${esc(u)}" alt="${t('logo.alt.'+k)}">`:LOGO_PH}</div>
+    <div><div class="lt">${t('logo.'+k)}</div><div class="sub">${u?t(k==='org'?'logo.hasOrg':'logo.hasInsp'):t('logo.none')}</div>
+    <div class="btnrow"><label class="btn sm" for="${id}"><input id="${id}" type="file" accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg" data-logo="${k}">${u?t('logo.replace'):t('logo.add')}</label>${u?`<button class="btn sm" type="button" data-bh="logoDel" data-k="${k}">${t('logo.remove')}</button>`:''}</div></div></div>`;}
+// top of a printed document: the contractor's logo; the inspection institution's on the inspector's records (KK, ZK)
+function docLogo(s,k){if(k==='exp')return '';const kind=s.pack==='RS'&&(k==='kk'||k==='zk')?'insp':'org',u=logoOf(kind);
+  return u?`<div class="dlogo"><img src="${esc(u)}" alt="${esc(inDoc(s,()=>t('logo.alt.'+kind)))}"></div>`:'';}
+document.addEventListener('change',e=>{const x=e.target;if(S&&x&&x.dataset&&x.dataset.logo)onLogoFile(x.dataset.logo,x);});
 function parseKarta(k){k=String(k||'').trim();if(!k||k==='—')return {kartaNaziv:'',kartaList:'',kartaRazmjer:'',kartaGod:''};
   return {kartaNaziv:k.split(/\s*(?:1\s*:|,)/)[0].trim(),kartaRazmjer:(k.match(/1\s*:\s*[\d.]+/)||[''])[0],kartaList:((k.match(/list\s+([^,]+)/i)||[])[1]||'').trim(),kartaGod:(k.match(/(\d{4})/)||[])[1]||''};}
 function mspX(s){const m=s.msp;if(m.kartaNaziv==null)Object.assign(m,parseKarta(m.karta));
@@ -5521,7 +5589,7 @@ function bhShow(s,k,v){const pages=inDoc(s,()=>BHD[k](s)),multi=pages.length>1||
   const miss=pages.reduce((a,p)=>a+missN(p.h),0),hint=miss?`<p class="fine noprint" style="margin:0">${t('rep.missHint',{n:miss})}</p>`:'';
   if(!multi){v.innerHTML=docShell(pages[0].h,k).replace('<pre ',nav+hint+(/wide/.test(pages[0].cls)||docZ>1?wideHint():'')+'<pre ');const el=$('#docEl');pages[0].cls.split(' ').filter(Boolean).forEach(c=>el.classList.add(c));}
   else v.innerHTML=`${docBar(k)}${hint}
-    <pre class="out noprint" id="copyOut" hidden></pre>${pages.some(p=>/wide/.test(p.cls))||docZ>1?wideHint():''}<div class="tbl"><div class="docs${docZ>1?' z'+docZ:''}" id="docEl">${pages.map(p=>`<article class="doc ${p.cls}">${p.h}</article>`).join('')}</div></div>`;
+    <pre class="out noprint" id="copyOut" hidden></pre>${pages.some(p=>/wide/.test(p.cls))||docZ>1?wideHint():''}<div class="tbl"><div class="docs${docZ>1?' z'+docZ:''}" id="docEl">${pages.map(p=>`<article class="doc ${p.cls}">${docLogo(s,k)}${p.h}</article>`).join('')}</div></div>`;
   if(k==='pak'||k==='zb')hydratePhotos();}
 
 /* ---------- Organizacija, tim i oprema (sheet from Radilišta) ---------- */
@@ -5537,6 +5605,7 @@ function openOrg(sec){if(sec)orgSec=sec;const o=org(),s=site(),ba=s.pack!=='RS',
   const eq=o.oprema.map((q,i)=>`<div class="orow eq"><select data-ei="${i}" data-ek="kat" aria-label="${t('org.kind')}">${Object.entries(EQK).map(([k2,x])=>`<option value="${k2}" ${k2===q.kat?'selected':''}>${tv(x)}</option>`).join('')}</select><input data-ei="${i}" data-ek="kom" type="number" min="0" value="${+q.kom||0}" inputmode="numeric" aria-label="${t('org.qty')}"><button type="button" class="x" data-bh="delE" data-i="${i}" aria-label="${t('org.delE')}">×</button><input class="span3" data-ei="${i}" data-ek="tip" value="${esc(q.tip||'')}" placeholder="${t('org.make')}" aria-label="${t('org.make')}"><input class="span3 mono" data-ei="${i}" data-ek="sn" value="${esc(q.sn||'')}" placeholder="${t('org.sn')}" aria-label="${t('org.sn')}"></div>`).join('');
   openSheet(`<div class="sheet-h"><div><div class="label">${t('org.label')}</div><h2>${t('org.title')}</h2></div><button class="x" type="button" data-act="close" aria-label="${t('c.close')}">×</button></div>
     <form id="orgForm" class="orgf" autocomplete="off">
+    <div class="label">${t('logo.title')}</div>${logoBlock('org')}${s.pack==='RS'&&isK(s)?logoBlock('insp'):''}
     ${det('org',t('org.secOrg'),`${f('oNaz',t('org.oNaz'),o.naziv)}${f('oPod',t('org.oPod'),o.podizvodjac)}${f('oTel',t('org.oTel'),o.tel)}
       <div class="grid2">${f('oOdg',t('org.oOdg'),o.odgovorna.ime)}${f('oOdgP',t('org.oOdgP'),o.odgovorna.poz)}</div>
       <div class="grid2">${f('oSas',t('org.oSas'),o.sastavio.ime)}${f('oSasP',t('org.fn'),o.sastavio.poz)}</div>
@@ -5577,6 +5646,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-bh]');if(
   const sec=(el.closest('details')||{dataset:{}}).dataset.sec;if(sec)orgSec=sec;
   if(a==='org'){openOrg('org');return;}
   if(a==='orgSave'){orgSave();return;}
+  if(a==='logoDel'){collectOrg();if(LOGO_KINDS.includes(el.dataset.k))delete logos()[el.dataset.k];save();renderHeader();openOrg();toast(t('logo.removed'));return;}
   collectOrg();
   if(a==='addP')o.ljudi.push({id:'P-'+Date.now().toString(36),ime:'',fn:'Deminer',nap:''});
   if(a==='delP')o.ljudi.splice(+el.dataset.i,1);
